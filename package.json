@@ -1,0 +1,14 @@
+{
+  "name": "chauhan-erp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev:desktop": "npm run dev -w apps/desktop",
+    "build:desktop": "npm run build -w apps/desktop"
+  }
+}

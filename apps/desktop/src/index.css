@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply select-none antialiased;
+  }
+  input, select, textarea {
+    @apply select-text;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09090b; /* zinc-950 */
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a; /* zinc-800 */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #fbbf24; /* amber-400 */
+}
+
+/* Tabular figures for monospace data alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

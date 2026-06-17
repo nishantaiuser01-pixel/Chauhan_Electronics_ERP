@@ -1,0 +1,72 @@
+{
+  "name": "apps-desktop",
+  "version": "1.0.0",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "npm run build:electron && concurrently \"npm run dev:vite\" \"npm run start:electron\"",
+    "dev:vite": "vite",
+    "build:electron": "esbuild electron/main.ts --bundle --platform=node --target=node20 --external:electron --external:better-sqlite3 --external:express --external:cors --external:qrcode --external:bcryptjs --external:node-thermal-printer --outfile=dist-electron/main.js && esbuild electron/preload.ts --bundle --platform=node --target=node20 --external:electron --outfile=dist-electron/preload.js",
+    "start:electron": "wait-on http://127.0.0.1:5180 && electron .",
+    "build": "vite build && npm run build:electron",
+    "dist": "npm run build && electron-builder"
+  },
+  "description": "Chauhan Electronics Offline POS and ERP",
+  "author": "Chauhan Electronics",
+  "build": {
+    "electronVersion": "30.0.1",
+    "appId": "com.chauhan.erp",
+    "productName": "Chauhan ERP",
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../../node_modules/better-sqlite3",
+        "to": "app/node_modules/better-sqlite3"
+      }
+    ]
+  },
+  "dependencies": {
+    "@chauhan-erp/core": "*",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "qrcode": "^1.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.344.0",
+    "zod": "^3.22.4",
+    "canvas-confetti": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/qrcode": "^1.5.5",
+    "@types/canvas-confetti": "^1.6.4",
+    "vite": "^5.1.4",
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^30.0.1",
+    "electron-builder": "^24.13.3",
+    "esbuild": "^0.20.1",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.18",
+    "typescript": "^5.3.3"
+  }
+}
