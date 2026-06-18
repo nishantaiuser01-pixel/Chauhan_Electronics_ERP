@@ -1,0 +1,92 @@
+# .github/workflows/build.yml
+# Builds all three artifacts on matching OS runners (no Windows/Android machine needed locally).
+# Trigger: manually (Actions tab -> Run workflow) or by pushing a tag like v1.0.0.
+# Download the binaries from the run's "Artifacts" section when it finishes.
+#
+# NOTE on script names: this assumes the desktop dist script is `dist` (run via
+# `npm run dist -w apps/desktop`) and the mobile web build is `build -w apps/mobile`,
+# matching what you've been running. If your package.json uses different names, adjust
+# the two marked lines below.
+
+name: Build Apps
+
+on:
+  workflow_dispatch: {}        # manual "Run workflow" button
+  push:
+    tags: ['v*']               # also runs on version tags (v1.0.0, etc.)
+
+jobs:
+  # ---------- Desktop: Windows .exe + macOS .dmg ----------
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: "--win"
+            artifact: windows-exe
+          - os: macos-latest
+            target: "--mac"
+            artifact: macos-dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20      # pin to LTS 20 — avoids the Node 25 native-binding issue
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build installer (electron-builder rebuilds better-sqlite3 for this OS)
+        run: npm run dist -w apps/desktop -- ${{ matrix.target }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            apps/desktop/release/*.exe
+            apps/desktop/release/*.dmg
+          if-no-files-found: warn
+
+  # ---------- Android .apk ----------
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'    # Capacitor 8 needs JDK 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build mobile web assets        # <-- adjust if your script name differs
+        run: npm run build -w apps/mobile
+
+      - name: Sync Capacitor
+        working-directory: apps/mobile
+        run: npx cap sync android
+
+      - name: Assemble debug APK
+        working-directory: apps/mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: apps/mobile/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
