@@ -13,6 +13,7 @@
   "description": "Chauhan Electronics Offline POS and ERP",
   "author": "Chauhan Electronics",
   "build": {
+    "npmRebuild": false,
     "electronVersion": "30.0.1",
     "appId": "com.chauhan.erp",
     "productName": "Chauhan ERP",
