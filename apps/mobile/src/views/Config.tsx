@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Wifi, Search, CheckCircle, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function Config({ onConfigSuccess }: { onConfigSuccess: () => void }) {
+export default function Config() {
   const [ipAddress, setIpAddress] = useState('192.168.');
-  const [port, setPort] = useState('3005');
+  const [port, setPort] = useState('47615');
   const [status, setStatus] = useState<'IDLE' | 'TESTING' | 'SUCCESS' | 'ERROR'>('IDLE');
   const [errorMsg, setErrorMsg] = useState('');
+  const { setDesktopUrl } = useAuth();
   const navigate = useNavigate();
 
   const handleTest = async () => {
@@ -29,11 +31,9 @@ export default function Config({ onConfigSuccess }: { onConfigSuccess: () => voi
         const data = await response.json();
         if (data.status === 'ok') {
           setStatus('SUCCESS');
-          localStorage.setItem('desktop_ip', `${ipAddress}:${port}`);
-          setTimeout(() => {
-            onConfigSuccess();
-            navigate('/scanner');
-          }, 1500);
+          const url = `${ipAddress}:${port}`;
+          setDesktopUrl(url);
+          setTimeout(() => { navigate('/login'); }, 1200);
         } else {
           throw new Error('Invalid response from server');
         }

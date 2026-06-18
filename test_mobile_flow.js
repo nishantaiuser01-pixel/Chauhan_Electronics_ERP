@@ -5,9 +5,6 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -27,7 +24,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/depd/index.js
 var require_depd = __commonJS({
@@ -1300,8 +1296,8 @@ var require_node = __commonJS({
           }
           break;
         case "FILE":
-          var fs4 = require("fs");
-          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
+          var fs3 = require("fs");
+          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -17447,7 +17443,7 @@ var require_mime_db = __commonJS({
 var require_mime_types = __commonJS({
   "node_modules/mime-types/index.js"(exports2) {
     "use strict";
-    var db = require_mime_db();
+    var db2 = require_mime_db();
     var extname = require("path").extname;
     var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
     var TEXT_TYPE_REGEXP = /^text\//i;
@@ -17464,7 +17460,7 @@ var require_mime_types = __commonJS({
         return false;
       }
       var match = EXTRACT_TYPE_REGEXP.exec(type);
-      var mime = match && db[match[1].toLowerCase()];
+      var mime = match && db2[match[1].toLowerCase()];
       if (mime && mime.charset) {
         return mime.charset;
       }
@@ -17499,11 +17495,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path2) {
-      if (!path2 || typeof path2 !== "string") {
+    function lookup(path) {
+      if (!path || typeof path !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path2).toLowerCase().substr(1);
+      var extension2 = extname("x." + path).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -17511,8 +17507,8 @@ var require_mime_types = __commonJS({
     }
     function populateMaps(extensions, types) {
       var preference = ["nginx", "apache", void 0, "iana"];
-      Object.keys(db).forEach(function forEachMimeType(type) {
-        var mime = db[type];
+      Object.keys(db2).forEach(function forEachMimeType(type) {
+        var mime = db2[type];
         var exts = mime.extensions;
         if (!exts || !exts.length) {
           return;
@@ -17521,7 +17517,7 @@ var require_mime_types = __commonJS({
         for (var i = 0; i < exts.length; i++) {
           var extension2 = exts[i];
           if (types[extension2]) {
-            var from = preference.indexOf(db[types[extension2]].source);
+            var from = preference.indexOf(db2[types[extension2]].source);
             var to = preference.indexOf(mime.source);
             if (types[extension2] !== "application/octet-stream" && (from > to || from === to && types[extension2].substr(0, 12) === "application/")) {
               continue;
@@ -21094,8 +21090,8 @@ var require_node2 = __commonJS({
           }
           break;
         case "FILE":
-          var fs4 = require("fs");
-          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
+          var fs3 = require("fs");
+          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -21817,8 +21813,8 @@ var require_node3 = __commonJS({
           }
           break;
         case "FILE":
-          var fs4 = require("fs");
-          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
+          var fs3 = require("fs");
+          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -21906,7 +21902,7 @@ var require_path_to_regexp = __commonJS({
   "node_modules/path-to-regexp/index.js"(exports2, module2) {
     module2.exports = pathToRegexp;
     var MATCHING_GROUP_REGEXP = /\\.|\((?:\?<(.*?)>)?(?!\?)/g;
-    function pathToRegexp(path2, keys, options) {
+    function pathToRegexp(path, keys, options) {
       options = options || {};
       keys = keys || [];
       var strict = options.strict;
@@ -21920,8 +21916,8 @@ var require_path_to_regexp = __commonJS({
       var pos = 0;
       var backtrack = "";
       var m;
-      if (path2 instanceof RegExp) {
-        while (m = MATCHING_GROUP_REGEXP.exec(path2.source)) {
+      if (path instanceof RegExp) {
+        while (m = MATCHING_GROUP_REGEXP.exec(path.source)) {
           if (m[0][0] === "\\")
             continue;
           keys.push({
@@ -21930,18 +21926,18 @@ var require_path_to_regexp = __commonJS({
             offset: m.index
           });
         }
-        return path2;
+        return path;
       }
-      if (Array.isArray(path2)) {
-        path2 = path2.map(function(value) {
+      if (Array.isArray(path)) {
+        path = path.map(function(value) {
           return pathToRegexp(value, keys, options).source;
         });
-        return new RegExp(path2.join("|"), flags);
+        return new RegExp(path.join("|"), flags);
       }
-      if (typeof path2 !== "string") {
+      if (typeof path !== "string") {
         throw new TypeError("path must be a string, array of strings, or regular expression");
       }
-      path2 = path2.replace(
+      path = path.replace(
         /\\.|(\/)?(\.)?:(\w+)(\(.*?\))?(\*)?(\?)?|[.*]|\/\(/g,
         function(match, slash, format, key, capture, star, optional, offset) {
           if (match[0] === "\\") {
@@ -21958,7 +21954,7 @@ var require_path_to_regexp = __commonJS({
           if (slash || format) {
             backtrack = "";
           } else {
-            backtrack += path2.slice(pos, offset);
+            backtrack += path.slice(pos, offset);
           }
           pos = offset + match.length;
           if (match === "*") {
@@ -21988,7 +21984,7 @@ var require_path_to_regexp = __commonJS({
           return result;
         }
       );
-      while (m = MATCHING_GROUP_REGEXP.exec(path2)) {
+      while (m = MATCHING_GROUP_REGEXP.exec(path)) {
         if (m[0][0] === "\\")
           continue;
         if (keysOffset + i === keys.length || keys[keysOffset + i].offset > m.index) {
@@ -22001,13 +21997,13 @@ var require_path_to_regexp = __commonJS({
         }
         i++;
       }
-      path2 += strict ? "" : path2[path2.length - 1] === "/" ? "?" : "/?";
+      path += strict ? "" : path[path.length - 1] === "/" ? "?" : "/?";
       if (end) {
-        path2 += "$";
-      } else if (path2[path2.length - 1] !== "/") {
-        path2 += lookahead ? "(?=/|$)" : "(?:/|$)";
+        path += "$";
+      } else if (path[path.length - 1] !== "/") {
+        path += lookahead ? "(?=/|$)" : "(?:/|$)";
       }
-      return new RegExp("^" + path2, flags);
+      return new RegExp("^" + path, flags);
     }
   }
 });
@@ -22020,19 +22016,19 @@ var require_layer = __commonJS({
     var debug = require_src3()("express:router:layer");
     var hasOwnProperty = Object.prototype.hasOwnProperty;
     module2.exports = Layer;
-    function Layer(path2, options, fn) {
+    function Layer(path, options, fn) {
       if (!(this instanceof Layer)) {
-        return new Layer(path2, options, fn);
+        return new Layer(path, options, fn);
       }
-      debug("new %o", path2);
+      debug("new %o", path);
       var opts = options || {};
       this.handle = fn;
       this.name = fn.name || "<anonymous>";
       this.params = void 0;
       this.path = void 0;
-      this.regexp = pathRegexp(path2, this.keys = [], opts);
-      this.regexp.fast_star = path2 === "*";
-      this.regexp.fast_slash = path2 === "/" && opts.end === false;
+      this.regexp = pathRegexp(path, this.keys = [], opts);
+      this.regexp.fast_star = path === "*";
+      this.regexp.fast_slash = path === "/" && opts.end === false;
     }
     Layer.prototype.handle_error = function handle_error(error, req, res, next) {
       var fn = this.handle;
@@ -22056,20 +22052,20 @@ var require_layer = __commonJS({
         next(err);
       }
     };
-    Layer.prototype.match = function match(path2) {
+    Layer.prototype.match = function match(path) {
       var match2;
-      if (path2 != null) {
+      if (path != null) {
         if (this.regexp.fast_slash) {
           this.params = {};
           this.path = "";
           return true;
         }
         if (this.regexp.fast_star) {
-          this.params = { "0": decode_param(path2) };
-          this.path = path2;
+          this.params = { "0": decode_param(path) };
+          this.path = path;
           return true;
         }
-        match2 = this.regexp.exec(path2);
+        match2 = this.regexp.exec(path);
       }
       if (!match2) {
         this.params = void 0;
@@ -22162,10 +22158,10 @@ var require_route = __commonJS({
     var slice = Array.prototype.slice;
     var toString = Object.prototype.toString;
     module2.exports = Route;
-    function Route(path2) {
-      this.path = path2;
+    function Route(path) {
+      this.path = path;
       this.stack = [];
-      debug("new %o", path2);
+      debug("new %o", path);
       this.methods = {};
     }
     Route.prototype._handles_method = function _handles_method(method) {
@@ -22378,8 +22374,8 @@ var require_router = __commonJS({
         if (++sync > 100) {
           return setImmediate(next, err);
         }
-        var path2 = getPathname(req);
-        if (path2 == null) {
+        var path = getPathname(req);
+        if (path == null) {
           return done(layerError);
         }
         var layer;
@@ -22387,7 +22383,7 @@ var require_router = __commonJS({
         var route;
         while (match !== true && idx < stack.length) {
           layer = stack[idx++];
-          match = matchLayer(layer, path2);
+          match = matchLayer(layer, path);
           route = layer.route;
           if (typeof match !== "boolean") {
             layerError = layerError || match;
@@ -22425,18 +22421,18 @@ var require_router = __commonJS({
           } else if (route) {
             layer.handle_request(req, res, next);
           } else {
-            trim_prefix(layer, layerError, layerPath, path2);
+            trim_prefix(layer, layerError, layerPath, path);
           }
           sync = 0;
         });
       }
-      function trim_prefix(layer, layerError, layerPath, path2) {
+      function trim_prefix(layer, layerError, layerPath, path) {
         if (layerPath.length !== 0) {
-          if (layerPath !== path2.slice(0, layerPath.length)) {
+          if (layerPath !== path.slice(0, layerPath.length)) {
             next(layerError);
             return;
           }
-          var c = path2[layerPath.length];
+          var c = path[layerPath.length];
           if (c && c !== "/" && c !== ".")
             return next(layerError);
           debug("trim prefix (%s) from url %s", layerPath, req.url);
@@ -22516,7 +22512,7 @@ var require_router = __commonJS({
     };
     proto.use = function use(fn) {
       var offset = 0;
-      var path2 = "/";
+      var path = "/";
       if (typeof fn !== "function") {
         var arg = fn;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -22524,7 +22520,7 @@ var require_router = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = fn;
+          path = fn;
         }
       }
       var callbacks = flatten(slice.call(arguments, offset));
@@ -22536,8 +22532,8 @@ var require_router = __commonJS({
         if (typeof fn !== "function") {
           throw new TypeError("Router.use() requires a middleware function but got a " + gettype(fn));
         }
-        debug("use %o %s", path2, fn.name || "<anonymous>");
-        var layer = new Layer(path2, {
+        debug("use %o %s", path, fn.name || "<anonymous>");
+        var layer = new Layer(path, {
           sensitive: this.caseSensitive,
           strict: false,
           end: false
@@ -22547,9 +22543,9 @@ var require_router = __commonJS({
       }
       return this;
     };
-    proto.route = function route(path2) {
-      var route2 = new Route(path2);
-      var layer = new Layer(path2, {
+    proto.route = function route(path) {
+      var route2 = new Route(path);
+      var layer = new Layer(path, {
         sensitive: this.caseSensitive,
         strict: this.strict,
         end: true
@@ -22559,8 +22555,8 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      proto[method] = function(path2) {
-        var route = this.route(path2);
+      proto[method] = function(path) {
+        var route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
@@ -22596,9 +22592,9 @@ var require_router = __commonJS({
       }
       return toString.call(obj).replace(objectRegExp, "$1");
     }
-    function matchLayer(layer, path2) {
+    function matchLayer(layer, path) {
       try {
-        return layer.match(path2);
+        return layer.match(path);
       } catch (err) {
         return err;
       }
@@ -22717,13 +22713,13 @@ var require_view = __commonJS({
   "node_modules/express/lib/view.js"(exports2, module2) {
     "use strict";
     var debug = require_src3()("express:view");
-    var path2 = require("path");
-    var fs4 = require("fs");
-    var dirname = path2.dirname;
-    var basename = path2.basename;
-    var extname = path2.extname;
-    var join2 = path2.join;
-    var resolve = path2.resolve;
+    var path = require("path");
+    var fs3 = require("fs");
+    var dirname = path.dirname;
+    var basename = path.basename;
+    var extname = path.extname;
+    var join = path.join;
+    var resolve = path.resolve;
     module2.exports = View;
     function View(name, options) {
       var opts = options || {};
@@ -22752,17 +22748,17 @@ var require_view = __commonJS({
       this.path = this.lookup(fileName);
     }
     View.prototype.lookup = function lookup(name) {
-      var path3;
+      var path2;
       var roots = [].concat(this.root);
       debug('lookup "%s"', name);
-      for (var i = 0; i < roots.length && !path3; i++) {
+      for (var i = 0; i < roots.length && !path2; i++) {
         var root = roots[i];
         var loc = resolve(root, name);
         var dir = dirname(loc);
         var file = basename(loc);
-        path3 = this.resolve(dir, file);
+        path2 = this.resolve(dir, file);
       }
-      return path3;
+      return path2;
     };
     View.prototype.render = function render(options, callback) {
       debug('render "%s"', this.path);
@@ -22770,21 +22766,21 @@ var require_view = __commonJS({
     };
     View.prototype.resolve = function resolve2(dir, file) {
       var ext = this.ext;
-      var path3 = join2(dir, file);
-      var stat = tryStat(path3);
+      var path2 = join(dir, file);
+      var stat = tryStat(path2);
       if (stat && stat.isFile()) {
-        return path3;
+        return path2;
       }
-      path3 = join2(dir, basename(file, ext), "index" + ext);
-      stat = tryStat(path3);
+      path2 = join(dir, basename(file, ext), "index" + ext);
+      stat = tryStat(path2);
       if (stat && stat.isFile()) {
-        return path3;
+        return path2;
       }
     };
-    function tryStat(path3) {
-      debug('stat "%s"', path3);
+    function tryStat(path2) {
+      debug('stat "%s"', path2);
       try {
-        return fs4.statSync(path3);
+        return fs3.statSync(path2);
       } catch (e) {
         return void 0;
       }
@@ -23399,8 +23395,8 @@ var require_node4 = __commonJS({
           }
           break;
         case "FILE":
-          var fs4 = require("fs");
-          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
+          var fs3 = require("fs");
+          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -23572,8 +23568,8 @@ var require_types = __commonJS({
 // node_modules/send/node_modules/mime/mime.js
 var require_mime = __commonJS({
   "node_modules/send/node_modules/mime/mime.js"(exports2, module2) {
-    var path2 = require("path");
-    var fs4 = require("fs");
+    var path = require("path");
+    var fs3 = require("fs");
     function Mime() {
       this.types = /* @__PURE__ */ Object.create(null);
       this.extensions = /* @__PURE__ */ Object.create(null);
@@ -23594,7 +23590,7 @@ var require_mime = __commonJS({
     };
     Mime.prototype.load = function(file) {
       this._loading = file;
-      var map = {}, content = fs4.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
+      var map = {}, content = fs3.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
       lines.forEach(function(line) {
         var fields = line.replace(/\s*#.*|^\s*|\s*$/g, "").split(/\s+/);
         map[fields.shift()] = fields;
@@ -23602,8 +23598,8 @@ var require_mime = __commonJS({
       this.define(map);
       this._loading = null;
     };
-    Mime.prototype.lookup = function(path3, fallback) {
-      var ext = path3.replace(/^.*[\.\/\\]/, "").toLowerCase();
+    Mime.prototype.lookup = function(path2, fallback) {
+      var ext = path2.replace(/^.*[\.\/\\]/, "").toLowerCase();
       return this.types[ext] || fallback || this.default_type;
     };
     Mime.prototype.extension = function(mimeType) {
@@ -23832,33 +23828,33 @@ var require_send = __commonJS({
     var escapeHtml = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs4 = require("fs");
+    var fs3 = require("fs");
     var mime = require_mime();
     var ms = require_ms5();
     var onFinished = require_on_finished();
     var parseRange = require_range_parser();
-    var path2 = require("path");
+    var path = require("path");
     var statuses = require_statuses();
     var Stream = require("stream");
     var util = require("util");
-    var extname = path2.extname;
-    var join2 = path2.join;
-    var normalize = path2.normalize;
-    var resolve = path2.resolve;
-    var sep = path2.sep;
+    var extname = path.extname;
+    var join = path.join;
+    var normalize = path.normalize;
+    var resolve = path.resolve;
+    var sep = path.sep;
     var BYTES_RANGE_REGEXP = /^ *bytes=/;
     var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1e3;
     var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
     module2.exports = send;
     module2.exports.mime = mime;
-    function send(req, path3, options) {
-      return new SendStream(req, path3, options);
+    function send(req, path2, options) {
+      return new SendStream(req, path2, options);
     }
-    function SendStream(req, path3, options) {
+    function SendStream(req, path2, options) {
       Stream.call(this);
       var opts = options || {};
       this.options = opts;
-      this.path = path3;
+      this.path = path2;
       this.req = req;
       this._acceptRanges = opts.acceptRanges !== void 0 ? Boolean(opts.acceptRanges) : true;
       this._cacheControl = opts.cacheControl !== void 0 ? Boolean(opts.cacheControl) : true;
@@ -23904,8 +23900,8 @@ var require_send = __commonJS({
       this._index = index2;
       return this;
     }, "send.index: pass index as option");
-    SendStream.prototype.root = function root(path3) {
-      this._root = resolve(String(path3));
+    SendStream.prototype.root = function root(path2) {
+      this._root = resolve(String(path2));
       debug("root %s", this._root);
       return this;
     };
@@ -24018,10 +24014,10 @@ var require_send = __commonJS({
       var lastModified = this.res.getHeader("Last-Modified");
       return parseHttpDate(lastModified) <= parseHttpDate(ifRange);
     };
-    SendStream.prototype.redirect = function redirect(path3) {
+    SendStream.prototype.redirect = function redirect(path2) {
       var res = this.res;
       if (hasListeners(this, "directory")) {
-        this.emit("directory", res, path3);
+        this.emit("directory", res, path2);
         return;
       }
       if (this.hasTrailingSlash()) {
@@ -24041,42 +24037,42 @@ var require_send = __commonJS({
     SendStream.prototype.pipe = function pipe(res) {
       var root = this._root;
       this.res = res;
-      var path3 = decode(this.path);
-      if (path3 === -1) {
+      var path2 = decode(this.path);
+      if (path2 === -1) {
         this.error(400);
         return res;
       }
-      if (~path3.indexOf("\0")) {
+      if (~path2.indexOf("\0")) {
         this.error(400);
         return res;
       }
       var parts;
       if (root !== null) {
-        if (path3) {
-          path3 = normalize("." + sep + path3);
+        if (path2) {
+          path2 = normalize("." + sep + path2);
         }
-        if (UP_PATH_REGEXP.test(path3)) {
-          debug('malicious path "%s"', path3);
+        if (UP_PATH_REGEXP.test(path2)) {
+          debug('malicious path "%s"', path2);
           this.error(403);
           return res;
         }
-        parts = path3.split(sep);
-        path3 = normalize(join2(root, path3));
+        parts = path2.split(sep);
+        path2 = normalize(join(root, path2));
       } else {
-        if (UP_PATH_REGEXP.test(path3)) {
-          debug('malicious path "%s"', path3);
+        if (UP_PATH_REGEXP.test(path2)) {
+          debug('malicious path "%s"', path2);
           this.error(403);
           return res;
         }
-        parts = normalize(path3).split(sep);
-        path3 = resolve(path3);
+        parts = normalize(path2).split(sep);
+        path2 = resolve(path2);
       }
       if (containsDotFile(parts)) {
         var access = this._dotfiles;
         if (access === void 0) {
           access = parts[parts.length - 1][0] === "." ? this._hidden ? "allow" : "ignore" : "allow";
         }
-        debug('%s dotfile "%s"', access, path3);
+        debug('%s dotfile "%s"', access, path2);
         switch (access) {
           case "allow":
             break;
@@ -24090,13 +24086,13 @@ var require_send = __commonJS({
         }
       }
       if (this._index.length && this.hasTrailingSlash()) {
-        this.sendIndex(path3);
+        this.sendIndex(path2);
         return res;
       }
-      this.sendFile(path3);
+      this.sendFile(path2);
       return res;
     };
-    SendStream.prototype.send = function send2(path3, stat) {
+    SendStream.prototype.send = function send2(path2, stat) {
       var len = stat.size;
       var options = this.options;
       var opts = {};
@@ -24108,9 +24104,9 @@ var require_send = __commonJS({
         this.headersAlreadySent();
         return;
       }
-      debug('pipe "%s"', path3);
-      this.setHeader(path3, stat);
-      this.type(path3);
+      debug('pipe "%s"', path2);
+      this.setHeader(path2, stat);
+      this.type(path2);
       if (this.isConditionalGET()) {
         if (this.isPreconditionFailure()) {
           this.error(412);
@@ -24160,30 +24156,30 @@ var require_send = __commonJS({
         res.end();
         return;
       }
-      this.stream(path3, opts);
+      this.stream(path2, opts);
     };
-    SendStream.prototype.sendFile = function sendFile(path3) {
+    SendStream.prototype.sendFile = function sendFile(path2) {
       var i = 0;
       var self = this;
-      debug('stat "%s"', path3);
-      fs4.stat(path3, function onstat(err, stat) {
-        if (err && err.code === "ENOENT" && !extname(path3) && path3[path3.length - 1] !== sep) {
+      debug('stat "%s"', path2);
+      fs3.stat(path2, function onstat(err, stat) {
+        if (err && err.code === "ENOENT" && !extname(path2) && path2[path2.length - 1] !== sep) {
           return next(err);
         }
         if (err)
           return self.onStatError(err);
         if (stat.isDirectory())
-          return self.redirect(path3);
-        self.emit("file", path3, stat);
-        self.send(path3, stat);
+          return self.redirect(path2);
+        self.emit("file", path2, stat);
+        self.send(path2, stat);
       });
       function next(err) {
         if (self._extensions.length <= i) {
           return err ? self.onStatError(err) : self.error(404);
         }
-        var p = path3 + "." + self._extensions[i++];
+        var p = path2 + "." + self._extensions[i++];
         debug('stat "%s"', p);
-        fs4.stat(p, function(err2, stat) {
+        fs3.stat(p, function(err2, stat) {
           if (err2)
             return next(err2);
           if (stat.isDirectory())
@@ -24193,7 +24189,7 @@ var require_send = __commonJS({
         });
       }
     };
-    SendStream.prototype.sendIndex = function sendIndex(path3) {
+    SendStream.prototype.sendIndex = function sendIndex(path2) {
       var i = -1;
       var self = this;
       function next(err) {
@@ -24202,9 +24198,9 @@ var require_send = __commonJS({
             return self.onStatError(err);
           return self.error(404);
         }
-        var p = join2(path3, self._index[i]);
+        var p = join(path2, self._index[i]);
         debug('stat "%s"', p);
-        fs4.stat(p, function(err2, stat) {
+        fs3.stat(p, function(err2, stat) {
           if (err2)
             return next(err2);
           if (stat.isDirectory())
@@ -24215,10 +24211,10 @@ var require_send = __commonJS({
       }
       next();
     };
-    SendStream.prototype.stream = function stream(path3, options) {
+    SendStream.prototype.stream = function stream(path2, options) {
       var self = this;
       var res = this.res;
-      var stream2 = fs4.createReadStream(path3, options);
+      var stream2 = fs3.createReadStream(path2, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -24233,11 +24229,11 @@ var require_send = __commonJS({
         self.emit("end");
       });
     };
-    SendStream.prototype.type = function type(path3) {
+    SendStream.prototype.type = function type(path2) {
       var res = this.res;
       if (res.getHeader("Content-Type"))
         return;
-      var type2 = mime.lookup(path3);
+      var type2 = mime.lookup(path2);
       if (!type2) {
         debug("no content-type");
         return;
@@ -24246,9 +24242,9 @@ var require_send = __commonJS({
       debug("content-type %s", type2);
       res.setHeader("Content-Type", type2 + (charset ? "; charset=" + charset : ""));
     };
-    SendStream.prototype.setHeader = function setHeader(path3, stat) {
+    SendStream.prototype.setHeader = function setHeader(path2, stat) {
       var res = this.res;
-      this.emit("headers", res, path3, stat);
+      this.emit("headers", res, path2, stat);
       if (this._acceptRanges && !res.getHeader("Accept-Ranges")) {
         debug("accept ranges");
         res.setHeader("Accept-Ranges", "bytes");
@@ -24307,9 +24303,9 @@ var require_send = __commonJS({
       }
       return err instanceof Error ? createError(status, err, { expose: false }) : createError(status, err);
     }
-    function decode(path3) {
+    function decode(path2) {
       try {
-        return decodeURIComponent(path3);
+        return decodeURIComponent(path2);
       } catch (err) {
         return -1;
       }
@@ -25221,12 +25217,12 @@ var require_utils2 = __commonJS({
     var querystring = require("querystring");
     exports2.etag = createETagGenerator({ weak: false });
     exports2.wetag = createETagGenerator({ weak: true });
-    exports2.isAbsolute = function(path2) {
-      if ("/" === path2[0])
+    exports2.isAbsolute = function(path) {
+      if ("/" === path[0])
         return true;
-      if (":" === path2[1] && ("\\" === path2[2] || "/" === path2[2]))
+      if (":" === path[1] && ("\\" === path[2] || "/" === path[2]))
         return true;
-      if ("\\\\" === path2.substring(0, 2))
+      if ("\\\\" === path.substring(0, 2))
         return true;
     };
     exports2.flatten = deprecate.function(
@@ -25440,7 +25436,7 @@ var require_application = __commonJS({
     };
     app2.use = function use(fn) {
       var offset = 0;
-      var path2 = "/";
+      var path = "/";
       if (typeof fn !== "function") {
         var arg = fn;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -25448,7 +25444,7 @@ var require_application = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = fn;
+          path = fn;
         }
       }
       var fns = flatten(slice.call(arguments, offset));
@@ -25459,12 +25455,12 @@ var require_application = __commonJS({
       var router = this._router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router.use(path2, fn2);
+          return router.use(path, fn2);
         }
-        debug(".use app under %s", path2);
-        fn2.mountpath = path2;
+        debug(".use app under %s", path);
+        fn2.mountpath = path;
         fn2.parent = this;
-        router.use(path2, function mounted_app(req, res, next) {
+        router.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             setPrototypeOf(req, orig.request);
@@ -25476,9 +25472,9 @@ var require_application = __commonJS({
       }, this);
       return this;
     };
-    app2.route = function route(path2) {
+    app2.route = function route(path) {
       this.lazyrouter();
-      return this._router.route(path2);
+      return this._router.route(path);
     };
     app2.engine = function engine(ext, fn) {
       if (typeof fn !== "function") {
@@ -25529,7 +25525,7 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app2.path = function path2() {
+    app2.path = function path() {
       return this.parent ? this.parent.path() + this.mountpath : "";
     };
     app2.enabled = function enabled(setting) {
@@ -25545,19 +25541,19 @@ var require_application = __commonJS({
       return this.set(setting, false);
     };
     methods.forEach(function(method) {
-      app2[method] = function(path2) {
+      app2[method] = function(path) {
         if (method === "get" && arguments.length === 1) {
-          return this.set(path2);
+          return this.set(path);
         }
         this.lazyrouter();
-        var route = this._router.route(path2);
+        var route = this._router.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
     });
-    app2.all = function all(path2) {
+    app2.all = function all(path) {
       this.lazyrouter();
-      var route = this._router.route(path2);
+      var route = this._router.route(path);
       var args = slice.call(arguments, 1);
       for (var i = 0; i < methods.length; i++) {
         route[methods[i]].apply(route, args);
@@ -26083,11 +26079,11 @@ var require_negotiator = __commonJS({
     var preferredMediaTypes = require_mediaType();
     module2.exports = Negotiator;
     module2.exports.Negotiator = Negotiator;
-    function Negotiator(request) {
+    function Negotiator(request2) {
       if (!(this instanceof Negotiator)) {
-        return new Negotiator(request);
+        return new Negotiator(request2);
       }
-      this.request = request;
+      this.request = request2;
     }
     Negotiator.prototype.charset = function charset(available) {
       var set = this.charsets(available);
@@ -26329,7 +26325,7 @@ var require_request = __commonJS({
       var subdomains2 = !isIP(hostname) ? hostname.split(".").reverse() : [hostname];
       return subdomains2.slice(offset);
     });
-    defineGetter(req, "path", function path2() {
+    defineGetter(req, "path", function path() {
       return parse(this).pathname;
     });
     defineGetter(req, "hostname", function hostname() {
@@ -26662,7 +26658,7 @@ var require_response = __commonJS({
     var http = require("http");
     var isAbsolute = require_utils2().isAbsolute;
     var onFinished = require_on_finished();
-    var path2 = require("path");
+    var path = require("path");
     var statuses = require_statuses();
     var merge = require_utils_merge();
     var sign = require_cookie_signature().sign;
@@ -26671,9 +26667,9 @@ var require_response = __commonJS({
     var setCharset = require_utils2().setCharset;
     var cookie = require_cookie();
     var send = require_send();
-    var extname = path2.extname;
+    var extname = path.extname;
     var mime = send.mime;
-    var resolve = path2.resolve;
+    var resolve = path.resolve;
     var vary = require_vary();
     var res = Object.create(http.ServerResponse.prototype);
     module2.exports = res;
@@ -26851,26 +26847,26 @@ var require_response = __commonJS({
       this.type("txt");
       return this.send(body);
     };
-    res.sendFile = function sendFile(path3, options, callback) {
+    res.sendFile = function sendFile(path2, options, callback) {
       var done = callback;
       var req = this.req;
       var res2 = this;
       var next = req.next;
       var opts = options || {};
-      if (!path3) {
+      if (!path2) {
         throw new TypeError("path argument is required to res.sendFile");
       }
-      if (typeof path3 !== "string") {
+      if (typeof path2 !== "string") {
         throw new TypeError("path must be a string to res.sendFile");
       }
       if (typeof options === "function") {
         done = options;
         opts = {};
       }
-      if (!opts.root && !isAbsolute(path3)) {
+      if (!opts.root && !isAbsolute(path2)) {
         throw new TypeError("path must be absolute or specify root to res.sendFile");
       }
-      var pathname = encodeURI(path3);
+      var pathname = encodeURI(path2);
       var file = send(req, pathname, opts);
       sendfile(res2, file, opts, function(err) {
         if (done)
@@ -26882,7 +26878,7 @@ var require_response = __commonJS({
         }
       });
     };
-    res.sendfile = function(path3, options, callback) {
+    res.sendfile = function(path2, options, callback) {
       var done = callback;
       var req = this.req;
       var res2 = this;
@@ -26892,7 +26888,7 @@ var require_response = __commonJS({
         done = options;
         opts = {};
       }
-      var file = send(req, path3, opts);
+      var file = send(req, path2, opts);
       sendfile(res2, file, opts, function(err) {
         if (done)
           return done(err);
@@ -26907,7 +26903,7 @@ var require_response = __commonJS({
       res.sendfile,
       "res.sendfile: Use res.sendFile instead"
     );
-    res.download = function download(path3, filename, options, callback) {
+    res.download = function download(path2, filename, options, callback) {
       var done = callback;
       var name = filename;
       var opts = options || null;
@@ -26924,7 +26920,7 @@ var require_response = __commonJS({
         opts = filename;
       }
       var headers = {
-        "Content-Disposition": contentDisposition(name || path3)
+        "Content-Disposition": contentDisposition(name || path2)
       };
       if (opts && opts.headers) {
         var keys = Object.keys(opts.headers);
@@ -26937,7 +26933,7 @@ var require_response = __commonJS({
       }
       opts = Object.create(opts);
       opts.headers = headers;
-      var fullPath = !opts.root ? resolve(path3) : path3;
+      var fullPath = !opts.root ? resolve(path2) : path2;
       return this.sendFile(fullPath, opts, done);
     };
     res.contentType = res.type = function contentType(type) {
@@ -27247,11 +27243,11 @@ var require_serve_static = __commonJS({
         }
         var forwardError = !fallthrough;
         var originalUrl = parseUrl.original(req);
-        var path2 = parseUrl(req).pathname;
-        if (path2 === "/" && originalUrl.pathname.substr(-1) !== "/") {
-          path2 = "";
+        var path = parseUrl(req).pathname;
+        if (path === "/" && originalUrl.pathname.substr(-1) !== "/") {
+          path = "";
         }
-        var stream = send(req, path2, opts);
+        var stream = send(req, path, opts);
         stream.on("directory", onDirectory);
         if (setHeaders) {
           stream.on("headers", setHeaders);
@@ -27665,202 +27661,101 @@ var require_lib4 = __commonJS({
   }
 });
 
-// packages/core/types.ts
-var init_types = __esm({
-  "packages/core/types.ts"() {
+// packages/core/gst.js
+var require_gst = __commonJS({
+  "packages/core/gst.js"(exports2) {
     "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.calculateGSTSplit = calculateGSTSplit;
+    exports2.getTaxableValue = getTaxableValue;
+    function calculateGSTSplit(taxableAmountPaise, gstRate, shopStateCode, customerGSTIN) {
+      var customerStateCode = shopStateCode;
+      if (customerGSTIN && customerGSTIN.trim().length >= 2) {
+        var code = customerGSTIN.trim().substring(0, 2);
+        if (/^\d+$/.test(code)) {
+          customerStateCode = code;
+        }
+      }
+      var totalTaxPaise = Math.round(taxableAmountPaise * gstRate / 100);
+      if (customerStateCode === shopStateCode) {
+        var halfTax = Math.round(totalTaxPaise / 2);
+        return {
+          cgst: halfTax,
+          sgst: totalTaxPaise - halfTax,
+          // handle odd-paise division correctly
+          igst: 0
+        };
+      } else {
+        return {
+          cgst: 0,
+          sgst: 0,
+          igst: totalTaxPaise
+        };
+      }
+    }
+    function getTaxableValue(lineTotalPaise, gstRate) {
+      return Math.round(lineTotalPaise / (1 + gstRate / 100));
+    }
   }
 });
+
+// packages/core/ledger.js
+var require_ledger = __commonJS({
+  "packages/core/ledger.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.calculateAging = calculateAging;
+    exports2.isCustomerOverdue = isCustomerOverdue;
+    function calculateAging(customer, currentDate) {
+      if (currentDate === void 0) {
+        currentDate = /* @__PURE__ */ new Date();
+      }
+      var buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
+      if (customer.current_balance <= 0 || !customer.credit_due_date) {
+        return buckets;
+      }
+      var dueDate = new Date(customer.credit_due_date);
+      var diffTime = currentDate.getTime() - dueDate.getTime();
+      var diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
+      if (diffDays <= 0) {
+        return buckets;
+      }
+      buckets.total_overdue = customer.current_balance;
+      if (diffDays <= 30) {
+        buckets["0-30"] = customer.current_balance;
+      } else if (diffDays <= 60) {
+        buckets["31-60"] = customer.current_balance;
+      } else if (diffDays <= 90) {
+        buckets["61-90"] = customer.current_balance;
+      } else {
+        buckets["90+"] = customer.current_balance;
+      }
+      return buckets;
+    }
+    function isCustomerOverdue(customer, currentDate) {
+      if (currentDate === void 0) {
+        currentDate = /* @__PURE__ */ new Date();
+      }
+      if (customer.current_balance <= 0 || !customer.credit_due_date)
+        return false;
+      var dueDate = new Date(customer.credit_due_date);
+      return currentDate.getTime() > dueDate.getTime();
+    }
+  }
+});
+
+// test_mobile_flow.ts
+var import_assert = __toESM(require("assert"));
+var import_better_sqlite32 = __toESM(require("better-sqlite3"));
+
+// apps/desktop/electron/api.ts
+var import_express = __toESM(require_express2());
+var import_cors = __toESM(require_lib4());
+var import_os = __toESM(require("os"));
+var fs = __toESM(require("fs"));
 
 // packages/core/db.ts
-function getDB() {
-  if (!dbInstance) {
-    throw new Error("Database not initialized. Call initDB(dbPath, schemaSql) first.");
-  }
-  return dbInstance;
-}
-function initDB(dbPath, schemaSql2) {
-  if (dbInstance) {
-    return dbInstance;
-  }
-  dbInstance = new import_better_sqlite3.default(dbPath);
-  dbInstance.pragma("foreign_keys = ON");
-  dbInstance.pragma("journal_mode = WAL");
-  const tableCheck = dbInstance.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='settings'").get();
-  if (!tableCheck) {
-    dbInstance.exec(schemaSql2);
-    seedDB(dbInstance);
-  }
-  return dbInstance;
-}
-function seedDB(db) {
-  const insertSetting = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)");
-  insertSetting.run("first_run", "1");
-  insertSetting.run("shop_name", "");
-  insertSetting.run("address", "");
-  insertSetting.run("gstin", "");
-  insertSetting.run("state_code", "29");
-  insertSetting.run("next_invoice_no", "1001");
-  insertSetting.run("job_prefix", "JOB/26/");
-  insertSetting.run("next_job_no", "2001");
-  insertSetting.run("default_gst_rate", "18");
-  insertSetting.run("currency", "INR");
-  insertSetting.run("sms_enabled", "0");
-  insertSetting.run("online_lookup", "0");
-  const insertCustomer = db.prepare(`
-    INSERT INTO customers (name, phone, shop_name, tier, gstin, credit_limit, current_balance, credit_due_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  insertCustomer.run("Counter Customer", "0000000000", null, "COUNTER", null, 0, 0, null);
-  insertCustomer.run("Abhishek Audio", "9876543210", "Abhishek Electronics", "DEALER", "29AAAPA1234B1Z0", 1e7, 45e5, "2026-07-16");
-  insertCustomer.run("Pooja Car Accessories", "9123456789", "Pooja Accessories", "DEALER", null, 5e6, 0, null);
-  insertCustomer.run("Sardar Distributors", "9988776655", "Sardar Audio Ltd", "DISTRIBUTOR", "29BBBBB5678C1Z1", 5e7, 0, null);
-  const insertLedger = db.prepare(`
-    INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
-  insertLedger.run(2, "SALE", 0, 45e5, 45e5, "Opening Balance");
-  const insertProduct = db.prepare(`
-    INSERT INTO products (sku_code, brand_name, model_name, category, hsn_code, gst_rate, requires_serial, warranty_months, min_restock_level, counter_price, dealer_price, distributor_price, loose_qty)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  insertProduct.run("8809123456789", "Pioneer", "DMH-Z5290BT", "Car Audio", "8527", 18, 1, 12, 3, 285e4, 25e5, 23e5, 0);
-  insertProduct.run("8809123456000", "Blaupunkt", "Key Largo 980", "Car Audio", "8527", 18, 1, 24, 2, 18e5, 16e5, 145e4, 0);
-  insertProduct.run("4001234567890", "Dixon", "8-Gauge Power Cable", "Accessories", "8544", 18, 0, 0, 20, 15e3, 12e3, 1e4, 150);
-  insertProduct.run("7890123456789", "Sony", "XM-N1004", "Car Audio", "8518", 18, 1, 12, 2, 95e4, 85e4, 8e5, 0);
-  const insertFitment = db.prepare("INSERT INTO product_fitment (product_id, vehicle_tag) VALUES (?, ?)");
-  insertFitment.run(1, "Universal Double Din");
-  insertFitment.run(1, "Creta 2024");
-  insertFitment.run(1, "Swift 2023");
-  insertFitment.run(2, "9 Inch Android");
-  insertFitment.run(2, "Universal Fitment");
-  insertFitment.run(4, "4 Channel Amplifier");
-  const insertInstance = db.prepare(`
-    INSERT INTO product_instances (product_id, serial_number, status, batch_number, purchase_cost, grn_id, sold_at, warranty_expires_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  insertInstance.run(1, "PIO-DMH-1001", "IN_STOCK", "B1", 19e5, 1, null, null);
-  insertInstance.run(1, "PIO-DMH-1002", "IN_STOCK", "B1", 19e5, 1, null, null);
-  insertInstance.run(1, "PIO-DMH-1003", "IN_STOCK", "B1", 19e5, 1, null, null);
-  insertInstance.run(2, "BP-KL-9801", "IN_STOCK", "B2", 12e5, 1, null, null);
-  insertInstance.run(2, "BP-KL-9802", "IN_STOCK", "B2", 12e5, 1, null, null);
-  insertInstance.run(4, "SONY-AMP-2001", "IN_STOCK", "B3", 6e5, 1, null, null);
-  insertInstance.run(4, "SONY-AMP-2002", "SOLD", "B3", 6e5, 1, "2026-06-01 12:00:00", "2027-06-01 12:00:00");
-  const insertGRN = db.prepare(`
-    INSERT INTO grn (grn_id, supplier_id, invoice_ref, total_cost, received_by)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  insertGRN.run(1, null, "INIT-STOCK", 87e5, 1);
-  const insertRepair = db.prepare(`
-    INSERT INTO repair_jobs (job_no, customer_id, customer_phone, customer_name, product_name, serial_number, sold_by_us, is_warranty, issue_reported, technician_notes, technician_id, status, est_cost, parts_cost, labour_cost, advance_paid, final_cost, ready_date, delivered_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  insertRepair.run(
-    "JOB/26/2001",
-    2,
-    // Abhishek Audio
-    "9876543210",
-    "Abhishek Audio",
-    "Sony XM-N1004 Amplifier",
-    "SONY-AMP-2002",
-    1,
-    1,
-    "Channel 3/4 no output",
-    "Checking pre-amp stage transistors",
-    3,
-    // Repair Tech
-    "IN_REPAIR",
-    15e4,
-    0,
-    0,
-    0,
-    0,
-    null,
-    null
-  );
-  const insertRepairHistory = db.prepare(`
-    INSERT INTO repair_status_history (job_id, old_status, new_status)
-    VALUES (?, ?, ?)
-  `);
-  insertRepairHistory.run(1, "PENDING", "IN_REPAIR");
-}
-var import_better_sqlite3, dbInstance;
-var init_db = __esm({
-  "packages/core/db.ts"() {
-    "use strict";
-    import_better_sqlite3 = __toESM(require("better-sqlite3"));
-    dbInstance = null;
-  }
-});
-
-// packages/core/pricing.ts
-var init_pricing = __esm({
-  "packages/core/pricing.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/warranty.ts
-var init_warranty = __esm({
-  "packages/core/warranty.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/gst.ts
-var init_gst = __esm({
-  "packages/core/gst.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/intake.ts
-var init_intake = __esm({
-  "packages/core/intake.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/ledger.ts
-function calculateAging(customer, currentDate = /* @__PURE__ */ new Date()) {
-  const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
-  if (customer.current_balance <= 0 || !customer.credit_due_date) {
-    return buckets;
-  }
-  const dueDate = new Date(customer.credit_due_date);
-  const diffTime = currentDate.getTime() - dueDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
-  if (diffDays <= 0) {
-    return buckets;
-  }
-  buckets.total_overdue = customer.current_balance;
-  if (diffDays <= 30) {
-    buckets["0-30"] = customer.current_balance;
-  } else if (diffDays <= 60) {
-    buckets["31-60"] = customer.current_balance;
-  } else if (diffDays <= 90) {
-    buckets["61-90"] = customer.current_balance;
-  } else {
-    buckets["90+"] = customer.current_balance;
-  }
-  return buckets;
-}
-var init_ledger = __esm({
-  "packages/core/ledger.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/sms.ts
-function formatPaymentReminder(customer, shopName) {
-  const amountRs = (customer.current_balance / 100).toFixed(2);
-  return `Dear ${customer.name}, your Udhaar balance of Rs.${amountRs} at ${shopName} is overdue. Please settle it at the earliest.`;
-}
-var init_sms = __esm({
-  "packages/core/sms.ts"() {
-    "use strict";
-  }
-});
+var import_better_sqlite3 = __toESM(require("better-sqlite3"));
 
 // packages/core/permissions.ts
 function authorize(role, action) {
@@ -27911,117 +27806,18 @@ function authorize(role, action) {
       return false;
   }
 }
-function assertCan(role, action) {
-  if (!authorize(role, action)) {
-    throw new Error(`Forbidden: Role ${role || "UNAUTHENTICATED"} is not allowed to perform ${action}`);
-  }
-}
-var init_permissions = __esm({
-  "packages/core/permissions.ts"() {
-    "use strict";
-  }
-});
-
-// packages/core/index.ts
-var init_core = __esm({
-  "packages/core/index.ts"() {
-    "use strict";
-    init_types();
-    init_db();
-    init_pricing();
-    init_warranty();
-    init_gst();
-    init_intake();
-    init_ledger();
-    init_sms();
-    init_permissions();
-  }
-});
-
-// packages/core/gst.js
-var require_gst = __commonJS({
-  "packages/core/gst.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.calculateGSTSplit = calculateGSTSplit;
-    exports2.getTaxableValue = getTaxableValue;
-    function calculateGSTSplit(taxableAmountPaise, gstRate, shopStateCode, customerGSTIN) {
-      var customerStateCode = shopStateCode;
-      if (customerGSTIN && customerGSTIN.trim().length >= 2) {
-        var code = customerGSTIN.trim().substring(0, 2);
-        if (/^\d+$/.test(code)) {
-          customerStateCode = code;
-        }
-      }
-      var totalTaxPaise = Math.round(taxableAmountPaise * gstRate / 100);
-      if (customerStateCode === shopStateCode) {
-        var halfTax = Math.round(totalTaxPaise / 2);
-        return {
-          cgst: halfTax,
-          sgst: totalTaxPaise - halfTax,
-          // handle odd-paise division correctly
-          igst: 0
-        };
-      } else {
-        return {
-          cgst: 0,
-          sgst: 0,
-          igst: totalTaxPaise
-        };
-      }
-    }
-    function getTaxableValue(lineTotalPaise, gstRate) {
-      return Math.round(lineTotalPaise / (1 + gstRate / 100));
-    }
-  }
-});
-
-// packages/core/ledger.js
-var require_ledger = __commonJS({
-  "packages/core/ledger.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.calculateAging = calculateAging2;
-    exports2.isCustomerOverdue = isCustomerOverdue;
-    function calculateAging2(customer, currentDate) {
-      if (currentDate === void 0) {
-        currentDate = /* @__PURE__ */ new Date();
-      }
-      var buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
-      if (customer.current_balance <= 0 || !customer.credit_due_date) {
-        return buckets;
-      }
-      var dueDate = new Date(customer.credit_due_date);
-      var diffTime = currentDate.getTime() - dueDate.getTime();
-      var diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
-      if (diffDays <= 0) {
-        return buckets;
-      }
-      buckets.total_overdue = customer.current_balance;
-      if (diffDays <= 30) {
-        buckets["0-30"] = customer.current_balance;
-      } else if (diffDays <= 60) {
-        buckets["31-60"] = customer.current_balance;
-      } else if (diffDays <= 90) {
-        buckets["61-90"] = customer.current_balance;
-      } else {
-        buckets["90+"] = customer.current_balance;
-      }
-      return buckets;
-    }
-    function isCustomerOverdue(customer, currentDate) {
-      if (currentDate === void 0) {
-        currentDate = /* @__PURE__ */ new Date();
-      }
-      if (customer.current_balance <= 0 || !customer.credit_due_date)
-        return false;
-      var dueDate = new Date(customer.credit_due_date);
-      return currentDate.getTime() > dueDate.getTime();
-    }
-  }
-});
 
 // apps/desktop/electron/api.ts
+var overrideTokens = /* @__PURE__ */ new Map();
+var tokenCleanupInterval = setInterval(() => {
+  const now = Date.now();
+  overrideTokens.forEach((v, k) => {
+    if (v.expires < now)
+      overrideTokens.delete(k);
+  });
+}, 6e4);
+if (tokenCleanupInterval.unref)
+  tokenCleanupInterval.unref();
 function getMaxDiscountPct(role) {
   if (role === "OWNER")
     return 100;
@@ -28042,7 +27838,7 @@ function safeProd(product, role) {
   return rest;
 }
 function createApiServer(options) {
-  const { getDB: getDB2, sessionStore: sessionStore2, isPackaged, mainWindow: mainWindow2, activeConfig: activeConfig2, configPath: configPath2, initDB: initDB2, schemaSql: schemaSql2 } = options;
+  const { getDB, sessionStore: sessionStore2, isPackaged, mainWindow, activeConfig, configPath, initDB, schemaSql } = options;
   const app2 = (0, import_express.default)();
   app2.use((0, import_cors.default)());
   app2.use(import_express.default.json());
@@ -28081,11 +27877,11 @@ function createApiServer(options) {
   app2.post("/api/auth/login", (req, res) => {
     const { pin } = req.body;
     try {
-      const db = getDB2();
-      const users = db.prepare("SELECT * FROM users WHERE active = 1").all();
-      const bcrypt2 = require("bcryptjs");
+      const db2 = getDB();
+      const users = db2.prepare("SELECT * FROM users WHERE active = 1").all();
+      const bcrypt = require("bcryptjs");
       const crypto = require("crypto");
-      const matchedUser = users.find((u) => bcrypt2.compareSync(pin, u.pin_hash));
+      const matchedUser = users.find((u) => bcrypt.compareSync(pin, u.pin_hash));
       if (matchedUser) {
         const token = crypto.randomBytes(32).toString("hex");
         sessionStore2.set(token, { user_id: matchedUser.user_id, role: matchedUser.role, issuedAt: Date.now() });
@@ -28107,13 +27903,13 @@ function createApiServer(options) {
   });
   app2.get("/api/products/:sku", requireRole("READ_CATALOGUE"), (req, res) => {
     try {
-      const db = getDB2();
+      const db2 = getDB();
       const sku = req.params.sku;
-      const product = db.prepare("SELECT * FROM products WHERE sku_code = ?").get(sku);
+      const product = db2.prepare("SELECT * FROM products WHERE sku_code = ?").get(sku);
       if (product) {
         let stock = 0;
         if (product.requires_serial) {
-          const row = db.prepare("SELECT COUNT(*) as count FROM product_instances WHERE product_id = ? AND status = 'IN_STOCK'").get(product.product_id);
+          const row = db2.prepare("SELECT COUNT(*) as count FROM product_instances WHERE product_id = ? AND status = 'IN_STOCK'").get(product.product_id);
           stock = row.count;
         } else {
           stock = product.loose_qty || 0;
@@ -28128,12 +27924,12 @@ function createApiServer(options) {
   });
   app2.get("/api/products/serial/:serial", requireRole("READ_CATALOGUE"), (req, res) => {
     try {
-      const db = getDB2();
+      const db2 = getDB();
       const { serial } = req.params;
-      const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
+      const instance = db2.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
       if (!instance)
         return res.status(404).json({ success: false, error: "Serial not found" });
-      const product = db.prepare("SELECT * FROM products WHERE product_id = ?").get(instance.product_id);
+      const product = db2.prepare("SELECT * FROM products WHERE product_id = ?").get(instance.product_id);
       if (!product)
         return res.status(404).json({ success: false, error: "Product not found" });
       res.json({
@@ -28152,8 +27948,8 @@ function createApiServer(options) {
       if (!cart || !Array.isArray(cart)) {
         return res.status(400).json({ success: false, error: "Invalid cart payload" });
       }
-      if (mainWindow2) {
-        mainWindow2.webContents.send("mobile-cart-received", cart);
+      if (mainWindow) {
+        mainWindow.webContents.send("mobile-cart-received", cart);
         res.json({ success: true, message: "Cart beamed to Desktop POS" });
       } else {
         res.status(500).json({ success: false, error: "Desktop UI not active" });
@@ -28165,10 +27961,10 @@ function createApiServer(options) {
   app2.get("/api/products/lookup/:sku", requireRole("READ_CATALOGUE"), (req, res) => {
     const { sku } = req.params;
     try {
-      const db = getDB2();
-      const product = db.prepare("SELECT * FROM products WHERE sku_code = ?").get(sku);
+      const db2 = getDB();
+      const product = db2.prepare("SELECT * FROM products WHERE sku_code = ?").get(sku);
       if (product) {
-        const tags = db.prepare("SELECT vehicle_tag FROM product_fitment WHERE product_id = ?").all(product.product_id).map((row) => row.vehicle_tag);
+        const tags = db2.prepare("SELECT vehicle_tag FROM product_fitment WHERE product_id = ?").all(product.product_id).map((row) => row.vehicle_tag);
         res.json({ found: true, product: { ...safeProd(product, req.session?.role), fitment_tags: tags } });
       } else {
         res.json({ found: false });
@@ -28180,8 +27976,8 @@ function createApiServer(options) {
   app2.get("/api/customers/lookup/:phone", requireRole("READ_CUSTOMERS"), (req, res) => {
     const { phone } = req.params;
     try {
-      const db = getDB2();
-      const customer = db.prepare("SELECT * FROM customers WHERE phone = ?").get(phone);
+      const db2 = getDB();
+      const customer = db2.prepare("SELECT * FROM customers WHERE phone = ?").get(phone);
       if (customer) {
         res.json({ found: true, customer });
       } else {
@@ -28193,8 +27989,8 @@ function createApiServer(options) {
   });
   app2.get("/api/customers", requireRole("READ_CUSTOMERS"), (req, res) => {
     try {
-      const db = getDB2();
-      const customers = db.prepare("SELECT customer_id, name, phone, tier, gstin, credit_limit, current_balance, credit_due_date FROM customers ORDER BY name").all();
+      const db2 = getDB();
+      const customers = db2.prepare("SELECT customer_id, name, phone, tier, gstin, credit_limit, current_balance, credit_due_date FROM customers ORDER BY name").all();
       res.json({ success: true, customers });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -28206,12 +28002,12 @@ function createApiServer(options) {
       return res.status(400).json({ success: false, error: "Name and Phone are required." });
     }
     try {
-      const db = getDB2();
-      const result = db.prepare(
+      const db2 = getDB();
+      const result = db2.prepare(
         `INSERT INTO customers (name, phone, shop_name, tier, gstin, credit_limit, current_balance)
          VALUES (?, ?, ?, ?, ?, ?, 0)`
       ).run(name, phone, shop_name || null, tier || "COUNTER", gstin || null, credit_limit || 0);
-      const newCustomer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(result.lastInsertRowid);
+      const newCustomer = db2.prepare("SELECT * FROM customers WHERE customer_id = ?").get(result.lastInsertRowid);
       res.json({ success: true, customer: newCustomer });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -28220,12 +28016,12 @@ function createApiServer(options) {
   app2.get("/api/customers/:id/ledger", requireRole("READ_CUSTOMERS"), (req, res) => {
     const customerId = req.params.id;
     try {
-      const db = getDB2();
-      const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customerId);
+      const db2 = getDB();
+      const customer = db2.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customerId);
       if (!customer) {
         return res.status(404).json({ success: false, error: "Customer not found" });
       }
-      const ledger = db.prepare("SELECT * FROM customer_ledger WHERE customer_id = ? ORDER BY created_at DESC").all(customerId);
+      const ledger = db2.prepare("SELECT * FROM customer_ledger WHERE customer_id = ? ORDER BY created_at DESC").all(customerId);
       res.json({ success: true, customer, ledger });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -28239,15 +28035,15 @@ function createApiServer(options) {
       return res.status(400).json({ success: false, error: "Valid payment amount required" });
     }
     try {
-      const db = getDB2();
-      const tx = db.transaction(() => {
-        db.prepare(`UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?`).run(amount, customerId);
-        const newCustomer = db.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(customerId);
-        db.prepare(
+      const db2 = getDB();
+      const tx = db2.transaction(() => {
+        db2.prepare(`UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?`).run(amount, customerId);
+        const newCustomer = db2.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(customerId);
+        db2.prepare(
           `INSERT INTO customer_ledger (customer_id, type, amount, balance_after, note)
            VALUES (?, 'PAYMENT', ?, ?, ?)`
         ).run(customerId, amount, newCustomer.current_balance, note || "Payment received");
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RECORD_PAYMENT', 'customer_ledger', ?, ?)`).run(userId, customerId, `Payment amount: ${amount}`);
+        db2.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RECORD_PAYMENT', 'customer_ledger', ?, ?)`).run(userId, customerId, `Payment amount: ${amount}`);
         return newCustomer.current_balance;
       });
       const newBalance = tx();
@@ -28259,17 +28055,17 @@ function createApiServer(options) {
   app2.get("/api/sales/invoice/:invoice_no", requireRole("READ_DASHBOARD"), (req, res) => {
     const invoice_no = decodeURIComponent(req.params.invoice_no);
     try {
-      const db = getDB2();
-      const sale = db.prepare("SELECT * FROM sales WHERE invoice_no = ?").get(invoice_no);
+      const db2 = getDB();
+      const sale = db2.prepare("SELECT * FROM sales WHERE invoice_no = ?").get(invoice_no);
       if (sale) {
-        const items = db.prepare(
+        const items = db2.prepare(
           `SELECT si.*, p.brand_name, p.model_name, p.hsn_code, p.gst_rate, pi.serial_number
            FROM sale_items si
            JOIN products p ON si.product_id = p.product_id
            LEFT JOIN product_instances pi ON si.instance_id = pi.instance_id
            WHERE si.sale_id = ?`
         ).all(sale.sale_id);
-        const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(sale.customer_id);
+        const customer = db2.prepare("SELECT * FROM customers WHERE customer_id = ?").get(sale.customer_id);
         res.json({ found: true, sale, items, customer });
       } else {
         res.json({ found: false });
@@ -28282,11 +28078,11 @@ function createApiServer(options) {
     try {
       const { product_id, instance_id, final_price } = req.body;
       const role = req.session?.role;
-      const db = getDB2();
-      const product = db.prepare("SELECT * FROM products WHERE product_id = ?").get(product_id);
+      const db2 = getDB();
+      const product = db2.prepare("SELECT * FROM products WHERE product_id = ?").get(product_id);
       if (!product)
         return res.status(404).json({ success: false, error: "Product not found" });
-      const instance = instance_id ? db.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(instance_id) : null;
+      const instance = instance_id ? db2.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(instance_id) : null;
       const tierPrice = product.counter_price || 0;
       const floor = getPriceFloor(product, instance);
       const maxDiscount = getMaxDiscountPct(role);
@@ -28306,11 +28102,11 @@ function createApiServer(options) {
   app2.post("/api/sales/admin-override", requireRole("CHECKOUT"), (req, res) => {
     try {
       const { admin_pin, product_id, instance_id, final_price, note, override_type, customer_id } = req.body;
-      const db = getDB2();
-      const bcrypt2 = require("bcryptjs");
+      const db2 = getDB();
+      const bcrypt = require("bcryptjs");
       const crypto = require("crypto");
-      const admins = db.prepare("SELECT * FROM users WHERE active = 1 AND role IN ('OWNER', 'CASHIER')").all();
-      const admin = admins.find((u) => bcrypt2.compareSync(admin_pin, u.pin_hash));
+      const admins = db2.prepare("SELECT * FROM users WHERE active = 1 AND role IN ('OWNER', 'CASHIER')").all();
+      const admin = admins.find((u) => bcrypt.compareSync(admin_pin, u.pin_hash));
       if (!admin)
         return res.status(401).json({ success: false, error: "Invalid admin PIN" });
       if (admin.role !== "OWNER") {
@@ -28325,7 +28121,7 @@ function createApiServer(options) {
           is_udhaar: true,
           customer_id
         });
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'UDHAAR_OVERRIDE', 'customer', ?, ?)`).run(admin.user_id, customer_id, `Override by ${admin.name}: note=${note ?? ""}`);
+        db2.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'UDHAAR_OVERRIDE', 'customer', ?, ?)`).run(admin.user_id, customer_id, `Override by ${admin.name}: note=${note ?? ""}`);
       } else {
         overrideTokens.set(token, {
           admin_user_id: admin.user_id,
@@ -28334,7 +28130,7 @@ function createApiServer(options) {
           product_id,
           final_price
         });
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'PRICE_OVERRIDE', 'product', ?, ?)`).run(admin.user_id, product_id, `Override by ${admin.name}: final_price=${final_price}, instance=${instance_id ?? "loose"}, note=${note ?? ""}`);
+        db2.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'PRICE_OVERRIDE', 'product', ?, ?)`).run(admin.user_id, product_id, `Override by ${admin.name}: final_price=${final_price}, instance=${instance_id ?? "loose"}, note=${note ?? ""}`);
       }
       res.json({ success: true, override_token: token, approved_by: admin.name });
     } catch (err) {
@@ -28348,8 +28144,8 @@ function createApiServer(options) {
       return res.status(400).json({ success: false, error: "Cart is empty." });
     }
     try {
-      const db = getDB2();
-      const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customer_id || 1);
+      const db2 = getDB();
+      const customer = db2.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customer_id || 1);
       if (!customer)
         return res.status(400).json({ success: false, error: "Customer not found." });
       let subtotal = 0;
@@ -28376,7 +28172,7 @@ function createApiServer(options) {
             return res.status(402).json({ success: false, error: "Credit limit exceeded.", needs_override: true });
         }
       }
-      const shopStateRow = db.prepare("SELECT value FROM settings WHERE key = 'state_code'").get();
+      const shopStateRow = db2.prepare("SELECT value FROM settings WHERE key = 'state_code'").get();
       const shopState = shopStateRow?.value || "29";
       let customerState = shopState;
       if (customer.gstin && customer.gstin.trim().length >= 2) {
@@ -28390,7 +28186,7 @@ function createApiServer(options) {
         const lineTotal = (item.price - item.discount) * item.quantity;
         const proportion = subtotal > 0 ? lineTotal / subtotal : 0;
         const lineTaxable = Math.round(lineTotal - discountVal * proportion);
-        const prodRow = db.prepare("SELECT gst_rate FROM products WHERE product_id = ?").get(item.product_id);
+        const prodRow = db2.prepare("SELECT gst_rate FROM products WHERE product_id = ?").get(item.product_id);
         const rate = prodRow?.gst_rate ?? 18;
         const taxableValue = Math.round(lineTaxable / (1 + rate / 100));
         const taxAmount = lineTaxable - taxableValue;
@@ -28401,14 +28197,14 @@ function createApiServer(options) {
         } else
           igstTotal += taxAmount;
       });
-      const checkoutTx = db.transaction(() => {
-        const prefixRow = db.prepare("SELECT value FROM settings WHERE key = 'invoice_prefix'").get();
-        const sequenceRow = db.prepare("SELECT value FROM settings WHERE key = 'next_invoice_no'").get();
+      const checkoutTx = db2.transaction(() => {
+        const prefixRow = db2.prepare("SELECT value FROM settings WHERE key = 'invoice_prefix'").get();
+        const sequenceRow = db2.prepare("SELECT value FROM settings WHERE key = 'next_invoice_no'").get();
         const prefix = prefixRow?.value || "CE/26/";
         const sequence = sequenceRow?.value || "1001";
         const invoiceNo = `${prefix}${sequence}`;
         const paidPaise = payment_mode === "UDHAAR" ? amount_paid || 0 : grandTotal;
-        const saleRes = db.prepare(
+        const saleRes = db2.prepare(
           `INSERT INTO sales (
             invoice_no, customer_id, tier_applied, subtotal, discount, 
             cgst, sgst, igst, grand_total, amount_paid, payment_mode, sold_by
@@ -28417,7 +28213,7 @@ function createApiServer(options) {
         const saleId = saleRes.lastInsertRowid;
         cart.forEach((item) => {
           if (item.instance_id) {
-            const inst = db.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(item.instance_id);
+            const inst = db2.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(item.instance_id);
             if (!inst || inst.status !== "IN_STOCK") {
               const err = new Error(`Serial ${item.instance_id} is not available (already sold or not in stock).`);
               err.statusCode = 409;
@@ -28429,12 +28225,12 @@ function createApiServer(options) {
                 throw new Error(`Override token expired for item ${item.instance_id}`);
               overrideTokens.delete(item.override_token);
             }
-            db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).run(saleId, item.product_id, item.instance_id, item.price, item.discount, item.price - item.discount, inst.purchase_cost || 0);
-            const prodRow = db.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(item.product_id);
+            db2.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).run(saleId, item.product_id, item.instance_id, item.price, item.discount, item.price - item.discount, inst.purchase_cost || 0);
+            const prodRow = db2.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(item.product_id);
             const warrantyMonths = prodRow?.warranty_months ?? 12;
-            db.prepare(`UPDATE product_instances SET status = 'SOLD', sold_at = datetime('now'), warranty_expires_at = datetime('now', '+' || ? || ' months') WHERE instance_id = ?`).run(warrantyMonths, item.instance_id);
+            db2.prepare(`UPDATE product_instances SET status = 'SOLD', sold_at = datetime('now'), warranty_expires_at = datetime('now', '+' || ? || ' months') WHERE instance_id = ?`).run(warrantyMonths, item.instance_id);
           } else {
-            const prodRow = db.prepare("SELECT loose_qty, purchase_cost FROM products WHERE product_id = ?").get(item.product_id);
+            const prodRow = db2.prepare("SELECT loose_qty, purchase_cost FROM products WHERE product_id = ?").get(item.product_id);
             if (!prodRow || prodRow.loose_qty < item.quantity)
               throw new Error(`Insufficient loose stock for product ID ${item.product_id}. Available: ${prodRow?.loose_qty || 0}`);
             if (item.override_token) {
@@ -28443,17 +28239,17 @@ function createApiServer(options) {
                 throw new Error(`Override token expired for loose item ${item.product_id}`);
               overrideTokens.delete(item.override_token);
             }
-            db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, NULL, ?, ?, ?, ?, ?)`).run(saleId, item.product_id, item.quantity, item.price, item.discount, (item.price - item.discount) * item.quantity, prodRow.purchase_cost || 0);
-            db.prepare(`UPDATE products SET loose_qty = loose_qty - ? WHERE product_id = ?`).run(item.quantity, item.product_id);
+            db2.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, NULL, ?, ?, ?, ?, ?)`).run(saleId, item.product_id, item.quantity, item.price, item.discount, (item.price - item.discount) * item.quantity, prodRow.purchase_cost || 0);
+            db2.prepare(`UPDATE products SET loose_qty = loose_qty - ? WHERE product_id = ?`).run(item.quantity, item.product_id);
           }
         });
         if (payment_mode === "UDHAAR") {
           const debtPaise = grandTotal - paidPaise;
-          db.prepare(`UPDATE customers SET current_balance = current_balance + ? WHERE customer_id = ?`).run(debtPaise, customer.customer_id);
-          db.prepare(`INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note) VALUES (?, 'SALE', ?, ?, (SELECT current_balance FROM customers WHERE customer_id = ?), ?)`).run(customer.customer_id, saleId, debtPaise, customer.customer_id, `Debited from invoice ${invoiceNo}`);
+          db2.prepare(`UPDATE customers SET current_balance = current_balance + ? WHERE customer_id = ?`).run(debtPaise, customer.customer_id);
+          db2.prepare(`INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note) VALUES (?, 'SALE', ?, ?, (SELECT current_balance FROM customers WHERE customer_id = ?), ?)`).run(customer.customer_id, saleId, debtPaise, customer.customer_id, `Debited from invoice ${invoiceNo}`);
         }
-        db.prepare(`UPDATE settings SET value = CAST((CAST(value AS INTEGER) + 1) AS TEXT) WHERE key = 'next_invoice_no'`).run();
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'CHECKOUT', 'sale', ?, ?)`).run(userId, saleId, `LAN API POS Checkout Completed. Invoice: ${invoiceNo}`);
+        db2.prepare(`UPDATE settings SET value = CAST((CAST(value AS INTEGER) + 1) AS TEXT) WHERE key = 'next_invoice_no'`).run();
+        db2.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'CHECKOUT', 'sale', ?, ?)`).run(userId, saleId, `LAN API POS Checkout Completed. Invoice: ${invoiceNo}`);
         return { invoiceNo, saleId };
       });
       const txResult = checkoutTx();
@@ -28465,12 +28261,12 @@ function createApiServer(options) {
   });
   app2.post("/api/sales/:id/print", requireRole("CHECKOUT"), async (req, res) => {
     try {
-      const db = getDB2();
-      const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(req.params.id);
+      const db2 = getDB();
+      const sale = db2.prepare("SELECT * FROM sales WHERE sale_id = ?").get(req.params.id);
       if (!sale)
         return res.status(404).json({ success: false, error: "Sale not found." });
       const { printReceipt } = require("./printer");
-      printReceipt(req.params.id, db).catch((e) => console.error("Print error:", e));
+      printReceipt(req.params.id, db2).catch((e) => console.error("Print error:", e));
       res.json({ success: true, message: "Print job dispatched" });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -28481,35 +28277,35 @@ function createApiServer(options) {
       const { channel, args } = req.body;
       try {
         let result;
-        const db = getDB2();
+        const db2 = getDB();
         if (channel === "db-query") {
-          result = db.prepare(args[0]).all(...args[1] || []);
+          result = db2.prepare(args[0]).all(...args[1] || []);
         } else if (channel === "db-get") {
-          result = db.prepare(args[0]).get(...args[1] || []);
+          result = db2.prepare(args[0]).get(...args[1] || []);
         } else if (channel === "db-run") {
-          const runRes = db.prepare(args[0]).run(...args[1] || []);
+          const runRes = db2.prepare(args[0]).run(...args[1] || []);
           result = { changes: runRes.changes, lastInsertRowid: runRes.lastInsertRowid };
         } else if (channel === "db-transaction") {
-          const runTx = db.transaction((txQueries) => {
+          const runTx = db2.transaction((txQueries) => {
             const results = [];
             for (const q of txQueries) {
-              results.push(db.prepare(q.sql).run(...q.params));
+              results.push(db2.prepare(q.sql).run(...q.params));
             }
             return results;
           });
           result = runTx(args[0]);
         } else if (channel === "get-db-config") {
-          result = activeConfig2;
+          result = activeConfig;
         } else if (channel === "set-db-config") {
-          if (activeConfig2) {
-            Object.assign(activeConfig2, args[0]);
-            if (configPath2)
-              fs.writeFileSync(configPath2, JSON.stringify(activeConfig2, null, 2));
-            if (args[0].dbPath && initDB2 && schemaSql2) {
-              initDB2(args[0].dbPath, schemaSql2);
+          if (activeConfig) {
+            Object.assign(activeConfig, args[0]);
+            if (configPath)
+              fs.writeFileSync(configPath, JSON.stringify(activeConfig, null, 2));
+            if (args[0].dbPath && initDB && schemaSql) {
+              initDB(args[0].dbPath, schemaSql);
             }
           }
-          result = activeConfig2;
+          result = activeConfig;
         } else if (channel === "get-lan-info") {
           const interfaces = import_os.default.networkInterfaces();
           let ip = "127.0.0.1";
@@ -28532,11 +28328,11 @@ function createApiServer(options) {
   app2.get("/api/warranty/:serial", requireRole("READ_DASHBOARD"), (req, res) => {
     const { serial } = req.params;
     try {
-      const db = getDB2();
-      const instance = db.prepare(`SELECT pi.*, p.brand_name, p.model_name, p.category FROM product_instances pi JOIN products p ON pi.product_id = p.product_id WHERE pi.serial_number = ?`).get(serial);
+      const db2 = getDB();
+      const instance = db2.prepare(`SELECT pi.*, p.brand_name, p.model_name, p.category FROM product_instances pi JOIN products p ON pi.product_id = p.product_id WHERE pi.serial_number = ?`).get(serial);
       if (!instance)
         return res.json({ found: false });
-      const saleItem = db.prepare(`SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, c.name as customer_name, c.phone as customer_phone FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id LEFT JOIN customers c ON s.customer_id = c.customer_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
+      const saleItem = db2.prepare(`SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, c.name as customer_name, c.phone as customer_phone FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id LEFT JOIN customers c ON s.customer_id = c.customer_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
       const now = /* @__PURE__ */ new Date();
       let warranty_valid = false;
       if (instance.warranty_expires_at) {
@@ -28552,13 +28348,13 @@ function createApiServer(options) {
   app2.post("/api/returns/validate", requireRole("ISSUE_CN"), (req, res) => {
     const { serial } = req.body;
     try {
-      const db = getDB2();
-      const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
+      const db2 = getDB();
+      const instance = db2.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
       if (!instance)
         return res.json({ outcome: "REJECT_UNKNOWN", message: "Never part of our inventory." });
       if (instance.status === "RMA_RETURNED")
         return res.json({ outcome: "REJECT_ALREADY_RETURNED", message: "This unit has already been returned (RMA_RETURNED)." });
-      const saleItem = db.prepare(`SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, s.payment_mode, c.name as customer_name, c.phone as customer_phone FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id LEFT JOIN customers c ON s.customer_id = c.customer_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
+      const saleItem = db2.prepare(`SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, s.payment_mode, c.name as customer_name, c.phone as customer_phone FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id LEFT JOIN customers c ON s.customer_id = c.customer_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
       if (!saleItem)
         return res.json({ outcome: "REJECT_NEVER_SOLD", message: "In stock registry but never sold to a customer." });
       return res.json({ outcome: "ALLOW", saleItem, instance });
@@ -28570,12 +28366,12 @@ function createApiServer(options) {
     const { serial, reason, resolution, refund_amount, replacement_serial, condition_sealed } = req.body;
     const userId = req.session.user_id;
     try {
-      const db = getDB2();
-      const tx = db.transaction(() => {
-        const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
+      const db2 = getDB();
+      const tx = db2.transaction(() => {
+        const instance = db2.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
         if (!instance || instance.status === "RMA_RETURNED")
           throw new Error("Invalid or already returned serial.");
-        const saleItem = db.prepare(`SELECT si.*, s.payment_mode, s.customer_id, s.sale_id FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
+        const saleItem = db2.prepare(`SELECT si.*, s.payment_mode, s.customer_id, s.sale_id FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id WHERE si.instance_id = ? AND s.status = 'COMPLETED'`).get(instance.instance_id);
         if (!saleItem)
           throw new Error("Sale item not found.");
         if (refund_amount > saleItem.unit_price)
@@ -28583,39 +28379,39 @@ function createApiServer(options) {
         let newStatus = "RMA_RETURNED";
         if (resolution === "CREDIT_NOTE" && condition_sealed)
           newStatus = "IN_STOCK";
-        db.prepare("UPDATE product_instances SET status = ? WHERE instance_id = ?").run(newStatus, instance.instance_id);
+        db2.prepare("UPDATE product_instances SET status = ? WHERE instance_id = ?").run(newStatus, instance.instance_id);
         let creditNoteNo = null;
         let cnId = null;
         if (resolution === "CREDIT_NOTE") {
-          const prefixRow = db.prepare("SELECT value FROM settings WHERE key = 'cn_prefix'").get();
-          const sequenceRow = db.prepare("SELECT value FROM settings WHERE key = 'next_cn_no'").get();
+          const prefixRow = db2.prepare("SELECT value FROM settings WHERE key = 'cn_prefix'").get();
+          const sequenceRow = db2.prepare("SELECT value FROM settings WHERE key = 'next_cn_no'").get();
           const prefix = prefixRow?.value || "CN-";
           const sequence = sequenceRow?.value || "1";
           creditNoteNo = `${prefix}${sequence}`;
-          db.prepare(`INSERT INTO credit_notes (cn_no, sale_id, instance_id, amount, reason) VALUES (?, ?, ?, ?, ?)`).run(creditNoteNo, saleItem.sale_id, instance.instance_id, refund_amount, reason);
-          cnId = db.prepare("SELECT last_insert_rowid() as id").get().id;
-          db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('next_cn_no', CAST((CAST(? AS INTEGER) + 1) AS TEXT))`).run(sequence);
+          db2.prepare(`INSERT INTO credit_notes (cn_no, sale_id, instance_id, amount, reason) VALUES (?, ?, ?, ?, ?)`).run(creditNoteNo, saleItem.sale_id, instance.instance_id, refund_amount, reason);
+          cnId = db2.prepare("SELECT last_insert_rowid() as id").get().id;
+          db2.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('next_cn_no', CAST((CAST(? AS INTEGER) + 1) AS TEXT))`).run(sequence);
           if (saleItem.payment_mode === "UDHAAR" && saleItem.customer_id) {
-            db.prepare("UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?").run(refund_amount, saleItem.customer_id);
-            const cust = db.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(saleItem.customer_id);
-            db.prepare(`INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note) VALUES (?, 'RETURN', (SELECT cn_id FROM credit_notes WHERE cn_no = ?), ?, ?, ?)`).run(saleItem.customer_id, creditNoteNo, refund_amount, cust.current_balance, `Credit Note ${creditNoteNo}`);
+            db2.prepare("UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?").run(refund_amount, saleItem.customer_id);
+            const cust = db2.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(saleItem.customer_id);
+            db2.prepare(`INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note) VALUES (?, 'RETURN', (SELECT cn_id FROM credit_notes WHERE cn_no = ?), ?, ?, ?)`).run(saleItem.customer_id, creditNoteNo, refund_amount, cust.current_balance, `Credit Note ${creditNoteNo}`);
           }
         } else if (resolution === "REPLACEMENT") {
           if (!replacement_serial)
             throw new Error("Replacement serial is required.");
-          const repInstance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ? AND status = 'IN_STOCK'").get(replacement_serial);
+          const repInstance = db2.prepare("SELECT * FROM product_instances WHERE serial_number = ? AND status = 'IN_STOCK'").get(replacement_serial);
           if (!repInstance)
             throw new Error("Replacement serial not found or not IN_STOCK.");
           if (repInstance.product_id !== instance.product_id)
             throw new Error("Replacement must be of the same product.");
-          const prodRow = db.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(instance.product_id);
+          const prodRow = db2.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(instance.product_id);
           const warrantyMonths = prodRow?.warranty_months ?? 12;
-          db.prepare(`UPDATE product_instances SET status = 'SOLD', sold_at = datetime('now'), warranty_expires_at = datetime('now', '+' || ? || ' months') WHERE instance_id = ?`).run(warrantyMonths, repInstance.instance_id);
-          db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total) VALUES (?, ?, ?, 1, 0, 0, 0)`).run(saleItem.sale_id, repInstance.product_id, repInstance.instance_id);
+          db2.prepare(`UPDATE product_instances SET status = 'SOLD', sold_at = datetime('now'), warranty_expires_at = datetime('now', '+' || ? || ' months') WHERE instance_id = ?`).run(warrantyMonths, repInstance.instance_id);
+          db2.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total) VALUES (?, ?, ?, 1, 0, 0, 0)`).run(saleItem.sale_id, repInstance.product_id, repInstance.instance_id);
         } else if (resolution === "SEND_TO_COMPANY") {
-          db.prepare(`INSERT INTO rma_register (instance_id, reason, status) VALUES (?, ?, 'SENT')`).run(instance.instance_id, reason);
+          db2.prepare(`INSERT INTO rma_register (instance_id, reason, status) VALUES (?, ?, 'SENT')`).run(instance.instance_id, reason);
         }
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RETURN_ACCEPT', 'product_instances', ?, ?)`).run(userId, instance.instance_id, `Resolution: ${resolution}, Refund: ${refund_amount}, Reason: ${reason}`);
+        db2.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RETURN_ACCEPT', 'product_instances', ?, ?)`).run(userId, instance.instance_id, `Resolution: ${resolution}, Refund: ${refund_amount}, Reason: ${reason}`);
         return { success: true, creditNoteNo, cnId, newStatus };
       });
       res.json(tx());
@@ -28627,7 +28423,7 @@ function createApiServer(options) {
   app2.get("/api/reports/margin", ownerOnly, (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-      const db = getDB2();
+      const db2 = getDB();
       const query = `
         SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
                si.line_total, p.gst_rate, si.unit_cost, si.quantity
@@ -28643,7 +28439,7 @@ function createApiServer(options) {
         params.push(startDate + " 00:00:00");
       if (endDate)
         params.push(endDate + " 23:59:59");
-      const rows = db.prepare(query).all(...params);
+      const rows = db2.prepare(query).all(...params);
       const { getTaxableValue } = require_gst();
       const groups = {};
       rows.forEach((r) => {
@@ -28666,7 +28462,7 @@ function createApiServer(options) {
   app2.get("/api/reports/sales", ownerOnly, (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-      const db = getDB2();
+      const db2 = getDB();
       const query = `
         SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
                SUM(si.line_total) as total_revenue,
@@ -28686,15 +28482,15 @@ function createApiServer(options) {
         params.push(startDate + " 00:00:00");
       if (endDate)
         params.push(endDate + " 23:59:59");
-      res.json({ success: true, data: db.prepare(query).all(...params) });
+      res.json({ success: true, data: db2.prepare(query).all(...params) });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
   app2.get("/api/reports/low-stock", ownerOnly, (req, res) => {
     try {
-      const db = getDB2();
-      const data = db.prepare(`
+      const db2 = getDB();
+      const data = db2.prepare(`
         SELECT p.product_id, p.sku_code, p.model_name, p.min_restock_level,
                s.name as supplier_name,
                (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
@@ -28711,8 +28507,8 @@ function createApiServer(options) {
   app2.get("/api/reports/dead-stock", ownerOnly, (req, res) => {
     const days = parseInt(req.query.days || "30", 10);
     try {
-      const db = getDB2();
-      const data = db.prepare(`
+      const db2 = getDB();
+      const data = db2.prepare(`
         SELECT p.product_id, p.sku_code, p.model_name,
                MAX(s.created_at) as last_sale_date,
                (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
@@ -28731,8 +28527,8 @@ function createApiServer(options) {
   });
   app2.get("/api/reports/valuation", ownerOnly, (req, res) => {
     try {
-      const db = getDB2();
-      const data = db.prepare(`
+      const db2 = getDB();
+      const data = db2.prepare(`
         SELECT 
           (SELECT SUM(purchase_cost) FROM product_instances WHERE status = 'IN_STOCK') as serialized_value,
           (SELECT SUM(loose_qty * purchase_cost) FROM products) as loose_value
@@ -28746,7 +28542,7 @@ function createApiServer(options) {
   app2.get("/api/reports/gstr1", ownerOnly, (req, res) => {
     const { startDate, endDate } = req.query;
     try {
-      const db = getDB2();
+      const db2 = getDB();
       const query = `
         SELECT s.sale_id, s.invoice_no, s.created_at, c.gstin, c.name as customer_name,
                s.subtotal, s.discount, s.cgst, s.sgst, s.igst, s.grand_total
@@ -28762,11 +28558,11 @@ function createApiServer(options) {
         params.push(startDate + " 00:00:00");
       if (endDate)
         params.push(endDate + " 23:59:59");
-      const invoices = db.prepare(query).all(...params);
+      const invoices = db2.prepare(query).all(...params);
       const { getTaxableValue } = require_gst();
       let total_cgst = 0, total_sgst = 0, total_igst = 0, total_taxable = 0;
       for (const inv of invoices) {
-        const items = db.prepare(`SELECT si.line_total, p.gst_rate FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = ?`).all(inv.sale_id);
+        const items = db2.prepare(`SELECT si.line_total, p.gst_rate FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = ?`).all(inv.sale_id);
         let inv_taxable = 0;
         let rates = /* @__PURE__ */ new Set();
         items.forEach((si) => {
@@ -28792,16 +28588,16 @@ function createApiServer(options) {
   });
   app2.get("/api/reports/udhaar", ownerOnly, (req, res) => {
     try {
-      const db = getDB2();
-      const customers = db.prepare(`
+      const db2 = getDB();
+      const customers = db2.prepare(`
         SELECT customer_id, name, phone, current_balance, credit_limit, credit_due_date
         FROM customers
         WHERE current_balance > 0
       `).all();
-      const { calculateAging: calculateAging2 } = require_ledger();
+      const { calculateAging } = require_ledger();
       const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
       customers.forEach((c) => {
-        const age = calculateAging2(c, /* @__PURE__ */ new Date());
+        const age = calculateAging(c, /* @__PURE__ */ new Date());
         buckets["0-30"] += age["0-30"];
         buckets["31-60"] += age["31-60"];
         buckets["61-90"] += age["61-90"];
@@ -28817,8 +28613,8 @@ function createApiServer(options) {
   });
   app2.get("/api/upi-accounts", requireRole("CHECKOUT"), (req, res) => {
     try {
-      const db = getDB2();
-      const accounts = db.prepare("SELECT * FROM upi_accounts WHERE is_active = 1").all();
+      const db2 = getDB();
+      const accounts = db2.prepare("SELECT * FROM upi_accounts WHERE is_active = 1").all();
       if (accounts.length === 0) {
         return res.json({ success: true, data: [{ id: 0, name: "Default UPI", upi_id: "default@upi" }] });
       }
@@ -28830,8 +28626,8 @@ function createApiServer(options) {
   app2.post("/api/upi-accounts", ownerOnly, (req, res) => {
     try {
       const { name, upi_id, merchant_code } = req.body;
-      const db = getDB2();
-      db.prepare(`INSERT INTO upi_accounts (name, upi_id, merchant_code) VALUES (?, ?, ?)`).run(name, upi_id, merchant_code || null);
+      const db2 = getDB();
+      db2.prepare(`INSERT INTO upi_accounts (name, upi_id, merchant_code) VALUES (?, ?, ?)`).run(name, upi_id, merchant_code || null);
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -28839,6022 +28635,51 @@ function createApiServer(options) {
   });
   return app2;
 }
-var import_express, import_cors, import_os, fs, overrideTokens, tokenCleanupInterval;
-var init_api = __esm({
-  "apps/desktop/electron/api.ts"() {
-    "use strict";
-    import_express = __toESM(require_express2());
-    import_cors = __toESM(require_lib4());
-    import_os = __toESM(require("os"));
-    fs = __toESM(require("fs"));
-    init_core();
-    overrideTokens = /* @__PURE__ */ new Map();
-    tokenCleanupInterval = setInterval(() => {
-      const now = Date.now();
-      overrideTokens.forEach((v, k) => {
-        if (v.expires < now)
-          overrideTokens.delete(k);
-      });
-    }, 6e4);
-    if (tokenCleanupInterval.unref)
-      tokenCleanupInterval.unref();
+
+// test_mobile_flow.ts
+var import_bcryptjs = require("bcryptjs");
+console.log("DB setup done");
+var dbPath = ":memory:";
+var fs2 = require("fs");
+var db = new import_better_sqlite32.default(dbPath);
+var schema = fs2.readFileSync("./packages/core/schema.sql", "utf8");
+db.exec(schema);
+console.log("Schema loaded");
+db.exec(`
+  INSERT INTO users (name, pin_hash, role, active) VALUES 
+  ('Admin User', '${(0, import_bcryptjs.hashSync)("1111", 4)}', 'OWNER', 1),
+  ('Sales Guy', '${(0, import_bcryptjs.hashSync)("2222", 4)}', 'CASHIER', 1);
+
+  INSERT INTO settings (key, value) VALUES 
+  ('shop_name', 'Chauhan Electronics'), 
+  ('state_code', '29'), 
+  ('invoice_prefix', 'CE/26/'), 
+  ('next_invoice_no', '1001');
+
+  INSERT INTO customers (name, phone, tier) VALUES ('Counter', '0000', 'COUNTER');
+  INSERT INTO customers (name, phone, tier) VALUES ('Dealer', '1111', 'DEALER');
+  INSERT INTO customers (name, phone, tier) VALUES ('Distributor', '2222', 'DISTRIBUTOR');
+  INSERT INTO customers (name, phone, tier, credit_limit, current_balance, credit_due_date) 
+  VALUES ('Broke Guy', '3333', 'COUNTER', 5000, 5000, '2025-01-01');
+
+  INSERT INTO products (sku_code, brand_name, model_name, requires_serial, purchase_cost, counter_price, dealer_price, distributor_price, loose_qty)
+  VALUES ('SKU1', 'Samsung', 'TV', 1, 1000000, 1500000, 1400000, 1300000, 0),
+         ('SKU2', 'Samsung', 'Loose Cable', 0, 1000, 1500, 1400, 1300, 50);
+
+  INSERT INTO product_instances (product_id, serial_number, status, purchase_cost)
+  VALUES (1, 'SN123', 'IN_STOCK', 1000000);
+`);
+console.log("DB seeded");
+var sessionStore = /* @__PURE__ */ new Map();
+var app = createApiServer({
+  getDB: () => db,
+  sessionStore,
+  isPackaged: true,
+  initDB: () => {
   }
 });
-
-// node_modules/qrcode/lib/can-promise.js
-var require_can_promise = __commonJS({
-  "node_modules/qrcode/lib/can-promise.js"(exports2, module2) {
-    module2.exports = function() {
-      return typeof Promise === "function" && Promise.prototype && Promise.prototype.then;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/utils.js
-var require_utils3 = __commonJS({
-  "node_modules/qrcode/lib/core/utils.js"(exports2) {
-    var toSJISFunction;
-    var CODEWORDS_COUNT = [
-      0,
-      // Not used
-      26,
-      44,
-      70,
-      100,
-      134,
-      172,
-      196,
-      242,
-      292,
-      346,
-      404,
-      466,
-      532,
-      581,
-      655,
-      733,
-      815,
-      901,
-      991,
-      1085,
-      1156,
-      1258,
-      1364,
-      1474,
-      1588,
-      1706,
-      1828,
-      1921,
-      2051,
-      2185,
-      2323,
-      2465,
-      2611,
-      2761,
-      2876,
-      3034,
-      3196,
-      3362,
-      3532,
-      3706
-    ];
-    exports2.getSymbolSize = function getSymbolSize(version) {
-      if (!version)
-        throw new Error('"version" cannot be null or undefined');
-      if (version < 1 || version > 40)
-        throw new Error('"version" should be in range from 1 to 40');
-      return version * 4 + 17;
-    };
-    exports2.getSymbolTotalCodewords = function getSymbolTotalCodewords(version) {
-      return CODEWORDS_COUNT[version];
-    };
-    exports2.getBCHDigit = function(data) {
-      let digit = 0;
-      while (data !== 0) {
-        digit++;
-        data >>>= 1;
-      }
-      return digit;
-    };
-    exports2.setToSJISFunction = function setToSJISFunction(f) {
-      if (typeof f !== "function") {
-        throw new Error('"toSJISFunc" is not a valid function.');
-      }
-      toSJISFunction = f;
-    };
-    exports2.isKanjiModeEnabled = function() {
-      return typeof toSJISFunction !== "undefined";
-    };
-    exports2.toSJIS = function toSJIS(kanji) {
-      return toSJISFunction(kanji);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/error-correction-level.js
-var require_error_correction_level = __commonJS({
-  "node_modules/qrcode/lib/core/error-correction-level.js"(exports2) {
-    exports2.L = { bit: 1 };
-    exports2.M = { bit: 0 };
-    exports2.Q = { bit: 3 };
-    exports2.H = { bit: 2 };
-    function fromString(string) {
-      if (typeof string !== "string") {
-        throw new Error("Param is not a string");
-      }
-      const lcStr = string.toLowerCase();
-      switch (lcStr) {
-        case "l":
-        case "low":
-          return exports2.L;
-        case "m":
-        case "medium":
-          return exports2.M;
-        case "q":
-        case "quartile":
-          return exports2.Q;
-        case "h":
-        case "high":
-          return exports2.H;
-        default:
-          throw new Error("Unknown EC Level: " + string);
-      }
-    }
-    exports2.isValid = function isValid(level) {
-      return level && typeof level.bit !== "undefined" && level.bit >= 0 && level.bit < 4;
-    };
-    exports2.from = function from(value, defaultValue) {
-      if (exports2.isValid(value)) {
-        return value;
-      }
-      try {
-        return fromString(value);
-      } catch (e) {
-        return defaultValue;
-      }
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/bit-buffer.js
-var require_bit_buffer = __commonJS({
-  "node_modules/qrcode/lib/core/bit-buffer.js"(exports2, module2) {
-    function BitBuffer() {
-      this.buffer = [];
-      this.length = 0;
-    }
-    BitBuffer.prototype = {
-      get: function(index) {
-        const bufIndex = Math.floor(index / 8);
-        return (this.buffer[bufIndex] >>> 7 - index % 8 & 1) === 1;
-      },
-      put: function(num, length) {
-        for (let i = 0; i < length; i++) {
-          this.putBit((num >>> length - i - 1 & 1) === 1);
-        }
-      },
-      getLengthInBits: function() {
-        return this.length;
-      },
-      putBit: function(bit) {
-        const bufIndex = Math.floor(this.length / 8);
-        if (this.buffer.length <= bufIndex) {
-          this.buffer.push(0);
-        }
-        if (bit) {
-          this.buffer[bufIndex] |= 128 >>> this.length % 8;
-        }
-        this.length++;
-      }
-    };
-    module2.exports = BitBuffer;
-  }
-});
-
-// node_modules/qrcode/lib/core/bit-matrix.js
-var require_bit_matrix = __commonJS({
-  "node_modules/qrcode/lib/core/bit-matrix.js"(exports2, module2) {
-    function BitMatrix(size) {
-      if (!size || size < 1) {
-        throw new Error("BitMatrix size must be defined and greater than 0");
-      }
-      this.size = size;
-      this.data = new Uint8Array(size * size);
-      this.reservedBit = new Uint8Array(size * size);
-    }
-    BitMatrix.prototype.set = function(row, col, value, reserved) {
-      const index = row * this.size + col;
-      this.data[index] = value;
-      if (reserved)
-        this.reservedBit[index] = true;
-    };
-    BitMatrix.prototype.get = function(row, col) {
-      return this.data[row * this.size + col];
-    };
-    BitMatrix.prototype.xor = function(row, col, value) {
-      this.data[row * this.size + col] ^= value;
-    };
-    BitMatrix.prototype.isReserved = function(row, col) {
-      return this.reservedBit[row * this.size + col];
-    };
-    module2.exports = BitMatrix;
-  }
-});
-
-// node_modules/qrcode/lib/core/alignment-pattern.js
-var require_alignment_pattern = __commonJS({
-  "node_modules/qrcode/lib/core/alignment-pattern.js"(exports2) {
-    var getSymbolSize = require_utils3().getSymbolSize;
-    exports2.getRowColCoords = function getRowColCoords(version) {
-      if (version === 1)
-        return [];
-      const posCount = Math.floor(version / 7) + 2;
-      const size = getSymbolSize(version);
-      const intervals = size === 145 ? 26 : Math.ceil((size - 13) / (2 * posCount - 2)) * 2;
-      const positions = [size - 7];
-      for (let i = 1; i < posCount - 1; i++) {
-        positions[i] = positions[i - 1] - intervals;
-      }
-      positions.push(6);
-      return positions.reverse();
-    };
-    exports2.getPositions = function getPositions(version) {
-      const coords = [];
-      const pos = exports2.getRowColCoords(version);
-      const posLength = pos.length;
-      for (let i = 0; i < posLength; i++) {
-        for (let j = 0; j < posLength; j++) {
-          if (i === 0 && j === 0 || // top-left
-          i === 0 && j === posLength - 1 || // bottom-left
-          i === posLength - 1 && j === 0) {
-            continue;
-          }
-          coords.push([pos[i], pos[j]]);
-        }
-      }
-      return coords;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/finder-pattern.js
-var require_finder_pattern = __commonJS({
-  "node_modules/qrcode/lib/core/finder-pattern.js"(exports2) {
-    var getSymbolSize = require_utils3().getSymbolSize;
-    var FINDER_PATTERN_SIZE = 7;
-    exports2.getPositions = function getPositions(version) {
-      const size = getSymbolSize(version);
-      return [
-        // top-left
-        [0, 0],
-        // top-right
-        [size - FINDER_PATTERN_SIZE, 0],
-        // bottom-left
-        [0, size - FINDER_PATTERN_SIZE]
-      ];
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/mask-pattern.js
-var require_mask_pattern = __commonJS({
-  "node_modules/qrcode/lib/core/mask-pattern.js"(exports2) {
-    exports2.Patterns = {
-      PATTERN000: 0,
-      PATTERN001: 1,
-      PATTERN010: 2,
-      PATTERN011: 3,
-      PATTERN100: 4,
-      PATTERN101: 5,
-      PATTERN110: 6,
-      PATTERN111: 7
-    };
-    var PenaltyScores = {
-      N1: 3,
-      N2: 3,
-      N3: 40,
-      N4: 10
-    };
-    exports2.isValid = function isValid(mask) {
-      return mask != null && mask !== "" && !isNaN(mask) && mask >= 0 && mask <= 7;
-    };
-    exports2.from = function from(value) {
-      return exports2.isValid(value) ? parseInt(value, 10) : void 0;
-    };
-    exports2.getPenaltyN1 = function getPenaltyN1(data) {
-      const size = data.size;
-      let points = 0;
-      let sameCountCol = 0;
-      let sameCountRow = 0;
-      let lastCol = null;
-      let lastRow = null;
-      for (let row = 0; row < size; row++) {
-        sameCountCol = sameCountRow = 0;
-        lastCol = lastRow = null;
-        for (let col = 0; col < size; col++) {
-          let module3 = data.get(row, col);
-          if (module3 === lastCol) {
-            sameCountCol++;
-          } else {
-            if (sameCountCol >= 5)
-              points += PenaltyScores.N1 + (sameCountCol - 5);
-            lastCol = module3;
-            sameCountCol = 1;
-          }
-          module3 = data.get(col, row);
-          if (module3 === lastRow) {
-            sameCountRow++;
-          } else {
-            if (sameCountRow >= 5)
-              points += PenaltyScores.N1 + (sameCountRow - 5);
-            lastRow = module3;
-            sameCountRow = 1;
-          }
-        }
-        if (sameCountCol >= 5)
-          points += PenaltyScores.N1 + (sameCountCol - 5);
-        if (sameCountRow >= 5)
-          points += PenaltyScores.N1 + (sameCountRow - 5);
-      }
-      return points;
-    };
-    exports2.getPenaltyN2 = function getPenaltyN2(data) {
-      const size = data.size;
-      let points = 0;
-      for (let row = 0; row < size - 1; row++) {
-        for (let col = 0; col < size - 1; col++) {
-          const last = data.get(row, col) + data.get(row, col + 1) + data.get(row + 1, col) + data.get(row + 1, col + 1);
-          if (last === 4 || last === 0)
-            points++;
-        }
-      }
-      return points * PenaltyScores.N2;
-    };
-    exports2.getPenaltyN3 = function getPenaltyN3(data) {
-      const size = data.size;
-      let points = 0;
-      let bitsCol = 0;
-      let bitsRow = 0;
-      for (let row = 0; row < size; row++) {
-        bitsCol = bitsRow = 0;
-        for (let col = 0; col < size; col++) {
-          bitsCol = bitsCol << 1 & 2047 | data.get(row, col);
-          if (col >= 10 && (bitsCol === 1488 || bitsCol === 93))
-            points++;
-          bitsRow = bitsRow << 1 & 2047 | data.get(col, row);
-          if (col >= 10 && (bitsRow === 1488 || bitsRow === 93))
-            points++;
-        }
-      }
-      return points * PenaltyScores.N3;
-    };
-    exports2.getPenaltyN4 = function getPenaltyN4(data) {
-      let darkCount = 0;
-      const modulesCount = data.data.length;
-      for (let i = 0; i < modulesCount; i++)
-        darkCount += data.data[i];
-      const k = Math.abs(Math.ceil(darkCount * 100 / modulesCount / 5) - 10);
-      return k * PenaltyScores.N4;
-    };
-    function getMaskAt(maskPattern, i, j) {
-      switch (maskPattern) {
-        case exports2.Patterns.PATTERN000:
-          return (i + j) % 2 === 0;
-        case exports2.Patterns.PATTERN001:
-          return i % 2 === 0;
-        case exports2.Patterns.PATTERN010:
-          return j % 3 === 0;
-        case exports2.Patterns.PATTERN011:
-          return (i + j) % 3 === 0;
-        case exports2.Patterns.PATTERN100:
-          return (Math.floor(i / 2) + Math.floor(j / 3)) % 2 === 0;
-        case exports2.Patterns.PATTERN101:
-          return i * j % 2 + i * j % 3 === 0;
-        case exports2.Patterns.PATTERN110:
-          return (i * j % 2 + i * j % 3) % 2 === 0;
-        case exports2.Patterns.PATTERN111:
-          return (i * j % 3 + (i + j) % 2) % 2 === 0;
-        default:
-          throw new Error("bad maskPattern:" + maskPattern);
-      }
-    }
-    exports2.applyMask = function applyMask(pattern, data) {
-      const size = data.size;
-      for (let col = 0; col < size; col++) {
-        for (let row = 0; row < size; row++) {
-          if (data.isReserved(row, col))
-            continue;
-          data.xor(row, col, getMaskAt(pattern, row, col));
-        }
-      }
-    };
-    exports2.getBestMask = function getBestMask(data, setupFormatFunc) {
-      const numPatterns = Object.keys(exports2.Patterns).length;
-      let bestPattern = 0;
-      let lowerPenalty = Infinity;
-      for (let p = 0; p < numPatterns; p++) {
-        setupFormatFunc(p);
-        exports2.applyMask(p, data);
-        const penalty = exports2.getPenaltyN1(data) + exports2.getPenaltyN2(data) + exports2.getPenaltyN3(data) + exports2.getPenaltyN4(data);
-        exports2.applyMask(p, data);
-        if (penalty < lowerPenalty) {
-          lowerPenalty = penalty;
-          bestPattern = p;
-        }
-      }
-      return bestPattern;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/error-correction-code.js
-var require_error_correction_code = __commonJS({
-  "node_modules/qrcode/lib/core/error-correction-code.js"(exports2) {
-    var ECLevel = require_error_correction_level();
-    var EC_BLOCKS_TABLE = [
-      // L  M  Q  H
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      2,
-      2,
-      1,
-      2,
-      2,
-      4,
-      1,
-      2,
-      4,
-      4,
-      2,
-      4,
-      4,
-      4,
-      2,
-      4,
-      6,
-      5,
-      2,
-      4,
-      6,
-      6,
-      2,
-      5,
-      8,
-      8,
-      4,
-      5,
-      8,
-      8,
-      4,
-      5,
-      8,
-      11,
-      4,
-      8,
-      10,
-      11,
-      4,
-      9,
-      12,
-      16,
-      4,
-      9,
-      16,
-      16,
-      6,
-      10,
-      12,
-      18,
-      6,
-      10,
-      17,
-      16,
-      6,
-      11,
-      16,
-      19,
-      6,
-      13,
-      18,
-      21,
-      7,
-      14,
-      21,
-      25,
-      8,
-      16,
-      20,
-      25,
-      8,
-      17,
-      23,
-      25,
-      9,
-      17,
-      23,
-      34,
-      9,
-      18,
-      25,
-      30,
-      10,
-      20,
-      27,
-      32,
-      12,
-      21,
-      29,
-      35,
-      12,
-      23,
-      34,
-      37,
-      12,
-      25,
-      34,
-      40,
-      13,
-      26,
-      35,
-      42,
-      14,
-      28,
-      38,
-      45,
-      15,
-      29,
-      40,
-      48,
-      16,
-      31,
-      43,
-      51,
-      17,
-      33,
-      45,
-      54,
-      18,
-      35,
-      48,
-      57,
-      19,
-      37,
-      51,
-      60,
-      19,
-      38,
-      53,
-      63,
-      20,
-      40,
-      56,
-      66,
-      21,
-      43,
-      59,
-      70,
-      22,
-      45,
-      62,
-      74,
-      24,
-      47,
-      65,
-      77,
-      25,
-      49,
-      68,
-      81
-    ];
-    var EC_CODEWORDS_TABLE = [
-      // L  M  Q  H
-      7,
-      10,
-      13,
-      17,
-      10,
-      16,
-      22,
-      28,
-      15,
-      26,
-      36,
-      44,
-      20,
-      36,
-      52,
-      64,
-      26,
-      48,
-      72,
-      88,
-      36,
-      64,
-      96,
-      112,
-      40,
-      72,
-      108,
-      130,
-      48,
-      88,
-      132,
-      156,
-      60,
-      110,
-      160,
-      192,
-      72,
-      130,
-      192,
-      224,
-      80,
-      150,
-      224,
-      264,
-      96,
-      176,
-      260,
-      308,
-      104,
-      198,
-      288,
-      352,
-      120,
-      216,
-      320,
-      384,
-      132,
-      240,
-      360,
-      432,
-      144,
-      280,
-      408,
-      480,
-      168,
-      308,
-      448,
-      532,
-      180,
-      338,
-      504,
-      588,
-      196,
-      364,
-      546,
-      650,
-      224,
-      416,
-      600,
-      700,
-      224,
-      442,
-      644,
-      750,
-      252,
-      476,
-      690,
-      816,
-      270,
-      504,
-      750,
-      900,
-      300,
-      560,
-      810,
-      960,
-      312,
-      588,
-      870,
-      1050,
-      336,
-      644,
-      952,
-      1110,
-      360,
-      700,
-      1020,
-      1200,
-      390,
-      728,
-      1050,
-      1260,
-      420,
-      784,
-      1140,
-      1350,
-      450,
-      812,
-      1200,
-      1440,
-      480,
-      868,
-      1290,
-      1530,
-      510,
-      924,
-      1350,
-      1620,
-      540,
-      980,
-      1440,
-      1710,
-      570,
-      1036,
-      1530,
-      1800,
-      570,
-      1064,
-      1590,
-      1890,
-      600,
-      1120,
-      1680,
-      1980,
-      630,
-      1204,
-      1770,
-      2100,
-      660,
-      1260,
-      1860,
-      2220,
-      720,
-      1316,
-      1950,
-      2310,
-      750,
-      1372,
-      2040,
-      2430
-    ];
-    exports2.getBlocksCount = function getBlocksCount(version, errorCorrectionLevel) {
-      switch (errorCorrectionLevel) {
-        case ECLevel.L:
-          return EC_BLOCKS_TABLE[(version - 1) * 4 + 0];
-        case ECLevel.M:
-          return EC_BLOCKS_TABLE[(version - 1) * 4 + 1];
-        case ECLevel.Q:
-          return EC_BLOCKS_TABLE[(version - 1) * 4 + 2];
-        case ECLevel.H:
-          return EC_BLOCKS_TABLE[(version - 1) * 4 + 3];
-        default:
-          return void 0;
-      }
-    };
-    exports2.getTotalCodewordsCount = function getTotalCodewordsCount(version, errorCorrectionLevel) {
-      switch (errorCorrectionLevel) {
-        case ECLevel.L:
-          return EC_CODEWORDS_TABLE[(version - 1) * 4 + 0];
-        case ECLevel.M:
-          return EC_CODEWORDS_TABLE[(version - 1) * 4 + 1];
-        case ECLevel.Q:
-          return EC_CODEWORDS_TABLE[(version - 1) * 4 + 2];
-        case ECLevel.H:
-          return EC_CODEWORDS_TABLE[(version - 1) * 4 + 3];
-        default:
-          return void 0;
-      }
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/galois-field.js
-var require_galois_field = __commonJS({
-  "node_modules/qrcode/lib/core/galois-field.js"(exports2) {
-    var EXP_TABLE = new Uint8Array(512);
-    var LOG_TABLE = new Uint8Array(256);
-    (function initTables() {
-      let x = 1;
-      for (let i = 0; i < 255; i++) {
-        EXP_TABLE[i] = x;
-        LOG_TABLE[x] = i;
-        x <<= 1;
-        if (x & 256) {
-          x ^= 285;
-        }
-      }
-      for (let i = 255; i < 512; i++) {
-        EXP_TABLE[i] = EXP_TABLE[i - 255];
-      }
-    })();
-    exports2.log = function log(n) {
-      if (n < 1)
-        throw new Error("log(" + n + ")");
-      return LOG_TABLE[n];
-    };
-    exports2.exp = function exp(n) {
-      return EXP_TABLE[n];
-    };
-    exports2.mul = function mul(x, y) {
-      if (x === 0 || y === 0)
-        return 0;
-      return EXP_TABLE[LOG_TABLE[x] + LOG_TABLE[y]];
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/polynomial.js
-var require_polynomial = __commonJS({
-  "node_modules/qrcode/lib/core/polynomial.js"(exports2) {
-    var GF = require_galois_field();
-    exports2.mul = function mul(p1, p2) {
-      const coeff = new Uint8Array(p1.length + p2.length - 1);
-      for (let i = 0; i < p1.length; i++) {
-        for (let j = 0; j < p2.length; j++) {
-          coeff[i + j] ^= GF.mul(p1[i], p2[j]);
-        }
-      }
-      return coeff;
-    };
-    exports2.mod = function mod(divident, divisor) {
-      let result = new Uint8Array(divident);
-      while (result.length - divisor.length >= 0) {
-        const coeff = result[0];
-        for (let i = 0; i < divisor.length; i++) {
-          result[i] ^= GF.mul(divisor[i], coeff);
-        }
-        let offset = 0;
-        while (offset < result.length && result[offset] === 0)
-          offset++;
-        result = result.slice(offset);
-      }
-      return result;
-    };
-    exports2.generateECPolynomial = function generateECPolynomial(degree) {
-      let poly = new Uint8Array([1]);
-      for (let i = 0; i < degree; i++) {
-        poly = exports2.mul(poly, new Uint8Array([1, GF.exp(i)]));
-      }
-      return poly;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/reed-solomon-encoder.js
-var require_reed_solomon_encoder = __commonJS({
-  "node_modules/qrcode/lib/core/reed-solomon-encoder.js"(exports2, module2) {
-    var Polynomial = require_polynomial();
-    function ReedSolomonEncoder(degree) {
-      this.genPoly = void 0;
-      this.degree = degree;
-      if (this.degree)
-        this.initialize(this.degree);
-    }
-    ReedSolomonEncoder.prototype.initialize = function initialize(degree) {
-      this.degree = degree;
-      this.genPoly = Polynomial.generateECPolynomial(this.degree);
-    };
-    ReedSolomonEncoder.prototype.encode = function encode(data) {
-      if (!this.genPoly) {
-        throw new Error("Encoder not initialized");
-      }
-      const paddedData = new Uint8Array(data.length + this.degree);
-      paddedData.set(data);
-      const remainder = Polynomial.mod(paddedData, this.genPoly);
-      const start = this.degree - remainder.length;
-      if (start > 0) {
-        const buff = new Uint8Array(this.degree);
-        buff.set(remainder, start);
-        return buff;
-      }
-      return remainder;
-    };
-    module2.exports = ReedSolomonEncoder;
-  }
-});
-
-// node_modules/qrcode/lib/core/version-check.js
-var require_version_check = __commonJS({
-  "node_modules/qrcode/lib/core/version-check.js"(exports2) {
-    exports2.isValid = function isValid(version) {
-      return !isNaN(version) && version >= 1 && version <= 40;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/regex.js
-var require_regex = __commonJS({
-  "node_modules/qrcode/lib/core/regex.js"(exports2) {
-    var numeric = "[0-9]+";
-    var alphanumeric = "[A-Z $%*+\\-./:]+";
-    var kanji = "(?:[u3000-u303F]|[u3040-u309F]|[u30A0-u30FF]|[uFF00-uFFEF]|[u4E00-u9FAF]|[u2605-u2606]|[u2190-u2195]|u203B|[u2010u2015u2018u2019u2025u2026u201Cu201Du2225u2260]|[u0391-u0451]|[u00A7u00A8u00B1u00B4u00D7u00F7])+";
-    kanji = kanji.replace(/u/g, "\\u");
-    var byte = "(?:(?![A-Z0-9 $%*+\\-./:]|" + kanji + ")(?:.|[\r\n]))+";
-    exports2.KANJI = new RegExp(kanji, "g");
-    exports2.BYTE_KANJI = new RegExp("[^A-Z0-9 $%*+\\-./:]+", "g");
-    exports2.BYTE = new RegExp(byte, "g");
-    exports2.NUMERIC = new RegExp(numeric, "g");
-    exports2.ALPHANUMERIC = new RegExp(alphanumeric, "g");
-    var TEST_KANJI = new RegExp("^" + kanji + "$");
-    var TEST_NUMERIC = new RegExp("^" + numeric + "$");
-    var TEST_ALPHANUMERIC = new RegExp("^[A-Z0-9 $%*+\\-./:]+$");
-    exports2.testKanji = function testKanji(str) {
-      return TEST_KANJI.test(str);
-    };
-    exports2.testNumeric = function testNumeric(str) {
-      return TEST_NUMERIC.test(str);
-    };
-    exports2.testAlphanumeric = function testAlphanumeric(str) {
-      return TEST_ALPHANUMERIC.test(str);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/mode.js
-var require_mode = __commonJS({
-  "node_modules/qrcode/lib/core/mode.js"(exports2) {
-    var VersionCheck = require_version_check();
-    var Regex = require_regex();
-    exports2.NUMERIC = {
-      id: "Numeric",
-      bit: 1 << 0,
-      ccBits: [10, 12, 14]
-    };
-    exports2.ALPHANUMERIC = {
-      id: "Alphanumeric",
-      bit: 1 << 1,
-      ccBits: [9, 11, 13]
-    };
-    exports2.BYTE = {
-      id: "Byte",
-      bit: 1 << 2,
-      ccBits: [8, 16, 16]
-    };
-    exports2.KANJI = {
-      id: "Kanji",
-      bit: 1 << 3,
-      ccBits: [8, 10, 12]
-    };
-    exports2.MIXED = {
-      bit: -1
-    };
-    exports2.getCharCountIndicator = function getCharCountIndicator(mode, version) {
-      if (!mode.ccBits)
-        throw new Error("Invalid mode: " + mode);
-      if (!VersionCheck.isValid(version)) {
-        throw new Error("Invalid version: " + version);
-      }
-      if (version >= 1 && version < 10)
-        return mode.ccBits[0];
-      else if (version < 27)
-        return mode.ccBits[1];
-      return mode.ccBits[2];
-    };
-    exports2.getBestModeForData = function getBestModeForData(dataStr) {
-      if (Regex.testNumeric(dataStr))
-        return exports2.NUMERIC;
-      else if (Regex.testAlphanumeric(dataStr))
-        return exports2.ALPHANUMERIC;
-      else if (Regex.testKanji(dataStr))
-        return exports2.KANJI;
-      else
-        return exports2.BYTE;
-    };
-    exports2.toString = function toString(mode) {
-      if (mode && mode.id)
-        return mode.id;
-      throw new Error("Invalid mode");
-    };
-    exports2.isValid = function isValid(mode) {
-      return mode && mode.bit && mode.ccBits;
-    };
-    function fromString(string) {
-      if (typeof string !== "string") {
-        throw new Error("Param is not a string");
-      }
-      const lcStr = string.toLowerCase();
-      switch (lcStr) {
-        case "numeric":
-          return exports2.NUMERIC;
-        case "alphanumeric":
-          return exports2.ALPHANUMERIC;
-        case "kanji":
-          return exports2.KANJI;
-        case "byte":
-          return exports2.BYTE;
-        default:
-          throw new Error("Unknown mode: " + string);
-      }
-    }
-    exports2.from = function from(value, defaultValue) {
-      if (exports2.isValid(value)) {
-        return value;
-      }
-      try {
-        return fromString(value);
-      } catch (e) {
-        return defaultValue;
-      }
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/version.js
-var require_version = __commonJS({
-  "node_modules/qrcode/lib/core/version.js"(exports2) {
-    var Utils = require_utils3();
-    var ECCode = require_error_correction_code();
-    var ECLevel = require_error_correction_level();
-    var Mode = require_mode();
-    var VersionCheck = require_version_check();
-    var G18 = 1 << 12 | 1 << 11 | 1 << 10 | 1 << 9 | 1 << 8 | 1 << 5 | 1 << 2 | 1 << 0;
-    var G18_BCH = Utils.getBCHDigit(G18);
-    function getBestVersionForDataLength(mode, length, errorCorrectionLevel) {
-      for (let currentVersion = 1; currentVersion <= 40; currentVersion++) {
-        if (length <= exports2.getCapacity(currentVersion, errorCorrectionLevel, mode)) {
-          return currentVersion;
-        }
-      }
-      return void 0;
-    }
-    function getReservedBitsCount(mode, version) {
-      return Mode.getCharCountIndicator(mode, version) + 4;
-    }
-    function getTotalBitsFromDataArray(segments, version) {
-      let totalBits = 0;
-      segments.forEach(function(data) {
-        const reservedBits = getReservedBitsCount(data.mode, version);
-        totalBits += reservedBits + data.getBitsLength();
-      });
-      return totalBits;
-    }
-    function getBestVersionForMixedData(segments, errorCorrectionLevel) {
-      for (let currentVersion = 1; currentVersion <= 40; currentVersion++) {
-        const length = getTotalBitsFromDataArray(segments, currentVersion);
-        if (length <= exports2.getCapacity(currentVersion, errorCorrectionLevel, Mode.MIXED)) {
-          return currentVersion;
-        }
-      }
-      return void 0;
-    }
-    exports2.from = function from(value, defaultValue) {
-      if (VersionCheck.isValid(value)) {
-        return parseInt(value, 10);
-      }
-      return defaultValue;
-    };
-    exports2.getCapacity = function getCapacity(version, errorCorrectionLevel, mode) {
-      if (!VersionCheck.isValid(version)) {
-        throw new Error("Invalid QR Code version");
-      }
-      if (typeof mode === "undefined")
-        mode = Mode.BYTE;
-      const totalCodewords = Utils.getSymbolTotalCodewords(version);
-      const ecTotalCodewords = ECCode.getTotalCodewordsCount(version, errorCorrectionLevel);
-      const dataTotalCodewordsBits = (totalCodewords - ecTotalCodewords) * 8;
-      if (mode === Mode.MIXED)
-        return dataTotalCodewordsBits;
-      const usableBits = dataTotalCodewordsBits - getReservedBitsCount(mode, version);
-      switch (mode) {
-        case Mode.NUMERIC:
-          return Math.floor(usableBits / 10 * 3);
-        case Mode.ALPHANUMERIC:
-          return Math.floor(usableBits / 11 * 2);
-        case Mode.KANJI:
-          return Math.floor(usableBits / 13);
-        case Mode.BYTE:
-        default:
-          return Math.floor(usableBits / 8);
-      }
-    };
-    exports2.getBestVersionForData = function getBestVersionForData(data, errorCorrectionLevel) {
-      let seg;
-      const ecl = ECLevel.from(errorCorrectionLevel, ECLevel.M);
-      if (Array.isArray(data)) {
-        if (data.length > 1) {
-          return getBestVersionForMixedData(data, ecl);
-        }
-        if (data.length === 0) {
-          return 1;
-        }
-        seg = data[0];
-      } else {
-        seg = data;
-      }
-      return getBestVersionForDataLength(seg.mode, seg.getLength(), ecl);
-    };
-    exports2.getEncodedBits = function getEncodedBits(version) {
-      if (!VersionCheck.isValid(version) || version < 7) {
-        throw new Error("Invalid QR Code version");
-      }
-      let d = version << 12;
-      while (Utils.getBCHDigit(d) - G18_BCH >= 0) {
-        d ^= G18 << Utils.getBCHDigit(d) - G18_BCH;
-      }
-      return version << 12 | d;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/format-info.js
-var require_format_info = __commonJS({
-  "node_modules/qrcode/lib/core/format-info.js"(exports2) {
-    var Utils = require_utils3();
-    var G15 = 1 << 10 | 1 << 8 | 1 << 5 | 1 << 4 | 1 << 2 | 1 << 1 | 1 << 0;
-    var G15_MASK = 1 << 14 | 1 << 12 | 1 << 10 | 1 << 4 | 1 << 1;
-    var G15_BCH = Utils.getBCHDigit(G15);
-    exports2.getEncodedBits = function getEncodedBits(errorCorrectionLevel, mask) {
-      const data = errorCorrectionLevel.bit << 3 | mask;
-      let d = data << 10;
-      while (Utils.getBCHDigit(d) - G15_BCH >= 0) {
-        d ^= G15 << Utils.getBCHDigit(d) - G15_BCH;
-      }
-      return (data << 10 | d) ^ G15_MASK;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/numeric-data.js
-var require_numeric_data = __commonJS({
-  "node_modules/qrcode/lib/core/numeric-data.js"(exports2, module2) {
-    var Mode = require_mode();
-    function NumericData(data) {
-      this.mode = Mode.NUMERIC;
-      this.data = data.toString();
-    }
-    NumericData.getBitsLength = function getBitsLength(length) {
-      return 10 * Math.floor(length / 3) + (length % 3 ? length % 3 * 3 + 1 : 0);
-    };
-    NumericData.prototype.getLength = function getLength() {
-      return this.data.length;
-    };
-    NumericData.prototype.getBitsLength = function getBitsLength() {
-      return NumericData.getBitsLength(this.data.length);
-    };
-    NumericData.prototype.write = function write(bitBuffer) {
-      let i, group, value;
-      for (i = 0; i + 3 <= this.data.length; i += 3) {
-        group = this.data.substr(i, 3);
-        value = parseInt(group, 10);
-        bitBuffer.put(value, 10);
-      }
-      const remainingNum = this.data.length - i;
-      if (remainingNum > 0) {
-        group = this.data.substr(i);
-        value = parseInt(group, 10);
-        bitBuffer.put(value, remainingNum * 3 + 1);
-      }
-    };
-    module2.exports = NumericData;
-  }
-});
-
-// node_modules/qrcode/lib/core/alphanumeric-data.js
-var require_alphanumeric_data = __commonJS({
-  "node_modules/qrcode/lib/core/alphanumeric-data.js"(exports2, module2) {
-    var Mode = require_mode();
-    var ALPHA_NUM_CHARS = [
-      "0",
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "A",
-      "B",
-      "C",
-      "D",
-      "E",
-      "F",
-      "G",
-      "H",
-      "I",
-      "J",
-      "K",
-      "L",
-      "M",
-      "N",
-      "O",
-      "P",
-      "Q",
-      "R",
-      "S",
-      "T",
-      "U",
-      "V",
-      "W",
-      "X",
-      "Y",
-      "Z",
-      " ",
-      "$",
-      "%",
-      "*",
-      "+",
-      "-",
-      ".",
-      "/",
-      ":"
-    ];
-    function AlphanumericData(data) {
-      this.mode = Mode.ALPHANUMERIC;
-      this.data = data;
-    }
-    AlphanumericData.getBitsLength = function getBitsLength(length) {
-      return 11 * Math.floor(length / 2) + 6 * (length % 2);
-    };
-    AlphanumericData.prototype.getLength = function getLength() {
-      return this.data.length;
-    };
-    AlphanumericData.prototype.getBitsLength = function getBitsLength() {
-      return AlphanumericData.getBitsLength(this.data.length);
-    };
-    AlphanumericData.prototype.write = function write(bitBuffer) {
-      let i;
-      for (i = 0; i + 2 <= this.data.length; i += 2) {
-        let value = ALPHA_NUM_CHARS.indexOf(this.data[i]) * 45;
-        value += ALPHA_NUM_CHARS.indexOf(this.data[i + 1]);
-        bitBuffer.put(value, 11);
-      }
-      if (this.data.length % 2) {
-        bitBuffer.put(ALPHA_NUM_CHARS.indexOf(this.data[i]), 6);
-      }
-    };
-    module2.exports = AlphanumericData;
-  }
-});
-
-// node_modules/qrcode/lib/core/byte-data.js
-var require_byte_data = __commonJS({
-  "node_modules/qrcode/lib/core/byte-data.js"(exports2, module2) {
-    var Mode = require_mode();
-    function ByteData(data) {
-      this.mode = Mode.BYTE;
-      if (typeof data === "string") {
-        this.data = new TextEncoder().encode(data);
-      } else {
-        this.data = new Uint8Array(data);
-      }
-    }
-    ByteData.getBitsLength = function getBitsLength(length) {
-      return length * 8;
-    };
-    ByteData.prototype.getLength = function getLength() {
-      return this.data.length;
-    };
-    ByteData.prototype.getBitsLength = function getBitsLength() {
-      return ByteData.getBitsLength(this.data.length);
-    };
-    ByteData.prototype.write = function(bitBuffer) {
-      for (let i = 0, l = this.data.length; i < l; i++) {
-        bitBuffer.put(this.data[i], 8);
-      }
-    };
-    module2.exports = ByteData;
-  }
-});
-
-// node_modules/qrcode/lib/core/kanji-data.js
-var require_kanji_data = __commonJS({
-  "node_modules/qrcode/lib/core/kanji-data.js"(exports2, module2) {
-    var Mode = require_mode();
-    var Utils = require_utils3();
-    function KanjiData(data) {
-      this.mode = Mode.KANJI;
-      this.data = data;
-    }
-    KanjiData.getBitsLength = function getBitsLength(length) {
-      return length * 13;
-    };
-    KanjiData.prototype.getLength = function getLength() {
-      return this.data.length;
-    };
-    KanjiData.prototype.getBitsLength = function getBitsLength() {
-      return KanjiData.getBitsLength(this.data.length);
-    };
-    KanjiData.prototype.write = function(bitBuffer) {
-      let i;
-      for (i = 0; i < this.data.length; i++) {
-        let value = Utils.toSJIS(this.data[i]);
-        if (value >= 33088 && value <= 40956) {
-          value -= 33088;
-        } else if (value >= 57408 && value <= 60351) {
-          value -= 49472;
-        } else {
-          throw new Error(
-            "Invalid SJIS character: " + this.data[i] + "\nMake sure your charset is UTF-8"
-          );
-        }
-        value = (value >>> 8 & 255) * 192 + (value & 255);
-        bitBuffer.put(value, 13);
-      }
-    };
-    module2.exports = KanjiData;
-  }
-});
-
-// node_modules/dijkstrajs/dijkstra.js
-var require_dijkstra = __commonJS({
-  "node_modules/dijkstrajs/dijkstra.js"(exports2, module2) {
-    "use strict";
-    var dijkstra = {
-      single_source_shortest_paths: function(graph, s, d) {
-        var predecessors = {};
-        var costs = {};
-        costs[s] = 0;
-        var open = dijkstra.PriorityQueue.make();
-        open.push(s, 0);
-        var closest, u, v, cost_of_s_to_u, adjacent_nodes, cost_of_e, cost_of_s_to_u_plus_cost_of_e, cost_of_s_to_v, first_visit;
-        while (!open.empty()) {
-          closest = open.pop();
-          u = closest.value;
-          cost_of_s_to_u = closest.cost;
-          adjacent_nodes = graph[u] || {};
-          for (v in adjacent_nodes) {
-            if (adjacent_nodes.hasOwnProperty(v)) {
-              cost_of_e = adjacent_nodes[v];
-              cost_of_s_to_u_plus_cost_of_e = cost_of_s_to_u + cost_of_e;
-              cost_of_s_to_v = costs[v];
-              first_visit = typeof costs[v] === "undefined";
-              if (first_visit || cost_of_s_to_v > cost_of_s_to_u_plus_cost_of_e) {
-                costs[v] = cost_of_s_to_u_plus_cost_of_e;
-                open.push(v, cost_of_s_to_u_plus_cost_of_e);
-                predecessors[v] = u;
-              }
-            }
-          }
-        }
-        if (typeof d !== "undefined" && typeof costs[d] === "undefined") {
-          var msg = ["Could not find a path from ", s, " to ", d, "."].join("");
-          throw new Error(msg);
-        }
-        return predecessors;
-      },
-      extract_shortest_path_from_predecessor_list: function(predecessors, d) {
-        var nodes = [];
-        var u = d;
-        var predecessor;
-        while (u) {
-          nodes.push(u);
-          predecessor = predecessors[u];
-          u = predecessors[u];
-        }
-        nodes.reverse();
-        return nodes;
-      },
-      find_path: function(graph, s, d) {
-        var predecessors = dijkstra.single_source_shortest_paths(graph, s, d);
-        return dijkstra.extract_shortest_path_from_predecessor_list(
-          predecessors,
-          d
-        );
-      },
-      /**
-       * A very naive priority queue implementation.
-       */
-      PriorityQueue: {
-        make: function(opts) {
-          var T = dijkstra.PriorityQueue, t = {}, key;
-          opts = opts || {};
-          for (key in T) {
-            if (T.hasOwnProperty(key)) {
-              t[key] = T[key];
-            }
-          }
-          t.queue = [];
-          t.sorter = opts.sorter || T.default_sorter;
-          return t;
-        },
-        default_sorter: function(a, b) {
-          return a.cost - b.cost;
-        },
-        /**
-         * Add a new item to the queue and ensure the highest priority element
-         * is at the front of the queue.
-         */
-        push: function(value, cost) {
-          var item = { value, cost };
-          this.queue.push(item);
-          this.queue.sort(this.sorter);
-        },
-        /**
-         * Return the highest priority element in the queue.
-         */
-        pop: function() {
-          return this.queue.shift();
-        },
-        empty: function() {
-          return this.queue.length === 0;
-        }
-      }
-    };
-    if (typeof module2 !== "undefined") {
-      module2.exports = dijkstra;
-    }
-  }
-});
-
-// node_modules/qrcode/lib/core/segments.js
-var require_segments = __commonJS({
-  "node_modules/qrcode/lib/core/segments.js"(exports2) {
-    var Mode = require_mode();
-    var NumericData = require_numeric_data();
-    var AlphanumericData = require_alphanumeric_data();
-    var ByteData = require_byte_data();
-    var KanjiData = require_kanji_data();
-    var Regex = require_regex();
-    var Utils = require_utils3();
-    var dijkstra = require_dijkstra();
-    function getStringByteLength(str) {
-      return unescape(encodeURIComponent(str)).length;
-    }
-    function getSegments(regex, mode, str) {
-      const segments = [];
-      let result;
-      while ((result = regex.exec(str)) !== null) {
-        segments.push({
-          data: result[0],
-          index: result.index,
-          mode,
-          length: result[0].length
-        });
-      }
-      return segments;
-    }
-    function getSegmentsFromString(dataStr) {
-      const numSegs = getSegments(Regex.NUMERIC, Mode.NUMERIC, dataStr);
-      const alphaNumSegs = getSegments(Regex.ALPHANUMERIC, Mode.ALPHANUMERIC, dataStr);
-      let byteSegs;
-      let kanjiSegs;
-      if (Utils.isKanjiModeEnabled()) {
-        byteSegs = getSegments(Regex.BYTE, Mode.BYTE, dataStr);
-        kanjiSegs = getSegments(Regex.KANJI, Mode.KANJI, dataStr);
-      } else {
-        byteSegs = getSegments(Regex.BYTE_KANJI, Mode.BYTE, dataStr);
-        kanjiSegs = [];
-      }
-      const segs = numSegs.concat(alphaNumSegs, byteSegs, kanjiSegs);
-      return segs.sort(function(s1, s2) {
-        return s1.index - s2.index;
-      }).map(function(obj) {
-        return {
-          data: obj.data,
-          mode: obj.mode,
-          length: obj.length
-        };
-      });
-    }
-    function getSegmentBitsLength(length, mode) {
-      switch (mode) {
-        case Mode.NUMERIC:
-          return NumericData.getBitsLength(length);
-        case Mode.ALPHANUMERIC:
-          return AlphanumericData.getBitsLength(length);
-        case Mode.KANJI:
-          return KanjiData.getBitsLength(length);
-        case Mode.BYTE:
-          return ByteData.getBitsLength(length);
-      }
-    }
-    function mergeSegments(segs) {
-      return segs.reduce(function(acc, curr) {
-        const prevSeg = acc.length - 1 >= 0 ? acc[acc.length - 1] : null;
-        if (prevSeg && prevSeg.mode === curr.mode) {
-          acc[acc.length - 1].data += curr.data;
-          return acc;
-        }
-        acc.push(curr);
-        return acc;
-      }, []);
-    }
-    function buildNodes(segs) {
-      const nodes = [];
-      for (let i = 0; i < segs.length; i++) {
-        const seg = segs[i];
-        switch (seg.mode) {
-          case Mode.NUMERIC:
-            nodes.push([
-              seg,
-              { data: seg.data, mode: Mode.ALPHANUMERIC, length: seg.length },
-              { data: seg.data, mode: Mode.BYTE, length: seg.length }
-            ]);
-            break;
-          case Mode.ALPHANUMERIC:
-            nodes.push([
-              seg,
-              { data: seg.data, mode: Mode.BYTE, length: seg.length }
-            ]);
-            break;
-          case Mode.KANJI:
-            nodes.push([
-              seg,
-              { data: seg.data, mode: Mode.BYTE, length: getStringByteLength(seg.data) }
-            ]);
-            break;
-          case Mode.BYTE:
-            nodes.push([
-              { data: seg.data, mode: Mode.BYTE, length: getStringByteLength(seg.data) }
-            ]);
-        }
-      }
-      return nodes;
-    }
-    function buildGraph(nodes, version) {
-      const table = {};
-      const graph = { start: {} };
-      let prevNodeIds = ["start"];
-      for (let i = 0; i < nodes.length; i++) {
-        const nodeGroup = nodes[i];
-        const currentNodeIds = [];
-        for (let j = 0; j < nodeGroup.length; j++) {
-          const node = nodeGroup[j];
-          const key = "" + i + j;
-          currentNodeIds.push(key);
-          table[key] = { node, lastCount: 0 };
-          graph[key] = {};
-          for (let n = 0; n < prevNodeIds.length; n++) {
-            const prevNodeId = prevNodeIds[n];
-            if (table[prevNodeId] && table[prevNodeId].node.mode === node.mode) {
-              graph[prevNodeId][key] = getSegmentBitsLength(table[prevNodeId].lastCount + node.length, node.mode) - getSegmentBitsLength(table[prevNodeId].lastCount, node.mode);
-              table[prevNodeId].lastCount += node.length;
-            } else {
-              if (table[prevNodeId])
-                table[prevNodeId].lastCount = node.length;
-              graph[prevNodeId][key] = getSegmentBitsLength(node.length, node.mode) + 4 + Mode.getCharCountIndicator(node.mode, version);
-            }
-          }
-        }
-        prevNodeIds = currentNodeIds;
-      }
-      for (let n = 0; n < prevNodeIds.length; n++) {
-        graph[prevNodeIds[n]].end = 0;
-      }
-      return { map: graph, table };
-    }
-    function buildSingleSegment(data, modesHint) {
-      let mode;
-      const bestMode = Mode.getBestModeForData(data);
-      mode = Mode.from(modesHint, bestMode);
-      if (mode !== Mode.BYTE && mode.bit < bestMode.bit) {
-        throw new Error('"' + data + '" cannot be encoded with mode ' + Mode.toString(mode) + ".\n Suggested mode is: " + Mode.toString(bestMode));
-      }
-      if (mode === Mode.KANJI && !Utils.isKanjiModeEnabled()) {
-        mode = Mode.BYTE;
-      }
-      switch (mode) {
-        case Mode.NUMERIC:
-          return new NumericData(data);
-        case Mode.ALPHANUMERIC:
-          return new AlphanumericData(data);
-        case Mode.KANJI:
-          return new KanjiData(data);
-        case Mode.BYTE:
-          return new ByteData(data);
-      }
-    }
-    exports2.fromArray = function fromArray(array) {
-      return array.reduce(function(acc, seg) {
-        if (typeof seg === "string") {
-          acc.push(buildSingleSegment(seg, null));
-        } else if (seg.data) {
-          acc.push(buildSingleSegment(seg.data, seg.mode));
-        }
-        return acc;
-      }, []);
-    };
-    exports2.fromString = function fromString(data, version) {
-      const segs = getSegmentsFromString(data, Utils.isKanjiModeEnabled());
-      const nodes = buildNodes(segs);
-      const graph = buildGraph(nodes, version);
-      const path2 = dijkstra.find_path(graph.map, "start", "end");
-      const optimizedSegs = [];
-      for (let i = 1; i < path2.length - 1; i++) {
-        optimizedSegs.push(graph.table[path2[i]].node);
-      }
-      return exports2.fromArray(mergeSegments(optimizedSegs));
-    };
-    exports2.rawSplit = function rawSplit(data) {
-      return exports2.fromArray(
-        getSegmentsFromString(data, Utils.isKanjiModeEnabled())
-      );
-    };
-  }
-});
-
-// node_modules/qrcode/lib/core/qrcode.js
-var require_qrcode = __commonJS({
-  "node_modules/qrcode/lib/core/qrcode.js"(exports2) {
-    var Utils = require_utils3();
-    var ECLevel = require_error_correction_level();
-    var BitBuffer = require_bit_buffer();
-    var BitMatrix = require_bit_matrix();
-    var AlignmentPattern = require_alignment_pattern();
-    var FinderPattern = require_finder_pattern();
-    var MaskPattern = require_mask_pattern();
-    var ECCode = require_error_correction_code();
-    var ReedSolomonEncoder = require_reed_solomon_encoder();
-    var Version = require_version();
-    var FormatInfo = require_format_info();
-    var Mode = require_mode();
-    var Segments = require_segments();
-    function setupFinderPattern(matrix, version) {
-      const size = matrix.size;
-      const pos = FinderPattern.getPositions(version);
-      for (let i = 0; i < pos.length; i++) {
-        const row = pos[i][0];
-        const col = pos[i][1];
-        for (let r = -1; r <= 7; r++) {
-          if (row + r <= -1 || size <= row + r)
-            continue;
-          for (let c = -1; c <= 7; c++) {
-            if (col + c <= -1 || size <= col + c)
-              continue;
-            if (r >= 0 && r <= 6 && (c === 0 || c === 6) || c >= 0 && c <= 6 && (r === 0 || r === 6) || r >= 2 && r <= 4 && c >= 2 && c <= 4) {
-              matrix.set(row + r, col + c, true, true);
-            } else {
-              matrix.set(row + r, col + c, false, true);
-            }
-          }
-        }
-      }
-    }
-    function setupTimingPattern(matrix) {
-      const size = matrix.size;
-      for (let r = 8; r < size - 8; r++) {
-        const value = r % 2 === 0;
-        matrix.set(r, 6, value, true);
-        matrix.set(6, r, value, true);
-      }
-    }
-    function setupAlignmentPattern(matrix, version) {
-      const pos = AlignmentPattern.getPositions(version);
-      for (let i = 0; i < pos.length; i++) {
-        const row = pos[i][0];
-        const col = pos[i][1];
-        for (let r = -2; r <= 2; r++) {
-          for (let c = -2; c <= 2; c++) {
-            if (r === -2 || r === 2 || c === -2 || c === 2 || r === 0 && c === 0) {
-              matrix.set(row + r, col + c, true, true);
-            } else {
-              matrix.set(row + r, col + c, false, true);
-            }
-          }
-        }
-      }
-    }
-    function setupVersionInfo(matrix, version) {
-      const size = matrix.size;
-      const bits = Version.getEncodedBits(version);
-      let row, col, mod;
-      for (let i = 0; i < 18; i++) {
-        row = Math.floor(i / 3);
-        col = i % 3 + size - 8 - 3;
-        mod = (bits >> i & 1) === 1;
-        matrix.set(row, col, mod, true);
-        matrix.set(col, row, mod, true);
-      }
-    }
-    function setupFormatInfo(matrix, errorCorrectionLevel, maskPattern) {
-      const size = matrix.size;
-      const bits = FormatInfo.getEncodedBits(errorCorrectionLevel, maskPattern);
-      let i, mod;
-      for (i = 0; i < 15; i++) {
-        mod = (bits >> i & 1) === 1;
-        if (i < 6) {
-          matrix.set(i, 8, mod, true);
-        } else if (i < 8) {
-          matrix.set(i + 1, 8, mod, true);
-        } else {
-          matrix.set(size - 15 + i, 8, mod, true);
-        }
-        if (i < 8) {
-          matrix.set(8, size - i - 1, mod, true);
-        } else if (i < 9) {
-          matrix.set(8, 15 - i - 1 + 1, mod, true);
-        } else {
-          matrix.set(8, 15 - i - 1, mod, true);
-        }
-      }
-      matrix.set(size - 8, 8, 1, true);
-    }
-    function setupData(matrix, data) {
-      const size = matrix.size;
-      let inc = -1;
-      let row = size - 1;
-      let bitIndex = 7;
-      let byteIndex = 0;
-      for (let col = size - 1; col > 0; col -= 2) {
-        if (col === 6)
-          col--;
-        while (true) {
-          for (let c = 0; c < 2; c++) {
-            if (!matrix.isReserved(row, col - c)) {
-              let dark = false;
-              if (byteIndex < data.length) {
-                dark = (data[byteIndex] >>> bitIndex & 1) === 1;
-              }
-              matrix.set(row, col - c, dark);
-              bitIndex--;
-              if (bitIndex === -1) {
-                byteIndex++;
-                bitIndex = 7;
-              }
-            }
-          }
-          row += inc;
-          if (row < 0 || size <= row) {
-            row -= inc;
-            inc = -inc;
-            break;
-          }
-        }
-      }
-    }
-    function createData(version, errorCorrectionLevel, segments) {
-      const buffer = new BitBuffer();
-      segments.forEach(function(data) {
-        buffer.put(data.mode.bit, 4);
-        buffer.put(data.getLength(), Mode.getCharCountIndicator(data.mode, version));
-        data.write(buffer);
-      });
-      const totalCodewords = Utils.getSymbolTotalCodewords(version);
-      const ecTotalCodewords = ECCode.getTotalCodewordsCount(version, errorCorrectionLevel);
-      const dataTotalCodewordsBits = (totalCodewords - ecTotalCodewords) * 8;
-      if (buffer.getLengthInBits() + 4 <= dataTotalCodewordsBits) {
-        buffer.put(0, 4);
-      }
-      while (buffer.getLengthInBits() % 8 !== 0) {
-        buffer.putBit(0);
-      }
-      const remainingByte = (dataTotalCodewordsBits - buffer.getLengthInBits()) / 8;
-      for (let i = 0; i < remainingByte; i++) {
-        buffer.put(i % 2 ? 17 : 236, 8);
-      }
-      return createCodewords(buffer, version, errorCorrectionLevel);
-    }
-    function createCodewords(bitBuffer, version, errorCorrectionLevel) {
-      const totalCodewords = Utils.getSymbolTotalCodewords(version);
-      const ecTotalCodewords = ECCode.getTotalCodewordsCount(version, errorCorrectionLevel);
-      const dataTotalCodewords = totalCodewords - ecTotalCodewords;
-      const ecTotalBlocks = ECCode.getBlocksCount(version, errorCorrectionLevel);
-      const blocksInGroup2 = totalCodewords % ecTotalBlocks;
-      const blocksInGroup1 = ecTotalBlocks - blocksInGroup2;
-      const totalCodewordsInGroup1 = Math.floor(totalCodewords / ecTotalBlocks);
-      const dataCodewordsInGroup1 = Math.floor(dataTotalCodewords / ecTotalBlocks);
-      const dataCodewordsInGroup2 = dataCodewordsInGroup1 + 1;
-      const ecCount = totalCodewordsInGroup1 - dataCodewordsInGroup1;
-      const rs = new ReedSolomonEncoder(ecCount);
-      let offset = 0;
-      const dcData = new Array(ecTotalBlocks);
-      const ecData = new Array(ecTotalBlocks);
-      let maxDataSize = 0;
-      const buffer = new Uint8Array(bitBuffer.buffer);
-      for (let b = 0; b < ecTotalBlocks; b++) {
-        const dataSize = b < blocksInGroup1 ? dataCodewordsInGroup1 : dataCodewordsInGroup2;
-        dcData[b] = buffer.slice(offset, offset + dataSize);
-        ecData[b] = rs.encode(dcData[b]);
-        offset += dataSize;
-        maxDataSize = Math.max(maxDataSize, dataSize);
-      }
-      const data = new Uint8Array(totalCodewords);
-      let index = 0;
-      let i, r;
-      for (i = 0; i < maxDataSize; i++) {
-        for (r = 0; r < ecTotalBlocks; r++) {
-          if (i < dcData[r].length) {
-            data[index++] = dcData[r][i];
-          }
-        }
-      }
-      for (i = 0; i < ecCount; i++) {
-        for (r = 0; r < ecTotalBlocks; r++) {
-          data[index++] = ecData[r][i];
-        }
-      }
-      return data;
-    }
-    function createSymbol(data, version, errorCorrectionLevel, maskPattern) {
-      let segments;
-      if (Array.isArray(data)) {
-        segments = Segments.fromArray(data);
-      } else if (typeof data === "string") {
-        let estimatedVersion = version;
-        if (!estimatedVersion) {
-          const rawSegments = Segments.rawSplit(data);
-          estimatedVersion = Version.getBestVersionForData(rawSegments, errorCorrectionLevel);
-        }
-        segments = Segments.fromString(data, estimatedVersion || 40);
-      } else {
-        throw new Error("Invalid data");
-      }
-      const bestVersion = Version.getBestVersionForData(segments, errorCorrectionLevel);
-      if (!bestVersion) {
-        throw new Error("The amount of data is too big to be stored in a QR Code");
-      }
-      if (!version) {
-        version = bestVersion;
-      } else if (version < bestVersion) {
-        throw new Error(
-          "\nThe chosen QR Code version cannot contain this amount of data.\nMinimum version required to store current data is: " + bestVersion + ".\n"
-        );
-      }
-      const dataBits = createData(version, errorCorrectionLevel, segments);
-      const moduleCount = Utils.getSymbolSize(version);
-      const modules = new BitMatrix(moduleCount);
-      setupFinderPattern(modules, version);
-      setupTimingPattern(modules);
-      setupAlignmentPattern(modules, version);
-      setupFormatInfo(modules, errorCorrectionLevel, 0);
-      if (version >= 7) {
-        setupVersionInfo(modules, version);
-      }
-      setupData(modules, dataBits);
-      if (isNaN(maskPattern)) {
-        maskPattern = MaskPattern.getBestMask(
-          modules,
-          setupFormatInfo.bind(null, modules, errorCorrectionLevel)
-        );
-      }
-      MaskPattern.applyMask(maskPattern, modules);
-      setupFormatInfo(modules, errorCorrectionLevel, maskPattern);
-      return {
-        modules,
-        version,
-        errorCorrectionLevel,
-        maskPattern,
-        segments
-      };
-    }
-    exports2.create = function create(data, options) {
-      if (typeof data === "undefined" || data === "") {
-        throw new Error("No input text");
-      }
-      let errorCorrectionLevel = ECLevel.M;
-      let version;
-      let mask;
-      if (typeof options !== "undefined") {
-        errorCorrectionLevel = ECLevel.from(options.errorCorrectionLevel, ECLevel.M);
-        version = Version.from(options.version);
-        mask = MaskPattern.from(options.maskPattern);
-        if (options.toSJISFunc) {
-          Utils.setToSJISFunction(options.toSJISFunc);
-        }
-      }
-      return createSymbol(data, version, errorCorrectionLevel, mask);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/chunkstream.js
-var require_chunkstream = __commonJS({
-  "node_modules/pngjs/lib/chunkstream.js"(exports2, module2) {
-    "use strict";
-    var util = require("util");
-    var Stream = require("stream");
-    var ChunkStream = module2.exports = function() {
-      Stream.call(this);
-      this._buffers = [];
-      this._buffered = 0;
-      this._reads = [];
-      this._paused = false;
-      this._encoding = "utf8";
-      this.writable = true;
-    };
-    util.inherits(ChunkStream, Stream);
-    ChunkStream.prototype.read = function(length, callback) {
-      this._reads.push({
-        length: Math.abs(length),
-        // if length < 0 then at most this length
-        allowLess: length < 0,
-        func: callback
-      });
-      process.nextTick(
-        function() {
-          this._process();
-          if (this._paused && this._reads && this._reads.length > 0) {
-            this._paused = false;
-            this.emit("drain");
-          }
-        }.bind(this)
-      );
-    };
-    ChunkStream.prototype.write = function(data, encoding) {
-      if (!this.writable) {
-        this.emit("error", new Error("Stream not writable"));
-        return false;
-      }
-      let dataBuffer;
-      if (Buffer.isBuffer(data)) {
-        dataBuffer = data;
-      } else {
-        dataBuffer = Buffer.from(data, encoding || this._encoding);
-      }
-      this._buffers.push(dataBuffer);
-      this._buffered += dataBuffer.length;
-      this._process();
-      if (this._reads && this._reads.length === 0) {
-        this._paused = true;
-      }
-      return this.writable && !this._paused;
-    };
-    ChunkStream.prototype.end = function(data, encoding) {
-      if (data) {
-        this.write(data, encoding);
-      }
-      this.writable = false;
-      if (!this._buffers) {
-        return;
-      }
-      if (this._buffers.length === 0) {
-        this._end();
-      } else {
-        this._buffers.push(null);
-        this._process();
-      }
-    };
-    ChunkStream.prototype.destroySoon = ChunkStream.prototype.end;
-    ChunkStream.prototype._end = function() {
-      if (this._reads.length > 0) {
-        this.emit("error", new Error("Unexpected end of input"));
-      }
-      this.destroy();
-    };
-    ChunkStream.prototype.destroy = function() {
-      if (!this._buffers) {
-        return;
-      }
-      this.writable = false;
-      this._reads = null;
-      this._buffers = null;
-      this.emit("close");
-    };
-    ChunkStream.prototype._processReadAllowingLess = function(read) {
-      this._reads.shift();
-      let smallerBuf = this._buffers[0];
-      if (smallerBuf.length > read.length) {
-        this._buffered -= read.length;
-        this._buffers[0] = smallerBuf.slice(read.length);
-        read.func.call(this, smallerBuf.slice(0, read.length));
-      } else {
-        this._buffered -= smallerBuf.length;
-        this._buffers.shift();
-        read.func.call(this, smallerBuf);
-      }
-    };
-    ChunkStream.prototype._processRead = function(read) {
-      this._reads.shift();
-      let pos = 0;
-      let count = 0;
-      let data = Buffer.alloc(read.length);
-      while (pos < read.length) {
-        let buf = this._buffers[count++];
-        let len = Math.min(buf.length, read.length - pos);
-        buf.copy(data, pos, 0, len);
-        pos += len;
-        if (len !== buf.length) {
-          this._buffers[--count] = buf.slice(len);
-        }
-      }
-      if (count > 0) {
-        this._buffers.splice(0, count);
-      }
-      this._buffered -= read.length;
-      read.func.call(this, data);
-    };
-    ChunkStream.prototype._process = function() {
-      try {
-        while (this._buffered > 0 && this._reads && this._reads.length > 0) {
-          let read = this._reads[0];
-          if (read.allowLess) {
-            this._processReadAllowingLess(read);
-          } else if (this._buffered >= read.length) {
-            this._processRead(read);
-          } else {
-            break;
-          }
-        }
-        if (this._buffers && !this.writable) {
-          this._end();
-        }
-      } catch (ex) {
-        this.emit("error", ex);
-      }
-    };
-  }
-});
-
-// node_modules/pngjs/lib/interlace.js
-var require_interlace = __commonJS({
-  "node_modules/pngjs/lib/interlace.js"(exports2) {
-    "use strict";
-    var imagePasses = [
-      {
-        // pass 1 - 1px
-        x: [0],
-        y: [0]
-      },
-      {
-        // pass 2 - 1px
-        x: [4],
-        y: [0]
-      },
-      {
-        // pass 3 - 2px
-        x: [0, 4],
-        y: [4]
-      },
-      {
-        // pass 4 - 4px
-        x: [2, 6],
-        y: [0, 4]
-      },
-      {
-        // pass 5 - 8px
-        x: [0, 2, 4, 6],
-        y: [2, 6]
-      },
-      {
-        // pass 6 - 16px
-        x: [1, 3, 5, 7],
-        y: [0, 2, 4, 6]
-      },
-      {
-        // pass 7 - 32px
-        x: [0, 1, 2, 3, 4, 5, 6, 7],
-        y: [1, 3, 5, 7]
-      }
-    ];
-    exports2.getImagePasses = function(width, height) {
-      let images = [];
-      let xLeftOver = width % 8;
-      let yLeftOver = height % 8;
-      let xRepeats = (width - xLeftOver) / 8;
-      let yRepeats = (height - yLeftOver) / 8;
-      for (let i = 0; i < imagePasses.length; i++) {
-        let pass = imagePasses[i];
-        let passWidth = xRepeats * pass.x.length;
-        let passHeight = yRepeats * pass.y.length;
-        for (let j = 0; j < pass.x.length; j++) {
-          if (pass.x[j] < xLeftOver) {
-            passWidth++;
-          } else {
-            break;
-          }
-        }
-        for (let j = 0; j < pass.y.length; j++) {
-          if (pass.y[j] < yLeftOver) {
-            passHeight++;
-          } else {
-            break;
-          }
-        }
-        if (passWidth > 0 && passHeight > 0) {
-          images.push({ width: passWidth, height: passHeight, index: i });
-        }
-      }
-      return images;
-    };
-    exports2.getInterlaceIterator = function(width) {
-      return function(x, y, pass) {
-        let outerXLeftOver = x % imagePasses[pass].x.length;
-        let outerX = (x - outerXLeftOver) / imagePasses[pass].x.length * 8 + imagePasses[pass].x[outerXLeftOver];
-        let outerYLeftOver = y % imagePasses[pass].y.length;
-        let outerY = (y - outerYLeftOver) / imagePasses[pass].y.length * 8 + imagePasses[pass].y[outerYLeftOver];
-        return outerX * 4 + outerY * width * 4;
-      };
-    };
-  }
-});
-
-// node_modules/pngjs/lib/paeth-predictor.js
-var require_paeth_predictor = __commonJS({
-  "node_modules/pngjs/lib/paeth-predictor.js"(exports2, module2) {
-    "use strict";
-    module2.exports = function paethPredictor(left, above, upLeft) {
-      let paeth = left + above - upLeft;
-      let pLeft = Math.abs(paeth - left);
-      let pAbove = Math.abs(paeth - above);
-      let pUpLeft = Math.abs(paeth - upLeft);
-      if (pLeft <= pAbove && pLeft <= pUpLeft) {
-        return left;
-      }
-      if (pAbove <= pUpLeft) {
-        return above;
-      }
-      return upLeft;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/filter-parse.js
-var require_filter_parse = __commonJS({
-  "node_modules/pngjs/lib/filter-parse.js"(exports2, module2) {
-    "use strict";
-    var interlaceUtils = require_interlace();
-    var paethPredictor = require_paeth_predictor();
-    function getByteWidth(width, bpp, depth) {
-      let byteWidth = width * bpp;
-      if (depth !== 8) {
-        byteWidth = Math.ceil(byteWidth / (8 / depth));
-      }
-      return byteWidth;
-    }
-    var Filter = module2.exports = function(bitmapInfo, dependencies) {
-      let width = bitmapInfo.width;
-      let height = bitmapInfo.height;
-      let interlace = bitmapInfo.interlace;
-      let bpp = bitmapInfo.bpp;
-      let depth = bitmapInfo.depth;
-      this.read = dependencies.read;
-      this.write = dependencies.write;
-      this.complete = dependencies.complete;
-      this._imageIndex = 0;
-      this._images = [];
-      if (interlace) {
-        let passes = interlaceUtils.getImagePasses(width, height);
-        for (let i = 0; i < passes.length; i++) {
-          this._images.push({
-            byteWidth: getByteWidth(passes[i].width, bpp, depth),
-            height: passes[i].height,
-            lineIndex: 0
-          });
-        }
-      } else {
-        this._images.push({
-          byteWidth: getByteWidth(width, bpp, depth),
-          height,
-          lineIndex: 0
-        });
-      }
-      if (depth === 8) {
-        this._xComparison = bpp;
-      } else if (depth === 16) {
-        this._xComparison = bpp * 2;
-      } else {
-        this._xComparison = 1;
-      }
-    };
-    Filter.prototype.start = function() {
-      this.read(
-        this._images[this._imageIndex].byteWidth + 1,
-        this._reverseFilterLine.bind(this)
-      );
-    };
-    Filter.prototype._unFilterType1 = function(rawData, unfilteredLine, byteWidth) {
-      let xComparison = this._xComparison;
-      let xBiggerThan = xComparison - 1;
-      for (let x = 0; x < byteWidth; x++) {
-        let rawByte = rawData[1 + x];
-        let f1Left = x > xBiggerThan ? unfilteredLine[x - xComparison] : 0;
-        unfilteredLine[x] = rawByte + f1Left;
-      }
-    };
-    Filter.prototype._unFilterType2 = function(rawData, unfilteredLine, byteWidth) {
-      let lastLine = this._lastLine;
-      for (let x = 0; x < byteWidth; x++) {
-        let rawByte = rawData[1 + x];
-        let f2Up = lastLine ? lastLine[x] : 0;
-        unfilteredLine[x] = rawByte + f2Up;
-      }
-    };
-    Filter.prototype._unFilterType3 = function(rawData, unfilteredLine, byteWidth) {
-      let xComparison = this._xComparison;
-      let xBiggerThan = xComparison - 1;
-      let lastLine = this._lastLine;
-      for (let x = 0; x < byteWidth; x++) {
-        let rawByte = rawData[1 + x];
-        let f3Up = lastLine ? lastLine[x] : 0;
-        let f3Left = x > xBiggerThan ? unfilteredLine[x - xComparison] : 0;
-        let f3Add = Math.floor((f3Left + f3Up) / 2);
-        unfilteredLine[x] = rawByte + f3Add;
-      }
-    };
-    Filter.prototype._unFilterType4 = function(rawData, unfilteredLine, byteWidth) {
-      let xComparison = this._xComparison;
-      let xBiggerThan = xComparison - 1;
-      let lastLine = this._lastLine;
-      for (let x = 0; x < byteWidth; x++) {
-        let rawByte = rawData[1 + x];
-        let f4Up = lastLine ? lastLine[x] : 0;
-        let f4Left = x > xBiggerThan ? unfilteredLine[x - xComparison] : 0;
-        let f4UpLeft = x > xBiggerThan && lastLine ? lastLine[x - xComparison] : 0;
-        let f4Add = paethPredictor(f4Left, f4Up, f4UpLeft);
-        unfilteredLine[x] = rawByte + f4Add;
-      }
-    };
-    Filter.prototype._reverseFilterLine = function(rawData) {
-      let filter = rawData[0];
-      let unfilteredLine;
-      let currentImage = this._images[this._imageIndex];
-      let byteWidth = currentImage.byteWidth;
-      if (filter === 0) {
-        unfilteredLine = rawData.slice(1, byteWidth + 1);
-      } else {
-        unfilteredLine = Buffer.alloc(byteWidth);
-        switch (filter) {
-          case 1:
-            this._unFilterType1(rawData, unfilteredLine, byteWidth);
-            break;
-          case 2:
-            this._unFilterType2(rawData, unfilteredLine, byteWidth);
-            break;
-          case 3:
-            this._unFilterType3(rawData, unfilteredLine, byteWidth);
-            break;
-          case 4:
-            this._unFilterType4(rawData, unfilteredLine, byteWidth);
-            break;
-          default:
-            throw new Error("Unrecognised filter type - " + filter);
-        }
-      }
-      this.write(unfilteredLine);
-      currentImage.lineIndex++;
-      if (currentImage.lineIndex >= currentImage.height) {
-        this._lastLine = null;
-        this._imageIndex++;
-        currentImage = this._images[this._imageIndex];
-      } else {
-        this._lastLine = unfilteredLine;
-      }
-      if (currentImage) {
-        this.read(currentImage.byteWidth + 1, this._reverseFilterLine.bind(this));
-      } else {
-        this._lastLine = null;
-        this.complete();
-      }
-    };
-  }
-});
-
-// node_modules/pngjs/lib/filter-parse-async.js
-var require_filter_parse_async = __commonJS({
-  "node_modules/pngjs/lib/filter-parse-async.js"(exports2, module2) {
-    "use strict";
-    var util = require("util");
-    var ChunkStream = require_chunkstream();
-    var Filter = require_filter_parse();
-    var FilterAsync = module2.exports = function(bitmapInfo) {
-      ChunkStream.call(this);
-      let buffers = [];
-      let that = this;
-      this._filter = new Filter(bitmapInfo, {
-        read: this.read.bind(this),
-        write: function(buffer) {
-          buffers.push(buffer);
-        },
-        complete: function() {
-          that.emit("complete", Buffer.concat(buffers));
-        }
-      });
-      this._filter.start();
-    };
-    util.inherits(FilterAsync, ChunkStream);
-  }
-});
-
-// node_modules/pngjs/lib/constants.js
-var require_constants = __commonJS({
-  "node_modules/pngjs/lib/constants.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      PNG_SIGNATURE: [137, 80, 78, 71, 13, 10, 26, 10],
-      TYPE_IHDR: 1229472850,
-      TYPE_IEND: 1229278788,
-      TYPE_IDAT: 1229209940,
-      TYPE_PLTE: 1347179589,
-      TYPE_tRNS: 1951551059,
-      // eslint-disable-line camelcase
-      TYPE_gAMA: 1732332865,
-      // eslint-disable-line camelcase
-      // color-type bits
-      COLORTYPE_GRAYSCALE: 0,
-      COLORTYPE_PALETTE: 1,
-      COLORTYPE_COLOR: 2,
-      COLORTYPE_ALPHA: 4,
-      // e.g. grayscale and alpha
-      // color-type combinations
-      COLORTYPE_PALETTE_COLOR: 3,
-      COLORTYPE_COLOR_ALPHA: 6,
-      COLORTYPE_TO_BPP_MAP: {
-        0: 1,
-        2: 3,
-        3: 1,
-        4: 2,
-        6: 4
-      },
-      GAMMA_DIVISION: 1e5
-    };
-  }
-});
-
-// node_modules/pngjs/lib/crc.js
-var require_crc = __commonJS({
-  "node_modules/pngjs/lib/crc.js"(exports2, module2) {
-    "use strict";
-    var crcTable = [];
-    (function() {
-      for (let i = 0; i < 256; i++) {
-        let currentCrc = i;
-        for (let j = 0; j < 8; j++) {
-          if (currentCrc & 1) {
-            currentCrc = 3988292384 ^ currentCrc >>> 1;
-          } else {
-            currentCrc = currentCrc >>> 1;
-          }
-        }
-        crcTable[i] = currentCrc;
-      }
-    })();
-    var CrcCalculator = module2.exports = function() {
-      this._crc = -1;
-    };
-    CrcCalculator.prototype.write = function(data) {
-      for (let i = 0; i < data.length; i++) {
-        this._crc = crcTable[(this._crc ^ data[i]) & 255] ^ this._crc >>> 8;
-      }
-      return true;
-    };
-    CrcCalculator.prototype.crc32 = function() {
-      return this._crc ^ -1;
-    };
-    CrcCalculator.crc32 = function(buf) {
-      let crc = -1;
-      for (let i = 0; i < buf.length; i++) {
-        crc = crcTable[(crc ^ buf[i]) & 255] ^ crc >>> 8;
-      }
-      return crc ^ -1;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/parser.js
-var require_parser = __commonJS({
-  "node_modules/pngjs/lib/parser.js"(exports2, module2) {
-    "use strict";
-    var constants = require_constants();
-    var CrcCalculator = require_crc();
-    var Parser = module2.exports = function(options, dependencies) {
-      this._options = options;
-      options.checkCRC = options.checkCRC !== false;
-      this._hasIHDR = false;
-      this._hasIEND = false;
-      this._emittedHeadersFinished = false;
-      this._palette = [];
-      this._colorType = 0;
-      this._chunks = {};
-      this._chunks[constants.TYPE_IHDR] = this._handleIHDR.bind(this);
-      this._chunks[constants.TYPE_IEND] = this._handleIEND.bind(this);
-      this._chunks[constants.TYPE_IDAT] = this._handleIDAT.bind(this);
-      this._chunks[constants.TYPE_PLTE] = this._handlePLTE.bind(this);
-      this._chunks[constants.TYPE_tRNS] = this._handleTRNS.bind(this);
-      this._chunks[constants.TYPE_gAMA] = this._handleGAMA.bind(this);
-      this.read = dependencies.read;
-      this.error = dependencies.error;
-      this.metadata = dependencies.metadata;
-      this.gamma = dependencies.gamma;
-      this.transColor = dependencies.transColor;
-      this.palette = dependencies.palette;
-      this.parsed = dependencies.parsed;
-      this.inflateData = dependencies.inflateData;
-      this.finished = dependencies.finished;
-      this.simpleTransparency = dependencies.simpleTransparency;
-      this.headersFinished = dependencies.headersFinished || function() {
-      };
-    };
-    Parser.prototype.start = function() {
-      this.read(constants.PNG_SIGNATURE.length, this._parseSignature.bind(this));
-    };
-    Parser.prototype._parseSignature = function(data) {
-      let signature = constants.PNG_SIGNATURE;
-      for (let i = 0; i < signature.length; i++) {
-        if (data[i] !== signature[i]) {
-          this.error(new Error("Invalid file signature"));
-          return;
-        }
-      }
-      this.read(8, this._parseChunkBegin.bind(this));
-    };
-    Parser.prototype._parseChunkBegin = function(data) {
-      let length = data.readUInt32BE(0);
-      let type = data.readUInt32BE(4);
-      let name = "";
-      for (let i = 4; i < 8; i++) {
-        name += String.fromCharCode(data[i]);
-      }
-      let ancillary = Boolean(data[4] & 32);
-      if (!this._hasIHDR && type !== constants.TYPE_IHDR) {
-        this.error(new Error("Expected IHDR on beggining"));
-        return;
-      }
-      this._crc = new CrcCalculator();
-      this._crc.write(Buffer.from(name));
-      if (this._chunks[type]) {
-        return this._chunks[type](length);
-      }
-      if (!ancillary) {
-        this.error(new Error("Unsupported critical chunk type " + name));
-        return;
-      }
-      this.read(length + 4, this._skipChunk.bind(this));
-    };
-    Parser.prototype._skipChunk = function() {
-      this.read(8, this._parseChunkBegin.bind(this));
-    };
-    Parser.prototype._handleChunkEnd = function() {
-      this.read(4, this._parseChunkEnd.bind(this));
-    };
-    Parser.prototype._parseChunkEnd = function(data) {
-      let fileCrc = data.readInt32BE(0);
-      let calcCrc = this._crc.crc32();
-      if (this._options.checkCRC && calcCrc !== fileCrc) {
-        this.error(new Error("Crc error - " + fileCrc + " - " + calcCrc));
-        return;
-      }
-      if (!this._hasIEND) {
-        this.read(8, this._parseChunkBegin.bind(this));
-      }
-    };
-    Parser.prototype._handleIHDR = function(length) {
-      this.read(length, this._parseIHDR.bind(this));
-    };
-    Parser.prototype._parseIHDR = function(data) {
-      this._crc.write(data);
-      let width = data.readUInt32BE(0);
-      let height = data.readUInt32BE(4);
-      let depth = data[8];
-      let colorType = data[9];
-      let compr = data[10];
-      let filter = data[11];
-      let interlace = data[12];
-      if (depth !== 8 && depth !== 4 && depth !== 2 && depth !== 1 && depth !== 16) {
-        this.error(new Error("Unsupported bit depth " + depth));
-        return;
-      }
-      if (!(colorType in constants.COLORTYPE_TO_BPP_MAP)) {
-        this.error(new Error("Unsupported color type"));
-        return;
-      }
-      if (compr !== 0) {
-        this.error(new Error("Unsupported compression method"));
-        return;
-      }
-      if (filter !== 0) {
-        this.error(new Error("Unsupported filter method"));
-        return;
-      }
-      if (interlace !== 0 && interlace !== 1) {
-        this.error(new Error("Unsupported interlace method"));
-        return;
-      }
-      this._colorType = colorType;
-      let bpp = constants.COLORTYPE_TO_BPP_MAP[this._colorType];
-      this._hasIHDR = true;
-      this.metadata({
-        width,
-        height,
-        depth,
-        interlace: Boolean(interlace),
-        palette: Boolean(colorType & constants.COLORTYPE_PALETTE),
-        color: Boolean(colorType & constants.COLORTYPE_COLOR),
-        alpha: Boolean(colorType & constants.COLORTYPE_ALPHA),
-        bpp,
-        colorType
-      });
-      this._handleChunkEnd();
-    };
-    Parser.prototype._handlePLTE = function(length) {
-      this.read(length, this._parsePLTE.bind(this));
-    };
-    Parser.prototype._parsePLTE = function(data) {
-      this._crc.write(data);
-      let entries = Math.floor(data.length / 3);
-      for (let i = 0; i < entries; i++) {
-        this._palette.push([data[i * 3], data[i * 3 + 1], data[i * 3 + 2], 255]);
-      }
-      this.palette(this._palette);
-      this._handleChunkEnd();
-    };
-    Parser.prototype._handleTRNS = function(length) {
-      this.simpleTransparency();
-      this.read(length, this._parseTRNS.bind(this));
-    };
-    Parser.prototype._parseTRNS = function(data) {
-      this._crc.write(data);
-      if (this._colorType === constants.COLORTYPE_PALETTE_COLOR) {
-        if (this._palette.length === 0) {
-          this.error(new Error("Transparency chunk must be after palette"));
-          return;
-        }
-        if (data.length > this._palette.length) {
-          this.error(new Error("More transparent colors than palette size"));
-          return;
-        }
-        for (let i = 0; i < data.length; i++) {
-          this._palette[i][3] = data[i];
-        }
-        this.palette(this._palette);
-      }
-      if (this._colorType === constants.COLORTYPE_GRAYSCALE) {
-        this.transColor([data.readUInt16BE(0)]);
-      }
-      if (this._colorType === constants.COLORTYPE_COLOR) {
-        this.transColor([
-          data.readUInt16BE(0),
-          data.readUInt16BE(2),
-          data.readUInt16BE(4)
-        ]);
-      }
-      this._handleChunkEnd();
-    };
-    Parser.prototype._handleGAMA = function(length) {
-      this.read(length, this._parseGAMA.bind(this));
-    };
-    Parser.prototype._parseGAMA = function(data) {
-      this._crc.write(data);
-      this.gamma(data.readUInt32BE(0) / constants.GAMMA_DIVISION);
-      this._handleChunkEnd();
-    };
-    Parser.prototype._handleIDAT = function(length) {
-      if (!this._emittedHeadersFinished) {
-        this._emittedHeadersFinished = true;
-        this.headersFinished();
-      }
-      this.read(-length, this._parseIDAT.bind(this, length));
-    };
-    Parser.prototype._parseIDAT = function(length, data) {
-      this._crc.write(data);
-      if (this._colorType === constants.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
-        throw new Error("Expected palette not found");
-      }
-      this.inflateData(data);
-      let leftOverLength = length - data.length;
-      if (leftOverLength > 0) {
-        this._handleIDAT(leftOverLength);
-      } else {
-        this._handleChunkEnd();
-      }
-    };
-    Parser.prototype._handleIEND = function(length) {
-      this.read(length, this._parseIEND.bind(this));
-    };
-    Parser.prototype._parseIEND = function(data) {
-      this._crc.write(data);
-      this._hasIEND = true;
-      this._handleChunkEnd();
-      if (this.finished) {
-        this.finished();
-      }
-    };
-  }
-});
-
-// node_modules/pngjs/lib/bitmapper.js
-var require_bitmapper = __commonJS({
-  "node_modules/pngjs/lib/bitmapper.js"(exports2) {
-    "use strict";
-    var interlaceUtils = require_interlace();
-    var pixelBppMapper = [
-      // 0 - dummy entry
-      function() {
-      },
-      // 1 - L
-      // 0: 0, 1: 0, 2: 0, 3: 0xff
-      function(pxData, data, pxPos, rawPos) {
-        if (rawPos === data.length) {
-          throw new Error("Ran out of data");
-        }
-        let pixel = data[rawPos];
-        pxData[pxPos] = pixel;
-        pxData[pxPos + 1] = pixel;
-        pxData[pxPos + 2] = pixel;
-        pxData[pxPos + 3] = 255;
-      },
-      // 2 - LA
-      // 0: 0, 1: 0, 2: 0, 3: 1
-      function(pxData, data, pxPos, rawPos) {
-        if (rawPos + 1 >= data.length) {
-          throw new Error("Ran out of data");
-        }
-        let pixel = data[rawPos];
-        pxData[pxPos] = pixel;
-        pxData[pxPos + 1] = pixel;
-        pxData[pxPos + 2] = pixel;
-        pxData[pxPos + 3] = data[rawPos + 1];
-      },
-      // 3 - RGB
-      // 0: 0, 1: 1, 2: 2, 3: 0xff
-      function(pxData, data, pxPos, rawPos) {
-        if (rawPos + 2 >= data.length) {
-          throw new Error("Ran out of data");
-        }
-        pxData[pxPos] = data[rawPos];
-        pxData[pxPos + 1] = data[rawPos + 1];
-        pxData[pxPos + 2] = data[rawPos + 2];
-        pxData[pxPos + 3] = 255;
-      },
-      // 4 - RGBA
-      // 0: 0, 1: 1, 2: 2, 3: 3
-      function(pxData, data, pxPos, rawPos) {
-        if (rawPos + 3 >= data.length) {
-          throw new Error("Ran out of data");
-        }
-        pxData[pxPos] = data[rawPos];
-        pxData[pxPos + 1] = data[rawPos + 1];
-        pxData[pxPos + 2] = data[rawPos + 2];
-        pxData[pxPos + 3] = data[rawPos + 3];
-      }
-    ];
-    var pixelBppCustomMapper = [
-      // 0 - dummy entry
-      function() {
-      },
-      // 1 - L
-      // 0: 0, 1: 0, 2: 0, 3: 0xff
-      function(pxData, pixelData, pxPos, maxBit) {
-        let pixel = pixelData[0];
-        pxData[pxPos] = pixel;
-        pxData[pxPos + 1] = pixel;
-        pxData[pxPos + 2] = pixel;
-        pxData[pxPos + 3] = maxBit;
-      },
-      // 2 - LA
-      // 0: 0, 1: 0, 2: 0, 3: 1
-      function(pxData, pixelData, pxPos) {
-        let pixel = pixelData[0];
-        pxData[pxPos] = pixel;
-        pxData[pxPos + 1] = pixel;
-        pxData[pxPos + 2] = pixel;
-        pxData[pxPos + 3] = pixelData[1];
-      },
-      // 3 - RGB
-      // 0: 0, 1: 1, 2: 2, 3: 0xff
-      function(pxData, pixelData, pxPos, maxBit) {
-        pxData[pxPos] = pixelData[0];
-        pxData[pxPos + 1] = pixelData[1];
-        pxData[pxPos + 2] = pixelData[2];
-        pxData[pxPos + 3] = maxBit;
-      },
-      // 4 - RGBA
-      // 0: 0, 1: 1, 2: 2, 3: 3
-      function(pxData, pixelData, pxPos) {
-        pxData[pxPos] = pixelData[0];
-        pxData[pxPos + 1] = pixelData[1];
-        pxData[pxPos + 2] = pixelData[2];
-        pxData[pxPos + 3] = pixelData[3];
-      }
-    ];
-    function bitRetriever(data, depth) {
-      let leftOver = [];
-      let i = 0;
-      function split() {
-        if (i === data.length) {
-          throw new Error("Ran out of data");
-        }
-        let byte = data[i];
-        i++;
-        let byte8, byte7, byte6, byte5, byte4, byte3, byte2, byte1;
-        switch (depth) {
-          default:
-            throw new Error("unrecognised depth");
-          case 16:
-            byte2 = data[i];
-            i++;
-            leftOver.push((byte << 8) + byte2);
-            break;
-          case 4:
-            byte2 = byte & 15;
-            byte1 = byte >> 4;
-            leftOver.push(byte1, byte2);
-            break;
-          case 2:
-            byte4 = byte & 3;
-            byte3 = byte >> 2 & 3;
-            byte2 = byte >> 4 & 3;
-            byte1 = byte >> 6 & 3;
-            leftOver.push(byte1, byte2, byte3, byte4);
-            break;
-          case 1:
-            byte8 = byte & 1;
-            byte7 = byte >> 1 & 1;
-            byte6 = byte >> 2 & 1;
-            byte5 = byte >> 3 & 1;
-            byte4 = byte >> 4 & 1;
-            byte3 = byte >> 5 & 1;
-            byte2 = byte >> 6 & 1;
-            byte1 = byte >> 7 & 1;
-            leftOver.push(byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8);
-            break;
-        }
-      }
-      return {
-        get: function(count) {
-          while (leftOver.length < count) {
-            split();
-          }
-          let returner = leftOver.slice(0, count);
-          leftOver = leftOver.slice(count);
-          return returner;
-        },
-        resetAfterLine: function() {
-          leftOver.length = 0;
-        },
-        end: function() {
-          if (i !== data.length) {
-            throw new Error("extra data found");
-          }
-        }
-      };
-    }
-    function mapImage8Bit(image, pxData, getPxPos, bpp, data, rawPos) {
-      let imageWidth = image.width;
-      let imageHeight = image.height;
-      let imagePass = image.index;
-      for (let y = 0; y < imageHeight; y++) {
-        for (let x = 0; x < imageWidth; x++) {
-          let pxPos = getPxPos(x, y, imagePass);
-          pixelBppMapper[bpp](pxData, data, pxPos, rawPos);
-          rawPos += bpp;
-        }
-      }
-      return rawPos;
-    }
-    function mapImageCustomBit(image, pxData, getPxPos, bpp, bits, maxBit) {
-      let imageWidth = image.width;
-      let imageHeight = image.height;
-      let imagePass = image.index;
-      for (let y = 0; y < imageHeight; y++) {
-        for (let x = 0; x < imageWidth; x++) {
-          let pixelData = bits.get(bpp);
-          let pxPos = getPxPos(x, y, imagePass);
-          pixelBppCustomMapper[bpp](pxData, pixelData, pxPos, maxBit);
-        }
-        bits.resetAfterLine();
-      }
-    }
-    exports2.dataToBitMap = function(data, bitmapInfo) {
-      let width = bitmapInfo.width;
-      let height = bitmapInfo.height;
-      let depth = bitmapInfo.depth;
-      let bpp = bitmapInfo.bpp;
-      let interlace = bitmapInfo.interlace;
-      let bits;
-      if (depth !== 8) {
-        bits = bitRetriever(data, depth);
-      }
-      let pxData;
-      if (depth <= 8) {
-        pxData = Buffer.alloc(width * height * 4);
-      } else {
-        pxData = new Uint16Array(width * height * 4);
-      }
-      let maxBit = Math.pow(2, depth) - 1;
-      let rawPos = 0;
-      let images;
-      let getPxPos;
-      if (interlace) {
-        images = interlaceUtils.getImagePasses(width, height);
-        getPxPos = interlaceUtils.getInterlaceIterator(width, height);
-      } else {
-        let nonInterlacedPxPos = 0;
-        getPxPos = function() {
-          let returner = nonInterlacedPxPos;
-          nonInterlacedPxPos += 4;
-          return returner;
-        };
-        images = [{ width, height }];
-      }
-      for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
-        if (depth === 8) {
-          rawPos = mapImage8Bit(
-            images[imageIndex],
-            pxData,
-            getPxPos,
-            bpp,
-            data,
-            rawPos
-          );
-        } else {
-          mapImageCustomBit(
-            images[imageIndex],
-            pxData,
-            getPxPos,
-            bpp,
-            bits,
-            maxBit
-          );
-        }
-      }
-      if (depth === 8) {
-        if (rawPos !== data.length) {
-          throw new Error("extra data found");
-        }
-      } else {
-        bits.end();
-      }
-      return pxData;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/format-normaliser.js
-var require_format_normaliser = __commonJS({
-  "node_modules/pngjs/lib/format-normaliser.js"(exports2, module2) {
-    "use strict";
-    function dePalette(indata, outdata, width, height, palette) {
-      let pxPos = 0;
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          let color = palette[indata[pxPos]];
-          if (!color) {
-            throw new Error("index " + indata[pxPos] + " not in palette");
-          }
-          for (let i = 0; i < 4; i++) {
-            outdata[pxPos + i] = color[i];
-          }
-          pxPos += 4;
-        }
-      }
-    }
-    function replaceTransparentColor(indata, outdata, width, height, transColor) {
-      let pxPos = 0;
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          let makeTrans = false;
-          if (transColor.length === 1) {
-            if (transColor[0] === indata[pxPos]) {
-              makeTrans = true;
-            }
-          } else if (transColor[0] === indata[pxPos] && transColor[1] === indata[pxPos + 1] && transColor[2] === indata[pxPos + 2]) {
-            makeTrans = true;
-          }
-          if (makeTrans) {
-            for (let i = 0; i < 4; i++) {
-              outdata[pxPos + i] = 0;
-            }
-          }
-          pxPos += 4;
-        }
-      }
-    }
-    function scaleDepth(indata, outdata, width, height, depth) {
-      let maxOutSample = 255;
-      let maxInSample = Math.pow(2, depth) - 1;
-      let pxPos = 0;
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          for (let i = 0; i < 4; i++) {
-            outdata[pxPos + i] = Math.floor(
-              indata[pxPos + i] * maxOutSample / maxInSample + 0.5
-            );
-          }
-          pxPos += 4;
-        }
-      }
-    }
-    module2.exports = function(indata, imageData) {
-      let depth = imageData.depth;
-      let width = imageData.width;
-      let height = imageData.height;
-      let colorType = imageData.colorType;
-      let transColor = imageData.transColor;
-      let palette = imageData.palette;
-      let outdata = indata;
-      if (colorType === 3) {
-        dePalette(indata, outdata, width, height, palette);
-      } else {
-        if (transColor) {
-          replaceTransparentColor(indata, outdata, width, height, transColor);
-        }
-        if (depth !== 8) {
-          if (depth === 16) {
-            outdata = Buffer.alloc(width * height * 4);
-          }
-          scaleDepth(indata, outdata, width, height, depth);
-        }
-      }
-      return outdata;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/parser-async.js
-var require_parser_async = __commonJS({
-  "node_modules/pngjs/lib/parser-async.js"(exports2, module2) {
-    "use strict";
-    var util = require("util");
-    var zlib = require("zlib");
-    var ChunkStream = require_chunkstream();
-    var FilterAsync = require_filter_parse_async();
-    var Parser = require_parser();
-    var bitmapper = require_bitmapper();
-    var formatNormaliser = require_format_normaliser();
-    var ParserAsync = module2.exports = function(options) {
-      ChunkStream.call(this);
-      this._parser = new Parser(options, {
-        read: this.read.bind(this),
-        error: this._handleError.bind(this),
-        metadata: this._handleMetaData.bind(this),
-        gamma: this.emit.bind(this, "gamma"),
-        palette: this._handlePalette.bind(this),
-        transColor: this._handleTransColor.bind(this),
-        finished: this._finished.bind(this),
-        inflateData: this._inflateData.bind(this),
-        simpleTransparency: this._simpleTransparency.bind(this),
-        headersFinished: this._headersFinished.bind(this)
-      });
-      this._options = options;
-      this.writable = true;
-      this._parser.start();
-    };
-    util.inherits(ParserAsync, ChunkStream);
-    ParserAsync.prototype._handleError = function(err) {
-      this.emit("error", err);
-      this.writable = false;
-      this.destroy();
-      if (this._inflate && this._inflate.destroy) {
-        this._inflate.destroy();
-      }
-      if (this._filter) {
-        this._filter.destroy();
-        this._filter.on("error", function() {
-        });
-      }
-      this.errord = true;
-    };
-    ParserAsync.prototype._inflateData = function(data) {
-      if (!this._inflate) {
-        if (this._bitmapInfo.interlace) {
-          this._inflate = zlib.createInflate();
-          this._inflate.on("error", this.emit.bind(this, "error"));
-          this._filter.on("complete", this._complete.bind(this));
-          this._inflate.pipe(this._filter);
-        } else {
-          let rowSize = (this._bitmapInfo.width * this._bitmapInfo.bpp * this._bitmapInfo.depth + 7 >> 3) + 1;
-          let imageSize = rowSize * this._bitmapInfo.height;
-          let chunkSize = Math.max(imageSize, zlib.Z_MIN_CHUNK);
-          this._inflate = zlib.createInflate({ chunkSize });
-          let leftToInflate = imageSize;
-          let emitError = this.emit.bind(this, "error");
-          this._inflate.on("error", function(err) {
-            if (!leftToInflate) {
-              return;
-            }
-            emitError(err);
-          });
-          this._filter.on("complete", this._complete.bind(this));
-          let filterWrite = this._filter.write.bind(this._filter);
-          this._inflate.on("data", function(chunk) {
-            if (!leftToInflate) {
-              return;
-            }
-            if (chunk.length > leftToInflate) {
-              chunk = chunk.slice(0, leftToInflate);
-            }
-            leftToInflate -= chunk.length;
-            filterWrite(chunk);
-          });
-          this._inflate.on("end", this._filter.end.bind(this._filter));
-        }
-      }
-      this._inflate.write(data);
-    };
-    ParserAsync.prototype._handleMetaData = function(metaData) {
-      this._metaData = metaData;
-      this._bitmapInfo = Object.create(metaData);
-      this._filter = new FilterAsync(this._bitmapInfo);
-    };
-    ParserAsync.prototype._handleTransColor = function(transColor) {
-      this._bitmapInfo.transColor = transColor;
-    };
-    ParserAsync.prototype._handlePalette = function(palette) {
-      this._bitmapInfo.palette = palette;
-    };
-    ParserAsync.prototype._simpleTransparency = function() {
-      this._metaData.alpha = true;
-    };
-    ParserAsync.prototype._headersFinished = function() {
-      this.emit("metadata", this._metaData);
-    };
-    ParserAsync.prototype._finished = function() {
-      if (this.errord) {
-        return;
-      }
-      if (!this._inflate) {
-        this.emit("error", "No Inflate block");
-      } else {
-        this._inflate.end();
-      }
-    };
-    ParserAsync.prototype._complete = function(filteredData) {
-      if (this.errord) {
-        return;
-      }
-      let normalisedBitmapData;
-      try {
-        let bitmapData = bitmapper.dataToBitMap(filteredData, this._bitmapInfo);
-        normalisedBitmapData = formatNormaliser(bitmapData, this._bitmapInfo);
-        bitmapData = null;
-      } catch (ex) {
-        this._handleError(ex);
-        return;
-      }
-      this.emit("parsed", normalisedBitmapData);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/bitpacker.js
-var require_bitpacker = __commonJS({
-  "node_modules/pngjs/lib/bitpacker.js"(exports2, module2) {
-    "use strict";
-    var constants = require_constants();
-    module2.exports = function(dataIn, width, height, options) {
-      let outHasAlpha = [constants.COLORTYPE_COLOR_ALPHA, constants.COLORTYPE_ALPHA].indexOf(
-        options.colorType
-      ) !== -1;
-      if (options.colorType === options.inputColorType) {
-        let bigEndian = function() {
-          let buffer = new ArrayBuffer(2);
-          new DataView(buffer).setInt16(
-            0,
-            256,
-            true
-            /* littleEndian */
-          );
-          return new Int16Array(buffer)[0] !== 256;
-        }();
-        if (options.bitDepth === 8 || options.bitDepth === 16 && bigEndian) {
-          return dataIn;
-        }
-      }
-      let data = options.bitDepth !== 16 ? dataIn : new Uint16Array(dataIn.buffer);
-      let maxValue = 255;
-      let inBpp = constants.COLORTYPE_TO_BPP_MAP[options.inputColorType];
-      if (inBpp === 4 && !options.inputHasAlpha) {
-        inBpp = 3;
-      }
-      let outBpp = constants.COLORTYPE_TO_BPP_MAP[options.colorType];
-      if (options.bitDepth === 16) {
-        maxValue = 65535;
-        outBpp *= 2;
-      }
-      let outData = Buffer.alloc(width * height * outBpp);
-      let inIndex = 0;
-      let outIndex = 0;
-      let bgColor = options.bgColor || {};
-      if (bgColor.red === void 0) {
-        bgColor.red = maxValue;
-      }
-      if (bgColor.green === void 0) {
-        bgColor.green = maxValue;
-      }
-      if (bgColor.blue === void 0) {
-        bgColor.blue = maxValue;
-      }
-      function getRGBA() {
-        let red;
-        let green;
-        let blue;
-        let alpha = maxValue;
-        switch (options.inputColorType) {
-          case constants.COLORTYPE_COLOR_ALPHA:
-            alpha = data[inIndex + 3];
-            red = data[inIndex];
-            green = data[inIndex + 1];
-            blue = data[inIndex + 2];
-            break;
-          case constants.COLORTYPE_COLOR:
-            red = data[inIndex];
-            green = data[inIndex + 1];
-            blue = data[inIndex + 2];
-            break;
-          case constants.COLORTYPE_ALPHA:
-            alpha = data[inIndex + 1];
-            red = data[inIndex];
-            green = red;
-            blue = red;
-            break;
-          case constants.COLORTYPE_GRAYSCALE:
-            red = data[inIndex];
-            green = red;
-            blue = red;
-            break;
-          default:
-            throw new Error(
-              "input color type:" + options.inputColorType + " is not supported at present"
-            );
-        }
-        if (options.inputHasAlpha) {
-          if (!outHasAlpha) {
-            alpha /= maxValue;
-            red = Math.min(
-              Math.max(Math.round((1 - alpha) * bgColor.red + alpha * red), 0),
-              maxValue
-            );
-            green = Math.min(
-              Math.max(Math.round((1 - alpha) * bgColor.green + alpha * green), 0),
-              maxValue
-            );
-            blue = Math.min(
-              Math.max(Math.round((1 - alpha) * bgColor.blue + alpha * blue), 0),
-              maxValue
-            );
-          }
-        }
-        return { red, green, blue, alpha };
-      }
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          let rgba = getRGBA(data, inIndex);
-          switch (options.colorType) {
-            case constants.COLORTYPE_COLOR_ALPHA:
-            case constants.COLORTYPE_COLOR:
-              if (options.bitDepth === 8) {
-                outData[outIndex] = rgba.red;
-                outData[outIndex + 1] = rgba.green;
-                outData[outIndex + 2] = rgba.blue;
-                if (outHasAlpha) {
-                  outData[outIndex + 3] = rgba.alpha;
-                }
-              } else {
-                outData.writeUInt16BE(rgba.red, outIndex);
-                outData.writeUInt16BE(rgba.green, outIndex + 2);
-                outData.writeUInt16BE(rgba.blue, outIndex + 4);
-                if (outHasAlpha) {
-                  outData.writeUInt16BE(rgba.alpha, outIndex + 6);
-                }
-              }
-              break;
-            case constants.COLORTYPE_ALPHA:
-            case constants.COLORTYPE_GRAYSCALE: {
-              let grayscale = (rgba.red + rgba.green + rgba.blue) / 3;
-              if (options.bitDepth === 8) {
-                outData[outIndex] = grayscale;
-                if (outHasAlpha) {
-                  outData[outIndex + 1] = rgba.alpha;
-                }
-              } else {
-                outData.writeUInt16BE(grayscale, outIndex);
-                if (outHasAlpha) {
-                  outData.writeUInt16BE(rgba.alpha, outIndex + 2);
-                }
-              }
-              break;
-            }
-            default:
-              throw new Error("unrecognised color Type " + options.colorType);
-          }
-          inIndex += inBpp;
-          outIndex += outBpp;
-        }
-      }
-      return outData;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/filter-pack.js
-var require_filter_pack = __commonJS({
-  "node_modules/pngjs/lib/filter-pack.js"(exports2, module2) {
-    "use strict";
-    var paethPredictor = require_paeth_predictor();
-    function filterNone(pxData, pxPos, byteWidth, rawData, rawPos) {
-      for (let x = 0; x < byteWidth; x++) {
-        rawData[rawPos + x] = pxData[pxPos + x];
-      }
-    }
-    function filterSumNone(pxData, pxPos, byteWidth) {
-      let sum = 0;
-      let length = pxPos + byteWidth;
-      for (let i = pxPos; i < length; i++) {
-        sum += Math.abs(pxData[i]);
-      }
-      return sum;
-    }
-    function filterSub(pxData, pxPos, byteWidth, rawData, rawPos, bpp) {
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let val = pxData[pxPos + x] - left;
-        rawData[rawPos + x] = val;
-      }
-    }
-    function filterSumSub(pxData, pxPos, byteWidth, bpp) {
-      let sum = 0;
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let val = pxData[pxPos + x] - left;
-        sum += Math.abs(val);
-      }
-      return sum;
-    }
-    function filterUp(pxData, pxPos, byteWidth, rawData, rawPos) {
-      for (let x = 0; x < byteWidth; x++) {
-        let up = pxPos > 0 ? pxData[pxPos + x - byteWidth] : 0;
-        let val = pxData[pxPos + x] - up;
-        rawData[rawPos + x] = val;
-      }
-    }
-    function filterSumUp(pxData, pxPos, byteWidth) {
-      let sum = 0;
-      let length = pxPos + byteWidth;
-      for (let x = pxPos; x < length; x++) {
-        let up = pxPos > 0 ? pxData[x - byteWidth] : 0;
-        let val = pxData[x] - up;
-        sum += Math.abs(val);
-      }
-      return sum;
-    }
-    function filterAvg(pxData, pxPos, byteWidth, rawData, rawPos, bpp) {
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let up = pxPos > 0 ? pxData[pxPos + x - byteWidth] : 0;
-        let val = pxData[pxPos + x] - (left + up >> 1);
-        rawData[rawPos + x] = val;
-      }
-    }
-    function filterSumAvg(pxData, pxPos, byteWidth, bpp) {
-      let sum = 0;
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let up = pxPos > 0 ? pxData[pxPos + x - byteWidth] : 0;
-        let val = pxData[pxPos + x] - (left + up >> 1);
-        sum += Math.abs(val);
-      }
-      return sum;
-    }
-    function filterPaeth(pxData, pxPos, byteWidth, rawData, rawPos, bpp) {
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let up = pxPos > 0 ? pxData[pxPos + x - byteWidth] : 0;
-        let upleft = pxPos > 0 && x >= bpp ? pxData[pxPos + x - (byteWidth + bpp)] : 0;
-        let val = pxData[pxPos + x] - paethPredictor(left, up, upleft);
-        rawData[rawPos + x] = val;
-      }
-    }
-    function filterSumPaeth(pxData, pxPos, byteWidth, bpp) {
-      let sum = 0;
-      for (let x = 0; x < byteWidth; x++) {
-        let left = x >= bpp ? pxData[pxPos + x - bpp] : 0;
-        let up = pxPos > 0 ? pxData[pxPos + x - byteWidth] : 0;
-        let upleft = pxPos > 0 && x >= bpp ? pxData[pxPos + x - (byteWidth + bpp)] : 0;
-        let val = pxData[pxPos + x] - paethPredictor(left, up, upleft);
-        sum += Math.abs(val);
-      }
-      return sum;
-    }
-    var filters = {
-      0: filterNone,
-      1: filterSub,
-      2: filterUp,
-      3: filterAvg,
-      4: filterPaeth
-    };
-    var filterSums = {
-      0: filterSumNone,
-      1: filterSumSub,
-      2: filterSumUp,
-      3: filterSumAvg,
-      4: filterSumPaeth
-    };
-    module2.exports = function(pxData, width, height, options, bpp) {
-      let filterTypes;
-      if (!("filterType" in options) || options.filterType === -1) {
-        filterTypes = [0, 1, 2, 3, 4];
-      } else if (typeof options.filterType === "number") {
-        filterTypes = [options.filterType];
-      } else {
-        throw new Error("unrecognised filter types");
-      }
-      if (options.bitDepth === 16) {
-        bpp *= 2;
-      }
-      let byteWidth = width * bpp;
-      let rawPos = 0;
-      let pxPos = 0;
-      let rawData = Buffer.alloc((byteWidth + 1) * height);
-      let sel = filterTypes[0];
-      for (let y = 0; y < height; y++) {
-        if (filterTypes.length > 1) {
-          let min = Infinity;
-          for (let i = 0; i < filterTypes.length; i++) {
-            let sum = filterSums[filterTypes[i]](pxData, pxPos, byteWidth, bpp);
-            if (sum < min) {
-              sel = filterTypes[i];
-              min = sum;
-            }
-          }
-        }
-        rawData[rawPos] = sel;
-        rawPos++;
-        filters[sel](pxData, pxPos, byteWidth, rawData, rawPos, bpp);
-        rawPos += byteWidth;
-        pxPos += byteWidth;
-      }
-      return rawData;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/packer.js
-var require_packer = __commonJS({
-  "node_modules/pngjs/lib/packer.js"(exports2, module2) {
-    "use strict";
-    var constants = require_constants();
-    var CrcStream = require_crc();
-    var bitPacker = require_bitpacker();
-    var filter = require_filter_pack();
-    var zlib = require("zlib");
-    var Packer = module2.exports = function(options) {
-      this._options = options;
-      options.deflateChunkSize = options.deflateChunkSize || 32 * 1024;
-      options.deflateLevel = options.deflateLevel != null ? options.deflateLevel : 9;
-      options.deflateStrategy = options.deflateStrategy != null ? options.deflateStrategy : 3;
-      options.inputHasAlpha = options.inputHasAlpha != null ? options.inputHasAlpha : true;
-      options.deflateFactory = options.deflateFactory || zlib.createDeflate;
-      options.bitDepth = options.bitDepth || 8;
-      options.colorType = typeof options.colorType === "number" ? options.colorType : constants.COLORTYPE_COLOR_ALPHA;
-      options.inputColorType = typeof options.inputColorType === "number" ? options.inputColorType : constants.COLORTYPE_COLOR_ALPHA;
-      if ([
-        constants.COLORTYPE_GRAYSCALE,
-        constants.COLORTYPE_COLOR,
-        constants.COLORTYPE_COLOR_ALPHA,
-        constants.COLORTYPE_ALPHA
-      ].indexOf(options.colorType) === -1) {
-        throw new Error(
-          "option color type:" + options.colorType + " is not supported at present"
-        );
-      }
-      if ([
-        constants.COLORTYPE_GRAYSCALE,
-        constants.COLORTYPE_COLOR,
-        constants.COLORTYPE_COLOR_ALPHA,
-        constants.COLORTYPE_ALPHA
-      ].indexOf(options.inputColorType) === -1) {
-        throw new Error(
-          "option input color type:" + options.inputColorType + " is not supported at present"
-        );
-      }
-      if (options.bitDepth !== 8 && options.bitDepth !== 16) {
-        throw new Error(
-          "option bit depth:" + options.bitDepth + " is not supported at present"
-        );
-      }
-    };
-    Packer.prototype.getDeflateOptions = function() {
-      return {
-        chunkSize: this._options.deflateChunkSize,
-        level: this._options.deflateLevel,
-        strategy: this._options.deflateStrategy
-      };
-    };
-    Packer.prototype.createDeflate = function() {
-      return this._options.deflateFactory(this.getDeflateOptions());
-    };
-    Packer.prototype.filterData = function(data, width, height) {
-      let packedData = bitPacker(data, width, height, this._options);
-      let bpp = constants.COLORTYPE_TO_BPP_MAP[this._options.colorType];
-      let filteredData = filter(packedData, width, height, this._options, bpp);
-      return filteredData;
-    };
-    Packer.prototype._packChunk = function(type, data) {
-      let len = data ? data.length : 0;
-      let buf = Buffer.alloc(len + 12);
-      buf.writeUInt32BE(len, 0);
-      buf.writeUInt32BE(type, 4);
-      if (data) {
-        data.copy(buf, 8);
-      }
-      buf.writeInt32BE(
-        CrcStream.crc32(buf.slice(4, buf.length - 4)),
-        buf.length - 4
-      );
-      return buf;
-    };
-    Packer.prototype.packGAMA = function(gamma) {
-      let buf = Buffer.alloc(4);
-      buf.writeUInt32BE(Math.floor(gamma * constants.GAMMA_DIVISION), 0);
-      return this._packChunk(constants.TYPE_gAMA, buf);
-    };
-    Packer.prototype.packIHDR = function(width, height) {
-      let buf = Buffer.alloc(13);
-      buf.writeUInt32BE(width, 0);
-      buf.writeUInt32BE(height, 4);
-      buf[8] = this._options.bitDepth;
-      buf[9] = this._options.colorType;
-      buf[10] = 0;
-      buf[11] = 0;
-      buf[12] = 0;
-      return this._packChunk(constants.TYPE_IHDR, buf);
-    };
-    Packer.prototype.packIDAT = function(data) {
-      return this._packChunk(constants.TYPE_IDAT, data);
-    };
-    Packer.prototype.packIEND = function() {
-      return this._packChunk(constants.TYPE_IEND, null);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/packer-async.js
-var require_packer_async = __commonJS({
-  "node_modules/pngjs/lib/packer-async.js"(exports2, module2) {
-    "use strict";
-    var util = require("util");
-    var Stream = require("stream");
-    var constants = require_constants();
-    var Packer = require_packer();
-    var PackerAsync = module2.exports = function(opt) {
-      Stream.call(this);
-      let options = opt || {};
-      this._packer = new Packer(options);
-      this._deflate = this._packer.createDeflate();
-      this.readable = true;
-    };
-    util.inherits(PackerAsync, Stream);
-    PackerAsync.prototype.pack = function(data, width, height, gamma) {
-      this.emit("data", Buffer.from(constants.PNG_SIGNATURE));
-      this.emit("data", this._packer.packIHDR(width, height));
-      if (gamma) {
-        this.emit("data", this._packer.packGAMA(gamma));
-      }
-      let filteredData = this._packer.filterData(data, width, height);
-      this._deflate.on("error", this.emit.bind(this, "error"));
-      this._deflate.on(
-        "data",
-        function(compressedData) {
-          this.emit("data", this._packer.packIDAT(compressedData));
-        }.bind(this)
-      );
-      this._deflate.on(
-        "end",
-        function() {
-          this.emit("data", this._packer.packIEND());
-          this.emit("end");
-        }.bind(this)
-      );
-      this._deflate.end(filteredData);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/sync-inflate.js
-var require_sync_inflate = __commonJS({
-  "node_modules/pngjs/lib/sync-inflate.js"(exports2, module2) {
-    "use strict";
-    var assert2 = require("assert").ok;
-    var zlib = require("zlib");
-    var util = require("util");
-    var kMaxLength = require("buffer").kMaxLength;
-    function Inflate(opts) {
-      if (!(this instanceof Inflate)) {
-        return new Inflate(opts);
-      }
-      if (opts && opts.chunkSize < zlib.Z_MIN_CHUNK) {
-        opts.chunkSize = zlib.Z_MIN_CHUNK;
-      }
-      zlib.Inflate.call(this, opts);
-      this._offset = this._offset === void 0 ? this._outOffset : this._offset;
-      this._buffer = this._buffer || this._outBuffer;
-      if (opts && opts.maxLength != null) {
-        this._maxLength = opts.maxLength;
-      }
-    }
-    function createInflate(opts) {
-      return new Inflate(opts);
-    }
-    function _close(engine, callback) {
-      if (callback) {
-        process.nextTick(callback);
-      }
-      if (!engine._handle) {
-        return;
-      }
-      engine._handle.close();
-      engine._handle = null;
-    }
-    Inflate.prototype._processChunk = function(chunk, flushFlag, asyncCb) {
-      if (typeof asyncCb === "function") {
-        return zlib.Inflate._processChunk.call(this, chunk, flushFlag, asyncCb);
-      }
-      let self = this;
-      let availInBefore = chunk && chunk.length;
-      let availOutBefore = this._chunkSize - this._offset;
-      let leftToInflate = this._maxLength;
-      let inOff = 0;
-      let buffers = [];
-      let nread = 0;
-      let error;
-      this.on("error", function(err) {
-        error = err;
-      });
-      function handleChunk(availInAfter, availOutAfter) {
-        if (self._hadError) {
-          return;
-        }
-        let have = availOutBefore - availOutAfter;
-        assert2(have >= 0, "have should not go down");
-        if (have > 0) {
-          let out = self._buffer.slice(self._offset, self._offset + have);
-          self._offset += have;
-          if (out.length > leftToInflate) {
-            out = out.slice(0, leftToInflate);
-          }
-          buffers.push(out);
-          nread += out.length;
-          leftToInflate -= out.length;
-          if (leftToInflate === 0) {
-            return false;
-          }
-        }
-        if (availOutAfter === 0 || self._offset >= self._chunkSize) {
-          availOutBefore = self._chunkSize;
-          self._offset = 0;
-          self._buffer = Buffer.allocUnsafe(self._chunkSize);
-        }
-        if (availOutAfter === 0) {
-          inOff += availInBefore - availInAfter;
-          availInBefore = availInAfter;
-          return true;
-        }
-        return false;
-      }
-      assert2(this._handle, "zlib binding closed");
-      let res;
-      do {
-        res = this._handle.writeSync(
-          flushFlag,
-          chunk,
-          // in
-          inOff,
-          // in_off
-          availInBefore,
-          // in_len
-          this._buffer,
-          // out
-          this._offset,
-          //out_off
-          availOutBefore
-        );
-        res = res || this._writeState;
-      } while (!this._hadError && handleChunk(res[0], res[1]));
-      if (this._hadError) {
-        throw error;
-      }
-      if (nread >= kMaxLength) {
-        _close(this);
-        throw new RangeError(
-          "Cannot create final Buffer. It would be larger than 0x" + kMaxLength.toString(16) + " bytes"
-        );
-      }
-      let buf = Buffer.concat(buffers, nread);
-      _close(this);
-      return buf;
-    };
-    util.inherits(Inflate, zlib.Inflate);
-    function zlibBufferSync(engine, buffer) {
-      if (typeof buffer === "string") {
-        buffer = Buffer.from(buffer);
-      }
-      if (!(buffer instanceof Buffer)) {
-        throw new TypeError("Not a string or buffer");
-      }
-      let flushFlag = engine._finishFlushFlag;
-      if (flushFlag == null) {
-        flushFlag = zlib.Z_FINISH;
-      }
-      return engine._processChunk(buffer, flushFlag);
-    }
-    function inflateSync(buffer, opts) {
-      return zlibBufferSync(new Inflate(opts), buffer);
-    }
-    module2.exports = exports2 = inflateSync;
-    exports2.Inflate = Inflate;
-    exports2.createInflate = createInflate;
-    exports2.inflateSync = inflateSync;
-  }
-});
-
-// node_modules/pngjs/lib/sync-reader.js
-var require_sync_reader = __commonJS({
-  "node_modules/pngjs/lib/sync-reader.js"(exports2, module2) {
-    "use strict";
-    var SyncReader = module2.exports = function(buffer) {
-      this._buffer = buffer;
-      this._reads = [];
-    };
-    SyncReader.prototype.read = function(length, callback) {
-      this._reads.push({
-        length: Math.abs(length),
-        // if length < 0 then at most this length
-        allowLess: length < 0,
-        func: callback
-      });
-    };
-    SyncReader.prototype.process = function() {
-      while (this._reads.length > 0 && this._buffer.length) {
-        let read = this._reads[0];
-        if (this._buffer.length && (this._buffer.length >= read.length || read.allowLess)) {
-          this._reads.shift();
-          let buf = this._buffer;
-          this._buffer = buf.slice(read.length);
-          read.func.call(this, buf.slice(0, read.length));
-        } else {
-          break;
-        }
-      }
-      if (this._reads.length > 0) {
-        return new Error("There are some read requests waitng on finished stream");
-      }
-      if (this._buffer.length > 0) {
-        return new Error("unrecognised content at end of stream");
-      }
-    };
-  }
-});
-
-// node_modules/pngjs/lib/filter-parse-sync.js
-var require_filter_parse_sync = __commonJS({
-  "node_modules/pngjs/lib/filter-parse-sync.js"(exports2) {
-    "use strict";
-    var SyncReader = require_sync_reader();
-    var Filter = require_filter_parse();
-    exports2.process = function(inBuffer, bitmapInfo) {
-      let outBuffers = [];
-      let reader = new SyncReader(inBuffer);
-      let filter = new Filter(bitmapInfo, {
-        read: reader.read.bind(reader),
-        write: function(bufferPart) {
-          outBuffers.push(bufferPart);
-        },
-        complete: function() {
-        }
-      });
-      filter.start();
-      reader.process();
-      return Buffer.concat(outBuffers);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/parser-sync.js
-var require_parser_sync = __commonJS({
-  "node_modules/pngjs/lib/parser-sync.js"(exports2, module2) {
-    "use strict";
-    var hasSyncZlib = true;
-    var zlib = require("zlib");
-    var inflateSync = require_sync_inflate();
-    if (!zlib.deflateSync) {
-      hasSyncZlib = false;
-    }
-    var SyncReader = require_sync_reader();
-    var FilterSync = require_filter_parse_sync();
-    var Parser = require_parser();
-    var bitmapper = require_bitmapper();
-    var formatNormaliser = require_format_normaliser();
-    module2.exports = function(buffer, options) {
-      if (!hasSyncZlib) {
-        throw new Error(
-          "To use the sync capability of this library in old node versions, please pin pngjs to v2.3.0"
-        );
-      }
-      let err;
-      function handleError(_err_) {
-        err = _err_;
-      }
-      let metaData;
-      function handleMetaData(_metaData_) {
-        metaData = _metaData_;
-      }
-      function handleTransColor(transColor) {
-        metaData.transColor = transColor;
-      }
-      function handlePalette(palette) {
-        metaData.palette = palette;
-      }
-      function handleSimpleTransparency() {
-        metaData.alpha = true;
-      }
-      let gamma;
-      function handleGamma(_gamma_) {
-        gamma = _gamma_;
-      }
-      let inflateDataList = [];
-      function handleInflateData(inflatedData2) {
-        inflateDataList.push(inflatedData2);
-      }
-      let reader = new SyncReader(buffer);
-      let parser = new Parser(options, {
-        read: reader.read.bind(reader),
-        error: handleError,
-        metadata: handleMetaData,
-        gamma: handleGamma,
-        palette: handlePalette,
-        transColor: handleTransColor,
-        inflateData: handleInflateData,
-        simpleTransparency: handleSimpleTransparency
-      });
-      parser.start();
-      reader.process();
-      if (err) {
-        throw err;
-      }
-      let inflateData = Buffer.concat(inflateDataList);
-      inflateDataList.length = 0;
-      let inflatedData;
-      if (metaData.interlace) {
-        inflatedData = zlib.inflateSync(inflateData);
-      } else {
-        let rowSize = (metaData.width * metaData.bpp * metaData.depth + 7 >> 3) + 1;
-        let imageSize = rowSize * metaData.height;
-        inflatedData = inflateSync(inflateData, {
-          chunkSize: imageSize,
-          maxLength: imageSize
-        });
-      }
-      inflateData = null;
-      if (!inflatedData || !inflatedData.length) {
-        throw new Error("bad png - invalid inflate data response");
-      }
-      let unfilteredData = FilterSync.process(inflatedData, metaData);
-      inflateData = null;
-      let bitmapData = bitmapper.dataToBitMap(unfilteredData, metaData);
-      unfilteredData = null;
-      let normalisedBitmapData = formatNormaliser(bitmapData, metaData);
-      metaData.data = normalisedBitmapData;
-      metaData.gamma = gamma || 0;
-      return metaData;
-    };
-  }
-});
-
-// node_modules/pngjs/lib/packer-sync.js
-var require_packer_sync = __commonJS({
-  "node_modules/pngjs/lib/packer-sync.js"(exports2, module2) {
-    "use strict";
-    var hasSyncZlib = true;
-    var zlib = require("zlib");
-    if (!zlib.deflateSync) {
-      hasSyncZlib = false;
-    }
-    var constants = require_constants();
-    var Packer = require_packer();
-    module2.exports = function(metaData, opt) {
-      if (!hasSyncZlib) {
-        throw new Error(
-          "To use the sync capability of this library in old node versions, please pin pngjs to v2.3.0"
-        );
-      }
-      let options = opt || {};
-      let packer = new Packer(options);
-      let chunks = [];
-      chunks.push(Buffer.from(constants.PNG_SIGNATURE));
-      chunks.push(packer.packIHDR(metaData.width, metaData.height));
-      if (metaData.gamma) {
-        chunks.push(packer.packGAMA(metaData.gamma));
-      }
-      let filteredData = packer.filterData(
-        metaData.data,
-        metaData.width,
-        metaData.height
-      );
-      let compressedData = zlib.deflateSync(
-        filteredData,
-        packer.getDeflateOptions()
-      );
-      filteredData = null;
-      if (!compressedData || !compressedData.length) {
-        throw new Error("bad png - invalid compressed data response");
-      }
-      chunks.push(packer.packIDAT(compressedData));
-      chunks.push(packer.packIEND());
-      return Buffer.concat(chunks);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/png-sync.js
-var require_png_sync = __commonJS({
-  "node_modules/pngjs/lib/png-sync.js"(exports2) {
-    "use strict";
-    var parse = require_parser_sync();
-    var pack = require_packer_sync();
-    exports2.read = function(buffer, options) {
-      return parse(buffer, options || {});
-    };
-    exports2.write = function(png, options) {
-      return pack(png, options);
-    };
-  }
-});
-
-// node_modules/pngjs/lib/png.js
-var require_png = __commonJS({
-  "node_modules/pngjs/lib/png.js"(exports2) {
-    "use strict";
-    var util = require("util");
-    var Stream = require("stream");
-    var Parser = require_parser_async();
-    var Packer = require_packer_async();
-    var PNGSync = require_png_sync();
-    var PNG = exports2.PNG = function(options) {
-      Stream.call(this);
-      options = options || {};
-      this.width = options.width | 0;
-      this.height = options.height | 0;
-      this.data = this.width > 0 && this.height > 0 ? Buffer.alloc(4 * this.width * this.height) : null;
-      if (options.fill && this.data) {
-        this.data.fill(0);
-      }
-      this.gamma = 0;
-      this.readable = this.writable = true;
-      this._parser = new Parser(options);
-      this._parser.on("error", this.emit.bind(this, "error"));
-      this._parser.on("close", this._handleClose.bind(this));
-      this._parser.on("metadata", this._metadata.bind(this));
-      this._parser.on("gamma", this._gamma.bind(this));
-      this._parser.on(
-        "parsed",
-        function(data) {
-          this.data = data;
-          this.emit("parsed", data);
-        }.bind(this)
-      );
-      this._packer = new Packer(options);
-      this._packer.on("data", this.emit.bind(this, "data"));
-      this._packer.on("end", this.emit.bind(this, "end"));
-      this._parser.on("close", this._handleClose.bind(this));
-      this._packer.on("error", this.emit.bind(this, "error"));
-    };
-    util.inherits(PNG, Stream);
-    PNG.sync = PNGSync;
-    PNG.prototype.pack = function() {
-      if (!this.data || !this.data.length) {
-        this.emit("error", "No data provided");
-        return this;
-      }
-      process.nextTick(
-        function() {
-          this._packer.pack(this.data, this.width, this.height, this.gamma);
-        }.bind(this)
-      );
-      return this;
-    };
-    PNG.prototype.parse = function(data, callback) {
-      if (callback) {
-        let onParsed, onError;
-        onParsed = function(parsedData) {
-          this.removeListener("error", onError);
-          this.data = parsedData;
-          callback(null, this);
-        }.bind(this);
-        onError = function(err) {
-          this.removeListener("parsed", onParsed);
-          callback(err, null);
-        }.bind(this);
-        this.once("parsed", onParsed);
-        this.once("error", onError);
-      }
-      this.end(data);
-      return this;
-    };
-    PNG.prototype.write = function(data) {
-      this._parser.write(data);
-      return true;
-    };
-    PNG.prototype.end = function(data) {
-      this._parser.end(data);
-    };
-    PNG.prototype._metadata = function(metadata) {
-      this.width = metadata.width;
-      this.height = metadata.height;
-      this.emit("metadata", metadata);
-    };
-    PNG.prototype._gamma = function(gamma) {
-      this.gamma = gamma;
-    };
-    PNG.prototype._handleClose = function() {
-      if (!this._parser.writable && !this._packer.readable) {
-        this.emit("close");
-      }
-    };
-    PNG.bitblt = function(src, dst, srcX, srcY, width, height, deltaX, deltaY) {
-      srcX |= 0;
-      srcY |= 0;
-      width |= 0;
-      height |= 0;
-      deltaX |= 0;
-      deltaY |= 0;
-      if (srcX > src.width || srcY > src.height || srcX + width > src.width || srcY + height > src.height) {
-        throw new Error("bitblt reading outside image");
-      }
-      if (deltaX > dst.width || deltaY > dst.height || deltaX + width > dst.width || deltaY + height > dst.height) {
-        throw new Error("bitblt writing outside image");
-      }
-      for (let y = 0; y < height; y++) {
-        src.data.copy(
-          dst.data,
-          (deltaY + y) * dst.width + deltaX << 2,
-          (srcY + y) * src.width + srcX << 2,
-          (srcY + y) * src.width + srcX + width << 2
-        );
-      }
-    };
-    PNG.prototype.bitblt = function(dst, srcX, srcY, width, height, deltaX, deltaY) {
-      PNG.bitblt(this, dst, srcX, srcY, width, height, deltaX, deltaY);
-      return this;
-    };
-    PNG.adjustGamma = function(src) {
-      if (src.gamma) {
-        for (let y = 0; y < src.height; y++) {
-          for (let x = 0; x < src.width; x++) {
-            let idx = src.width * y + x << 2;
-            for (let i = 0; i < 3; i++) {
-              let sample = src.data[idx + i] / 255;
-              sample = Math.pow(sample, 1 / 2.2 / src.gamma);
-              src.data[idx + i] = Math.round(sample * 255);
-            }
-          }
-        }
-        src.gamma = 0;
-      }
-    };
-    PNG.prototype.adjustGamma = function() {
-      PNG.adjustGamma(this);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/utils.js
-var require_utils4 = __commonJS({
-  "node_modules/qrcode/lib/renderer/utils.js"(exports2) {
-    function hex2rgba(hex) {
-      if (typeof hex === "number") {
-        hex = hex.toString();
-      }
-      if (typeof hex !== "string") {
-        throw new Error("Color should be defined as hex string");
-      }
-      let hexCode = hex.slice().replace("#", "").split("");
-      if (hexCode.length < 3 || hexCode.length === 5 || hexCode.length > 8) {
-        throw new Error("Invalid hex color: " + hex);
-      }
-      if (hexCode.length === 3 || hexCode.length === 4) {
-        hexCode = Array.prototype.concat.apply([], hexCode.map(function(c) {
-          return [c, c];
-        }));
-      }
-      if (hexCode.length === 6)
-        hexCode.push("F", "F");
-      const hexValue = parseInt(hexCode.join(""), 16);
-      return {
-        r: hexValue >> 24 & 255,
-        g: hexValue >> 16 & 255,
-        b: hexValue >> 8 & 255,
-        a: hexValue & 255,
-        hex: "#" + hexCode.slice(0, 6).join("")
-      };
-    }
-    exports2.getOptions = function getOptions(options) {
-      if (!options)
-        options = {};
-      if (!options.color)
-        options.color = {};
-      const margin = typeof options.margin === "undefined" || options.margin === null || options.margin < 0 ? 4 : options.margin;
-      const width = options.width && options.width >= 21 ? options.width : void 0;
-      const scale = options.scale || 4;
-      return {
-        width,
-        scale: width ? 4 : scale,
-        margin,
-        color: {
-          dark: hex2rgba(options.color.dark || "#000000ff"),
-          light: hex2rgba(options.color.light || "#ffffffff")
-        },
-        type: options.type,
-        rendererOpts: options.rendererOpts || {}
-      };
-    };
-    exports2.getScale = function getScale(qrSize, opts) {
-      return opts.width && opts.width >= qrSize + opts.margin * 2 ? opts.width / (qrSize + opts.margin * 2) : opts.scale;
-    };
-    exports2.getImageWidth = function getImageWidth(qrSize, opts) {
-      const scale = exports2.getScale(qrSize, opts);
-      return Math.floor((qrSize + opts.margin * 2) * scale);
-    };
-    exports2.qrToImageData = function qrToImageData(imgData, qr, opts) {
-      const size = qr.modules.size;
-      const data = qr.modules.data;
-      const scale = exports2.getScale(size, opts);
-      const symbolSize = Math.floor((size + opts.margin * 2) * scale);
-      const scaledMargin = opts.margin * scale;
-      const palette = [opts.color.light, opts.color.dark];
-      for (let i = 0; i < symbolSize; i++) {
-        for (let j = 0; j < symbolSize; j++) {
-          let posDst = (i * symbolSize + j) * 4;
-          let pxColor = opts.color.light;
-          if (i >= scaledMargin && j >= scaledMargin && i < symbolSize - scaledMargin && j < symbolSize - scaledMargin) {
-            const iSrc = Math.floor((i - scaledMargin) / scale);
-            const jSrc = Math.floor((j - scaledMargin) / scale);
-            pxColor = palette[data[iSrc * size + jSrc] ? 1 : 0];
-          }
-          imgData[posDst++] = pxColor.r;
-          imgData[posDst++] = pxColor.g;
-          imgData[posDst++] = pxColor.b;
-          imgData[posDst] = pxColor.a;
-        }
-      }
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/png.js
-var require_png2 = __commonJS({
-  "node_modules/qrcode/lib/renderer/png.js"(exports2) {
-    var fs4 = require("fs");
-    var PNG = require_png().PNG;
-    var Utils = require_utils4();
-    exports2.render = function render(qrData, options) {
-      const opts = Utils.getOptions(options);
-      const pngOpts = opts.rendererOpts;
-      const size = Utils.getImageWidth(qrData.modules.size, opts);
-      pngOpts.width = size;
-      pngOpts.height = size;
-      const pngImage = new PNG(pngOpts);
-      Utils.qrToImageData(pngImage.data, qrData, opts);
-      return pngImage;
-    };
-    exports2.renderToDataURL = function renderToDataURL(qrData, options, cb) {
-      if (typeof cb === "undefined") {
-        cb = options;
-        options = void 0;
-      }
-      exports2.renderToBuffer(qrData, options, function(err, output) {
-        if (err)
-          cb(err);
-        let url = "data:image/png;base64,";
-        url += output.toString("base64");
-        cb(null, url);
-      });
-    };
-    exports2.renderToBuffer = function renderToBuffer(qrData, options, cb) {
-      if (typeof cb === "undefined") {
-        cb = options;
-        options = void 0;
-      }
-      const png = exports2.render(qrData, options);
-      const buffer = [];
-      png.on("error", cb);
-      png.on("data", function(data) {
-        buffer.push(data);
-      });
-      png.on("end", function() {
-        cb(null, Buffer.concat(buffer));
-      });
-      png.pack();
-    };
-    exports2.renderToFile = function renderToFile(path2, qrData, options, cb) {
-      if (typeof cb === "undefined") {
-        cb = options;
-        options = void 0;
-      }
-      let called = false;
-      const done = (...args) => {
-        if (called)
-          return;
-        called = true;
-        cb.apply(null, args);
-      };
-      const stream = fs4.createWriteStream(path2);
-      stream.on("error", done);
-      stream.on("close", done);
-      exports2.renderToFileStream(stream, qrData, options);
-    };
-    exports2.renderToFileStream = function renderToFileStream(stream, qrData, options) {
-      const png = exports2.render(qrData, options);
-      png.pack().pipe(stream);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/utf8.js
-var require_utf8 = __commonJS({
-  "node_modules/qrcode/lib/renderer/utf8.js"(exports2) {
-    var Utils = require_utils4();
-    var BLOCK_CHAR = {
-      WW: " ",
-      WB: "\u2584",
-      BB: "\u2588",
-      BW: "\u2580"
-    };
-    var INVERTED_BLOCK_CHAR = {
-      BB: " ",
-      BW: "\u2584",
-      WW: "\u2588",
-      WB: "\u2580"
-    };
-    function getBlockChar(top, bottom, blocks) {
-      if (top && bottom)
-        return blocks.BB;
-      if (top && !bottom)
-        return blocks.BW;
-      if (!top && bottom)
-        return blocks.WB;
-      return blocks.WW;
-    }
-    exports2.render = function(qrData, options, cb) {
-      const opts = Utils.getOptions(options);
-      let blocks = BLOCK_CHAR;
-      if (opts.color.dark.hex === "#ffffff" || opts.color.light.hex === "#000000") {
-        blocks = INVERTED_BLOCK_CHAR;
-      }
-      const size = qrData.modules.size;
-      const data = qrData.modules.data;
-      let output = "";
-      let hMargin = Array(size + opts.margin * 2 + 1).join(blocks.WW);
-      hMargin = Array(opts.margin / 2 + 1).join(hMargin + "\n");
-      const vMargin = Array(opts.margin + 1).join(blocks.WW);
-      output += hMargin;
-      for (let i = 0; i < size; i += 2) {
-        output += vMargin;
-        for (let j = 0; j < size; j++) {
-          const topModule = data[i * size + j];
-          const bottomModule = data[(i + 1) * size + j];
-          output += getBlockChar(topModule, bottomModule, blocks);
-        }
-        output += vMargin + "\n";
-      }
-      output += hMargin.slice(0, -1);
-      if (typeof cb === "function") {
-        cb(null, output);
-      }
-      return output;
-    };
-    exports2.renderToFile = function renderToFile(path2, qrData, options, cb) {
-      if (typeof cb === "undefined") {
-        cb = options;
-        options = void 0;
-      }
-      const fs4 = require("fs");
-      const utf8 = exports2.render(qrData, options);
-      fs4.writeFile(path2, utf8, cb);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/terminal/terminal.js
-var require_terminal = __commonJS({
-  "node_modules/qrcode/lib/renderer/terminal/terminal.js"(exports2) {
-    exports2.render = function(qrData, options, cb) {
-      const size = qrData.modules.size;
-      const data = qrData.modules.data;
-      const black = "\x1B[40m  \x1B[0m";
-      const white = "\x1B[47m  \x1B[0m";
-      let output = "";
-      const hMargin = Array(size + 3).join(white);
-      const vMargin = Array(2).join(white);
-      output += hMargin + "\n";
-      for (let i = 0; i < size; ++i) {
-        output += white;
-        for (let j = 0; j < size; j++) {
-          output += data[i * size + j] ? black : white;
-        }
-        output += vMargin + "\n";
-      }
-      output += hMargin + "\n";
-      if (typeof cb === "function") {
-        cb(null, output);
-      }
-      return output;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/terminal/terminal-small.js
-var require_terminal_small = __commonJS({
-  "node_modules/qrcode/lib/renderer/terminal/terminal-small.js"(exports2) {
-    var backgroundWhite = "\x1B[47m";
-    var backgroundBlack = "\x1B[40m";
-    var foregroundWhite = "\x1B[37m";
-    var foregroundBlack = "\x1B[30m";
-    var reset = "\x1B[0m";
-    var lineSetupNormal = backgroundWhite + foregroundBlack;
-    var lineSetupInverse = backgroundBlack + foregroundWhite;
-    var createPalette = function(lineSetup, foregroundWhite2, foregroundBlack2) {
-      return {
-        // 1 ... white, 2 ... black, 0 ... transparent (default)
-        "00": reset + " " + lineSetup,
-        "01": reset + foregroundWhite2 + "\u2584" + lineSetup,
-        "02": reset + foregroundBlack2 + "\u2584" + lineSetup,
-        10: reset + foregroundWhite2 + "\u2580" + lineSetup,
-        11: " ",
-        12: "\u2584",
-        20: reset + foregroundBlack2 + "\u2580" + lineSetup,
-        21: "\u2580",
-        22: "\u2588"
-      };
-    };
-    var mkCodePixel = function(modules, size, x, y) {
-      const sizePlus = size + 1;
-      if (x >= sizePlus || y >= sizePlus || y < -1 || x < -1)
-        return "0";
-      if (x >= size || y >= size || y < 0 || x < 0)
-        return "1";
-      const idx = y * size + x;
-      return modules[idx] ? "2" : "1";
-    };
-    var mkCode = function(modules, size, x, y) {
-      return mkCodePixel(modules, size, x, y) + mkCodePixel(modules, size, x, y + 1);
-    };
-    exports2.render = function(qrData, options, cb) {
-      const size = qrData.modules.size;
-      const data = qrData.modules.data;
-      const inverse = !!(options && options.inverse);
-      const lineSetup = options && options.inverse ? lineSetupInverse : lineSetupNormal;
-      const white = inverse ? foregroundBlack : foregroundWhite;
-      const black = inverse ? foregroundWhite : foregroundBlack;
-      const palette = createPalette(lineSetup, white, black);
-      const newLine = reset + "\n" + lineSetup;
-      let output = lineSetup;
-      for (let y = -1; y < size + 1; y += 2) {
-        for (let x = -1; x < size; x++) {
-          output += palette[mkCode(data, size, x, y)];
-        }
-        output += palette[mkCode(data, size, size, y)] + newLine;
-      }
-      output += reset;
-      if (typeof cb === "function") {
-        cb(null, output);
-      }
-      return output;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/terminal.js
-var require_terminal2 = __commonJS({
-  "node_modules/qrcode/lib/renderer/terminal.js"(exports2) {
-    var big = require_terminal();
-    var small = require_terminal_small();
-    exports2.render = function(qrData, options, cb) {
-      if (options && options.small) {
-        return small.render(qrData, options, cb);
-      }
-      return big.render(qrData, options, cb);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/svg-tag.js
-var require_svg_tag = __commonJS({
-  "node_modules/qrcode/lib/renderer/svg-tag.js"(exports2) {
-    var Utils = require_utils4();
-    function getColorAttrib(color, attrib) {
-      const alpha = color.a / 255;
-      const str = attrib + '="' + color.hex + '"';
-      return alpha < 1 ? str + " " + attrib + '-opacity="' + alpha.toFixed(2).slice(1) + '"' : str;
-    }
-    function svgCmd(cmd, x, y) {
-      let str = cmd + x;
-      if (typeof y !== "undefined")
-        str += " " + y;
-      return str;
-    }
-    function qrToPath(data, size, margin) {
-      let path2 = "";
-      let moveBy = 0;
-      let newRow = false;
-      let lineLength = 0;
-      for (let i = 0; i < data.length; i++) {
-        const col = Math.floor(i % size);
-        const row = Math.floor(i / size);
-        if (!col && !newRow)
-          newRow = true;
-        if (data[i]) {
-          lineLength++;
-          if (!(i > 0 && col > 0 && data[i - 1])) {
-            path2 += newRow ? svgCmd("M", col + margin, 0.5 + row + margin) : svgCmd("m", moveBy, 0);
-            moveBy = 0;
-            newRow = false;
-          }
-          if (!(col + 1 < size && data[i + 1])) {
-            path2 += svgCmd("h", lineLength);
-            lineLength = 0;
-          }
-        } else {
-          moveBy++;
-        }
-      }
-      return path2;
-    }
-    exports2.render = function render(qrData, options, cb) {
-      const opts = Utils.getOptions(options);
-      const size = qrData.modules.size;
-      const data = qrData.modules.data;
-      const qrcodesize = size + opts.margin * 2;
-      const bg = !opts.color.light.a ? "" : "<path " + getColorAttrib(opts.color.light, "fill") + ' d="M0 0h' + qrcodesize + "v" + qrcodesize + 'H0z"/>';
-      const path2 = "<path " + getColorAttrib(opts.color.dark, "stroke") + ' d="' + qrToPath(data, size, opts.margin) + '"/>';
-      const viewBox = 'viewBox="0 0 ' + qrcodesize + " " + qrcodesize + '"';
-      const width = !opts.width ? "" : 'width="' + opts.width + '" height="' + opts.width + '" ';
-      const svgTag = '<svg xmlns="http://www.w3.org/2000/svg" ' + width + viewBox + ' shape-rendering="crispEdges">' + bg + path2 + "</svg>\n";
-      if (typeof cb === "function") {
-        cb(null, svgTag);
-      }
-      return svgTag;
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/svg.js
-var require_svg = __commonJS({
-  "node_modules/qrcode/lib/renderer/svg.js"(exports2) {
-    var svgTagRenderer = require_svg_tag();
-    exports2.render = svgTagRenderer.render;
-    exports2.renderToFile = function renderToFile(path2, qrData, options, cb) {
-      if (typeof cb === "undefined") {
-        cb = options;
-        options = void 0;
-      }
-      const fs4 = require("fs");
-      const svgTag = exports2.render(qrData, options);
-      const xmlStr = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">' + svgTag;
-      fs4.writeFile(path2, xmlStr, cb);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/renderer/canvas.js
-var require_canvas = __commonJS({
-  "node_modules/qrcode/lib/renderer/canvas.js"(exports2) {
-    var Utils = require_utils4();
-    function clearCanvas(ctx, canvas, size) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (!canvas.style)
-        canvas.style = {};
-      canvas.height = size;
-      canvas.width = size;
-      canvas.style.height = size + "px";
-      canvas.style.width = size + "px";
-    }
-    function getCanvasElement() {
-      try {
-        return document.createElement("canvas");
-      } catch (e) {
-        throw new Error("You need to specify a canvas element");
-      }
-    }
-    exports2.render = function render(qrData, canvas, options) {
-      let opts = options;
-      let canvasEl = canvas;
-      if (typeof opts === "undefined" && (!canvas || !canvas.getContext)) {
-        opts = canvas;
-        canvas = void 0;
-      }
-      if (!canvas) {
-        canvasEl = getCanvasElement();
-      }
-      opts = Utils.getOptions(opts);
-      const size = Utils.getImageWidth(qrData.modules.size, opts);
-      const ctx = canvasEl.getContext("2d");
-      const image = ctx.createImageData(size, size);
-      Utils.qrToImageData(image.data, qrData, opts);
-      clearCanvas(ctx, canvasEl, size);
-      ctx.putImageData(image, 0, 0);
-      return canvasEl;
-    };
-    exports2.renderToDataURL = function renderToDataURL(qrData, canvas, options) {
-      let opts = options;
-      if (typeof opts === "undefined" && (!canvas || !canvas.getContext)) {
-        opts = canvas;
-        canvas = void 0;
-      }
-      if (!opts)
-        opts = {};
-      const canvasEl = exports2.render(qrData, canvas, opts);
-      const type = opts.type || "image/png";
-      const rendererOpts = opts.rendererOpts || {};
-      return canvasEl.toDataURL(type, rendererOpts.quality);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/browser.js
-var require_browser5 = __commonJS({
-  "node_modules/qrcode/lib/browser.js"(exports2) {
-    var canPromise = require_can_promise();
-    var QRCode2 = require_qrcode();
-    var CanvasRenderer = require_canvas();
-    var SvgRenderer = require_svg_tag();
-    function renderCanvas(renderFunc, canvas, text, opts, cb) {
-      const args = [].slice.call(arguments, 1);
-      const argsNum = args.length;
-      const isLastArgCb = typeof args[argsNum - 1] === "function";
-      if (!isLastArgCb && !canPromise()) {
-        throw new Error("Callback required as last argument");
-      }
-      if (isLastArgCb) {
-        if (argsNum < 2) {
-          throw new Error("Too few arguments provided");
-        }
-        if (argsNum === 2) {
-          cb = text;
-          text = canvas;
-          canvas = opts = void 0;
-        } else if (argsNum === 3) {
-          if (canvas.getContext && typeof cb === "undefined") {
-            cb = opts;
-            opts = void 0;
-          } else {
-            cb = opts;
-            opts = text;
-            text = canvas;
-            canvas = void 0;
-          }
-        }
-      } else {
-        if (argsNum < 1) {
-          throw new Error("Too few arguments provided");
-        }
-        if (argsNum === 1) {
-          text = canvas;
-          canvas = opts = void 0;
-        } else if (argsNum === 2 && !canvas.getContext) {
-          opts = text;
-          text = canvas;
-          canvas = void 0;
-        }
-        return new Promise(function(resolve, reject) {
-          try {
-            const data = QRCode2.create(text, opts);
-            resolve(renderFunc(data, canvas, opts));
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
-      try {
-        const data = QRCode2.create(text, opts);
-        cb(null, renderFunc(data, canvas, opts));
-      } catch (e) {
-        cb(e);
-      }
-    }
-    exports2.create = QRCode2.create;
-    exports2.toCanvas = renderCanvas.bind(null, CanvasRenderer.render);
-    exports2.toDataURL = renderCanvas.bind(null, CanvasRenderer.renderToDataURL);
-    exports2.toString = renderCanvas.bind(null, function(data, _, opts) {
-      return SvgRenderer.render(data, opts);
-    });
-  }
-});
-
-// node_modules/qrcode/lib/server.js
-var require_server = __commonJS({
-  "node_modules/qrcode/lib/server.js"(exports2) {
-    var canPromise = require_can_promise();
-    var QRCode2 = require_qrcode();
-    var PngRenderer = require_png2();
-    var Utf8Renderer = require_utf8();
-    var TerminalRenderer = require_terminal2();
-    var SvgRenderer = require_svg();
-    function checkParams(text, opts, cb) {
-      if (typeof text === "undefined") {
-        throw new Error("String required as first argument");
-      }
-      if (typeof cb === "undefined") {
-        cb = opts;
-        opts = {};
-      }
-      if (typeof cb !== "function") {
-        if (!canPromise()) {
-          throw new Error("Callback required as last argument");
-        } else {
-          opts = cb || {};
-          cb = null;
-        }
-      }
-      return {
-        opts,
-        cb
-      };
-    }
-    function getTypeFromFilename(path2) {
-      return path2.slice((path2.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
-    }
-    function getRendererFromType(type) {
-      switch (type) {
-        case "svg":
-          return SvgRenderer;
-        case "txt":
-        case "utf8":
-          return Utf8Renderer;
-        case "png":
-        case "image/png":
-        default:
-          return PngRenderer;
-      }
-    }
-    function getStringRendererFromType(type) {
-      switch (type) {
-        case "svg":
-          return SvgRenderer;
-        case "terminal":
-          return TerminalRenderer;
-        case "utf8":
-        default:
-          return Utf8Renderer;
-      }
-    }
-    function render(renderFunc, text, params) {
-      if (!params.cb) {
-        return new Promise(function(resolve, reject) {
-          try {
-            const data = QRCode2.create(text, params.opts);
-            return renderFunc(data, params.opts, function(err, data2) {
-              return err ? reject(err) : resolve(data2);
-            });
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
-      try {
-        const data = QRCode2.create(text, params.opts);
-        return renderFunc(data, params.opts, params.cb);
-      } catch (e) {
-        params.cb(e);
-      }
-    }
-    exports2.create = QRCode2.create;
-    exports2.toCanvas = require_browser5().toCanvas;
-    exports2.toString = function toString(text, opts, cb) {
-      const params = checkParams(text, opts, cb);
-      const type = params.opts ? params.opts.type : void 0;
-      const renderer = getStringRendererFromType(type);
-      return render(renderer.render, text, params);
-    };
-    exports2.toDataURL = function toDataURL(text, opts, cb) {
-      const params = checkParams(text, opts, cb);
-      const renderer = getRendererFromType(params.opts.type);
-      return render(renderer.renderToDataURL, text, params);
-    };
-    exports2.toBuffer = function toBuffer(text, opts, cb) {
-      const params = checkParams(text, opts, cb);
-      const renderer = getRendererFromType(params.opts.type);
-      return render(renderer.renderToBuffer, text, params);
-    };
-    exports2.toFile = function toFile(path2, text, opts, cb) {
-      if (typeof path2 !== "string" || !(typeof text === "string" || typeof text === "object")) {
-        throw new Error("Invalid argument");
-      }
-      if (arguments.length < 3 && !canPromise()) {
-        throw new Error("Too few arguments provided");
-      }
-      const params = checkParams(text, opts, cb);
-      const type = params.opts.type || getTypeFromFilename(path2);
-      const renderer = getRendererFromType(type);
-      const renderToFile = renderer.renderToFile.bind(null, path2);
-      return render(renderToFile, text, params);
-    };
-    exports2.toFileStream = function toFileStream(stream, text, opts) {
-      if (arguments.length < 2) {
-        throw new Error("Too few arguments provided");
-      }
-      const params = checkParams(text, opts, stream.emit.bind(stream, "error"));
-      const renderer = getRendererFromType("png");
-      const renderToFileStream = renderer.renderToFileStream.bind(null, stream);
-      render(renderToFileStream, text, params);
-    };
-  }
-});
-
-// node_modules/qrcode/lib/index.js
-var require_lib5 = __commonJS({
-  "node_modules/qrcode/lib/index.js"(exports2, module2) {
-    module2.exports = require_server();
-  }
-});
-
-// apps/desktop/electron/main.ts
-var main_exports = {};
-function handleElevated(channel, action, handler) {
-  import_electron.ipcMain.handle(channel, async (event, ...args) => {
-    assertCan(activeDesktopSession?.role, action);
-    return handler(event, ...args);
-  });
-}
-function startExpressServer() {
-  if (serverInstance)
-    return;
-  const expressApp = createApiServer({
-    getDB,
-    sessionStore,
-    isPackaged: import_electron.app.isPackaged,
-    mainWindow,
-    activeConfig,
-    configPath,
-    initDB,
-    schemaSql
-  });
-  serverInstance = expressApp.listen(PORT, "0.0.0.0", () => {
-    console.log(`Express LAN API server listening on http://0.0.0.0:${PORT}`);
-  });
-}
-function getLocalIpAddress() {
-  const interfaces = os2.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name] || []) {
-      if (iface.family === "IPv4" && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return "127.0.0.1";
-}
-function performBackup(backupFolder) {
-  if (!backupFolder || !fs2.existsSync(backupFolder)) {
-    throw new Error("Backup directory does not exist or is not set.");
-  }
-  const dateStr = (/* @__PURE__ */ new Date()).toISOString().replace(/T/, "_").replace(/\..+/, "").replace(/:/g, "-");
-  const backupFileName = `chauhan_erp_backup_${dateStr}.db`;
-  const destinationPath = path.join(backupFolder, backupFileName);
-  fs2.copyFileSync(activeConfig.dbPath, destinationPath);
-  return destinationPath;
-}
-function enqueueSms(phone, templateKey, vars, channel = "SMS") {
-  try {
-    const db = getDB();
-    const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-    const settings = {};
-    settingsRows.forEach((r) => settings[r.key] = r.value);
-    if (settings["sms_enabled"] !== "true")
-      return false;
-    let body = settings[templateKey] || "";
-    if (!body) {
-      if (templateKey === "sms_tpl_repair_update")
-        body = "Job {job_no}: your {product} is {status}.";
-      if (templateKey === "sms_tpl_payment")
-        body = "Received Rs {amount} against Inv {invoice_no}. Thank you!";
-      if (templateKey === "sms_tpl_reminder")
-        body = "Reminder: Udhaar balance of Rs {balance} is overdue.";
-    }
-    for (const [k, v] of Object.entries(vars)) {
-      body = body.replace(new RegExp("{" + k + "}", "g"), v);
-    }
-    db.prepare("INSERT INTO sms_outbox (phone, body, channel) VALUES (?, ?, ?)").run(phone, body, channel);
-    return true;
-  } catch (err) {
-    console.error("SMS Queue Error:", err);
-    return false;
-  }
-}
-async function sendViaGateway(msg) {
-  const db = getDB();
-  const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-  const settings = {};
-  settingsRows.forEach((r) => settings[r.key] = r.value);
-  const channel = msg.channel || "SMS";
-  if (channel === "WHATSAPP") {
-    if (settings["whatsapp_api_enabled"] !== "true" || !settings["whatsapp_api_key"]) {
-      console.log(`[WA WORKER] No API key \u2014 skip auto-send for msg #${msg.id}`);
-      return false;
-    }
-    console.log(`[WA WORKER] Would send via WhatsApp API to ${msg.phone}: ${msg.body.substring(0, 50)}...`);
-    return true;
-  }
-  const gateway = settings["sms_gateway"] || "MOCK";
-  const apiKey = settings["sms_gateway_key"] || "";
-  const senderId = settings["sms_sender_id"] || "CHAUHAN";
-  if (gateway === "MOCK") {
-    console.log(`[SMS WORKER] MOCK send to ${msg.phone}: ${msg.body.substring(0, 50)}...`);
-    return true;
-  }
-  if (gateway === "MSG91" && apiKey) {
-    try {
-      const url = `https://api.msg91.com/api/v5/flow/`;
-      console.log(`[SMS WORKER] MSG91 send to ${msg.phone} (key: ${apiKey.substring(0, 6)}...)`);
-      return true;
-    } catch (e) {
-      console.error("[SMS WORKER] MSG91 error:", e);
-      return false;
-    }
-  }
-  if (gateway === "GUPSHUP" && apiKey) {
-    try {
-      console.log(`[SMS WORKER] GUPSHUP send to ${msg.phone} (key: ${apiKey.substring(0, 6)}...)`);
-      return true;
-    } catch (e) {
-      console.error("[SMS WORKER] GUPSHUP error:", e);
-      return false;
-    }
-  }
-  console.log(`[SMS WORKER] No gateway configured \u2014 queued msg #${msg.id} stays pending.`);
-  return false;
-}
-function createWindow() {
-  mainWindow = new import_electron.BrowserWindow({
-    width: 1280,
-    height: 800,
-    title: "Chauhan Electronics ERP",
-    backgroundColor: "#09090b",
-    // zinc-950
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
-  });
-  if (import_electron.app.isPackaged) {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
-  } else {
-    mainWindow.loadURL("http://127.0.0.1:5180");
-    mainWindow.webContents.openDevTools();
-  }
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
-}
-var import_electron, path, fs2, os2, import_node_thermal_printer, import_qrcode, userDataPath, configPath, activeConfig, sessionStore, schemaSql, devSchemaPath, prodSchemaPath, activeDesktopSession, PORT, serverInstance, mainWindow;
-var init_main = __esm({
-  "apps/desktop/electron/main.ts"() {
-    "use strict";
-    import_electron = require("electron");
-    path = __toESM(require("path"));
-    fs2 = __toESM(require("fs"));
-    os2 = __toESM(require("os"));
-    import_node_thermal_printer = require("node-thermal-printer");
-    init_core();
-    import_qrcode = __toESM(require_lib5());
-    init_api();
-    init_core();
-    userDataPath = import_electron.app.getPath("userData");
-    configPath = path.join(userDataPath, "db-config.json");
-    activeConfig = {
-      dbPath: path.join(userDataPath, "chauhan-erp.db"),
-      backupDir: ""
-    };
-    sessionStore = /* @__PURE__ */ new Map();
-    if (fs2.existsSync(configPath)) {
-      try {
-        activeConfig = JSON.parse(fs2.readFileSync(configPath, "utf8"));
-      } catch (e) {
-        console.error("Error reading db-config.json, using defaults", e);
-      }
-    } else {
-      fs2.writeFileSync(configPath, JSON.stringify(activeConfig, null, 2));
-    }
-    schemaSql = "";
-    devSchemaPath = path.join(__dirname, "../../packages/core/schema.sql");
-    prodSchemaPath = path.join(process.resourcesPath, "schema.sql");
-    if (fs2.existsSync(devSchemaPath)) {
-      schemaSql = fs2.readFileSync(devSchemaPath, "utf8");
-    } else if (fs2.existsSync(prodSchemaPath)) {
-      schemaSql = fs2.readFileSync(prodSchemaPath, "utf8");
-    } else {
-      schemaSql = `
-    CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
-    CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, pin_hash TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('OWNER','CASHIER','STOCK','TECHNICIAN')), active INTEGER DEFAULT 1);
-    CREATE TABLE IF NOT EXISTS audit_log (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER REFERENCES users(user_id), action TEXT, entity TEXT, entity_id INTEGER, detail TEXT, created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS customers (customer_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, phone TEXT UNIQUE NOT NULL, shop_name TEXT, tier TEXT NOT NULL DEFAULT 'COUNTER' CHECK(tier IN ('COUNTER','DEALER','DISTRIBUTOR')), gstin TEXT, credit_limit INTEGER DEFAULT 0, current_balance INTEGER DEFAULT 0, credit_due_date TEXT, created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS customer_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, customer_id INTEGER REFERENCES customers(customer_id), type TEXT CHECK(type IN ('SALE','PAYMENT','ADJUSTMENT','RETURN')), ref_id INTEGER, amount INTEGER, balance_after INTEGER, note TEXT, created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS suppliers (supplier_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, phone TEXT, gstin TEXT, current_payable INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS products (product_id INTEGER PRIMARY KEY AUTOINCREMENT, sku_code TEXT UNIQUE, brand_name TEXT, model_name TEXT, category TEXT, hsn_code TEXT, gst_rate INTEGER DEFAULT 18, requires_serial INTEGER DEFAULT 1, warranty_months INTEGER DEFAULT 12, min_restock_level INTEGER DEFAULT 5, counter_price INTEGER, dealer_price INTEGER, distributor_price INTEGER, loose_qty INTEGER DEFAULT 0, purchase_cost INTEGER DEFAULT 0, supplier_id INTEGER REFERENCES suppliers(supplier_id), created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS product_fitment (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER REFERENCES products(product_id) ON DELETE CASCADE, vehicle_tag TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS product_instances (instance_id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL REFERENCES products(product_id), serial_number TEXT UNIQUE NOT NULL, status TEXT NOT NULL DEFAULT 'IN_STOCK' CHECK(status IN ('IN_STOCK','SOLD','RMA_RETURNED','IN_REPAIR','SCRAPPED')), batch_number TEXT, purchase_cost INTEGER, grn_id INTEGER, received_at TEXT DEFAULT (datetime('now')), sold_at TEXT, warranty_expires_at TEXT);
-    CREATE TABLE IF NOT EXISTS grn (grn_id INTEGER PRIMARY KEY AUTOINCREMENT, supplier_id INTEGER REFERENCES suppliers(supplier_id), invoice_ref TEXT, total_cost INTEGER DEFAULT 0, received_by INTEGER REFERENCES users(user_id), created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS sales (sale_id INTEGER PRIMARY KEY AUTOINCREMENT, invoice_no TEXT UNIQUE, customer_id INTEGER REFERENCES customers(customer_id), tier_applied TEXT NOT NULL, subtotal INTEGER, discount INTEGER DEFAULT 0, cgst INTEGER DEFAULT 0, sgst INTEGER DEFAULT 0, igst INTEGER DEFAULT 0, grand_total INTEGER, amount_paid INTEGER, payment_mode TEXT, status TEXT DEFAULT 'COMPLETED' CHECK(status IN ('HELD','COMPLETED','CANCELLED')), sold_by INTEGER REFERENCES users(user_id), created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS sale_items (sale_item_id INTEGER PRIMARY KEY AUTOINCREMENT, sale_id INTEGER REFERENCES sales(sale_id) ON DELETE CASCADE, product_id INTEGER REFERENCES products(product_id), instance_id UNIQUE REFERENCES product_instances(instance_id), quantity INTEGER DEFAULT 1, unit_price INTEGER, line_discount INTEGER DEFAULT 0, line_total INTEGER, unit_cost INTEGER DEFAULT 0);
-    CREATE TABLE IF NOT EXISTS credit_notes (cn_id INTEGER PRIMARY KEY AUTOINCREMENT, cn_no TEXT UNIQUE, sale_id INTEGER REFERENCES sales(sale_id), instance_id REFERENCES product_instances(instance_id), amount INTEGER, reason TEXT, created_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS rma_register (rma_id INTEGER PRIMARY KEY AUTOINCREMENT, instance_id INTEGER REFERENCES product_instances(instance_id), supplier_id INTEGER REFERENCES suppliers(supplier_id), reason TEXT, status TEXT NOT NULL DEFAULT 'SENT' CHECK(status IN ('SENT','REPLACED','CREDITED','RECEIVED_BACK')), sent_at TEXT DEFAULT (datetime('now')), resolved_at TEXT, note TEXT);
-    CREATE TABLE IF NOT EXISTS repair_jobs (job_id INTEGER PRIMARY KEY AUTOINCREMENT, job_no TEXT UNIQUE, customer_id INTEGER REFERENCES customers(customer_id), customer_phone TEXT NOT NULL, customer_name TEXT, product_name TEXT, serial_number TEXT, sold_by_us INTEGER DEFAULT 0, is_warranty INTEGER DEFAULT 0, issue_reported TEXT, technician_notes TEXT, technician_id INTEGER REFERENCES users(user_id), status TEXT NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','IN_REPAIR','SENT_TO_COMPANY','READY','DELIVERED')), est_cost INTEGER, parts_cost INTEGER DEFAULT 0, labour_cost INTEGER DEFAULT 0, advance_paid INTEGER DEFAULT 0, final_cost INTEGER, intake_date TEXT DEFAULT (datetime('now')), ready_date TEXT, delivered_date TEXT);
-    CREATE TABLE IF NOT EXISTS repair_parts (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER REFERENCES repair_jobs(job_id) ON DELETE CASCADE, product_id INTEGER REFERENCES products(product_id), instance_id REFERENCES product_instances(instance_id), qty INTEGER DEFAULT 1, cost INTEGER);
-    CREATE TABLE IF NOT EXISTS repair_status_history (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER REFERENCES repair_jobs(job_id) ON DELETE CASCADE, old_status TEXT, new_status TEXT, changed_at TEXT DEFAULT (datetime('now')));
-    CREATE TABLE IF NOT EXISTS sms_outbox (id INTEGER PRIMARY KEY AUTOINCREMENT, phone TEXT, body TEXT, channel TEXT DEFAULT 'SMS' CHECK(channel IN ('SMS','WHATSAPP')), status TEXT DEFAULT 'QUEUED' CHECK(status IN ('QUEUED','SENT','FAILED')), created_at TEXT DEFAULT (datetime('now')), sent_at TEXT, retry_count INTEGER DEFAULT 0);
-    CREATE TABLE IF NOT EXISTS expenses (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, amount INTEGER, note TEXT, created_at TEXT DEFAULT (datetime('now')));
-  `;
-    }
-    try {
-      initDB(activeConfig.dbPath, schemaSql);
-      console.log(`Database initialized successfully at ${activeConfig.dbPath}`);
-      try {
-        const db = getDB();
-        const cols = db.prepare("PRAGMA table_info(sms_outbox)").all();
-        if (!cols.find((c) => c.name === "channel")) {
-          db.prepare("ALTER TABLE sms_outbox ADD COLUMN channel TEXT DEFAULT 'SMS'").run();
-          console.log("Migration: added channel column to sms_outbox");
-        }
-      } catch (migErr) {
-        console.error("Migration error (channel):", migErr);
-      }
-      try {
-        const db = getDB();
-        const prodCols = db.prepare("PRAGMA table_info(products)").all();
-        if (!prodCols.find((c) => c.name === "purchase_cost")) {
-          db.prepare("ALTER TABLE products ADD COLUMN purchase_cost INTEGER DEFAULT 0").run();
-          console.log("Migration: added purchase_cost to products");
-        }
-        if (!prodCols.find((c) => c.name === "supplier_id")) {
-          db.prepare("ALTER TABLE products ADD COLUMN supplier_id INTEGER REFERENCES suppliers(supplier_id)").run();
-          console.log("Migration: added supplier_id to products");
-        }
-        const siCols = db.prepare("PRAGMA table_info(sale_items)").all();
-        if (!siCols.find((c) => c.name === "unit_cost")) {
-          db.prepare("ALTER TABLE sale_items ADD COLUMN unit_cost INTEGER DEFAULT 0").run();
-          console.log("Migration: added unit_cost to sale_items");
-          db.prepare(`
-        UPDATE sale_items
-        SET unit_cost = (
-          SELECT pi.purchase_cost 
-          FROM product_instances pi 
-          WHERE pi.instance_id = sale_items.instance_id
-        )
-        WHERE instance_id IS NOT NULL AND unit_cost = 0;
-      `).run();
-          console.log("Migration: backfilled unit_cost for serialized items");
-        }
-      } catch (migErr) {
-        console.error("Migration error (reports):", migErr);
-      }
-    } catch (err) {
-      console.error("Failed to initialize database", err);
-    }
-    activeDesktopSession = null;
-    PORT = 47615;
-    serverInstance = null;
-    import_electron.ipcMain.handle("verify-desktop-pin", (e, pin) => {
-      const db = getDB();
-      const users = db.prepare("SELECT * FROM users WHERE active = 1").all();
-      const bcrypt2 = require("bcryptjs");
-      const matchedUser = users.find((u) => bcrypt2.compareSync(pin, u.pin_hash));
-      if (matchedUser) {
-        const userPayload = { user_id: matchedUser.user_id, role: matchedUser.role, name: matchedUser.name };
-        activeDesktopSession = userPayload;
-        return { success: true, user: userPayload };
-      }
-      return { success: false, error: "Invalid PIN" };
-    });
-    import_electron.ipcMain.handle("desktop-logout", () => {
-      activeDesktopSession = null;
-      return true;
-    });
-    import_electron.ipcMain.handle("check-first-run", async () => {
-      const db = getDB();
-      const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get();
-      return { firstRun: !row || row.value !== "0" };
-    });
-    handleElevated("db-query", "BACKUP_RESTORE", async (event, sql, params = []) => {
-      const db = getDB();
-      return db.prepare(sql).all(...params);
-    });
-    handleElevated("db-get", "BACKUP_RESTORE", async (event, sql, params = []) => {
-      const db = getDB();
-      return db.prepare(sql).get(...params);
-    });
-    handleElevated("db-run", "BACKUP_RESTORE", async (event, sql, params = []) => {
-      const db = getDB();
-      const res = db.prepare(sql).run(...params);
-      return {
-        changes: res.changes,
-        lastInsertRowid: res.lastInsertRowid
-      };
-    });
-    handleElevated("db-transaction", "BACKUP_RESTORE", async (event, queries) => {
-      const db = getDB();
-      const runTx = db.transaction((txQueries) => {
-        const results = [];
-        for (const q of txQueries) {
-          results.push(db.prepare(q.sql).run(...q.params));
-        }
-        return results;
-      });
-      return runTx(queries);
-    });
-    import_electron.ipcMain.handle("initialize-setup", async (event, queries) => {
-      const db = getDB();
-      const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get();
-      const alreadyDone = row && row.value === "0";
-      if (alreadyDone) {
-        const ownerExists = db.prepare("SELECT user_id FROM users WHERE role = 'OWNER' LIMIT 1").get();
-        if (ownerExists) {
-          throw new Error("Setup already completed");
-        }
-        db.prepare("UPDATE settings SET value = '1' WHERE key = 'first_run'").run();
-      }
-      const runTx = db.transaction((txQueries) => {
-        const results = [];
-        for (const q of txQueries) {
-          results.push(db.prepare(q.sql).run(...q.params));
-        }
-        return results;
-      });
-      return runTx(queries);
-    });
-    import_electron.ipcMain.handle("get-db-config", async () => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      return activeConfig;
-    });
-    handleElevated("set-db-config", "USER_MGMT", async (event, newConfig) => {
-      activeConfig = { ...activeConfig, ...newConfig };
-      fs2.writeFileSync(configPath, JSON.stringify(activeConfig, null, 2));
-      if (newConfig.dbPath) {
-        initDB(activeConfig.dbPath, schemaSql);
-      }
-      return activeConfig;
-    });
-    handleElevated("select-directory", "BACKUP_RESTORE", async () => {
-      const result = await import_electron.dialog.showOpenDialog({
-        properties: ["openDirectory"]
-      });
-      if (result.canceled || result.filePaths.length === 0) {
-        return null;
-      }
-      return result.filePaths[0];
-    });
-    handleElevated("select-file", "BACKUP_RESTORE", async (event, filters) => {
-      const result = await import_electron.dialog.showOpenDialog({
-        properties: ["openFile"],
-        filters
-      });
-      if (result.canceled || result.filePaths.length === 0) {
-        return null;
-      }
-      return result.filePaths[0];
-    });
-    handleElevated("backup-now", "BACKUP_RESTORE", async () => {
-      if (!activeConfig.backupDir) {
-        throw new Error("No backup directory configured");
-      }
-      return performBackup(activeConfig.backupDir);
-    });
-    handleElevated("restore-db", "BACKUP_RESTORE", async (event, backupFilePath) => {
-      if (!fs2.existsSync(backupFilePath)) {
-        throw new Error("Selected backup file does not exist");
-      }
-      const safetyDir = userDataPath;
-      const safetyBackupPath = path.join(safetyDir, "chauhan_erp_safety_backup_before_restore.db");
-      fs2.copyFileSync(activeConfig.dbPath, safetyBackupPath);
-      try {
-        const tempDb = new (require("better-sqlite3"))(backupFilePath);
-        const integrity = tempDb.pragma("integrity_check");
-        tempDb.close();
-        if (integrity[0]?.integrity_check !== "ok" && integrity[0] !== "ok") {
-          throw new Error("Integrity check failed on backup file");
-        }
-        fs2.copyFileSync(backupFilePath, activeConfig.dbPath);
-        const walFile = `${activeConfig.dbPath}-wal`;
-        const shmFile = `${activeConfig.dbPath}-shm`;
-        if (fs2.existsSync(walFile))
-          fs2.unlinkSync(walFile);
-        if (fs2.existsSync(shmFile))
-          fs2.unlinkSync(shmFile);
-        initDB(activeConfig.dbPath, schemaSql);
-        return { success: true };
-      } catch (err) {
-        fs2.copyFileSync(safetyBackupPath, activeConfig.dbPath);
-        initDB(activeConfig.dbPath, schemaSql);
-        throw new Error(`Restore failed: ${err.message}. Safety backup restored.`);
-      }
-    });
-    import_electron.ipcMain.handle("get-lan-info", async () => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      return {
-        ip: getLocalIpAddress(),
-        port: PORT
-      };
-    });
-    import_electron.ipcMain.handle("get-customers-aging", async () => {
-      assertCan(activeDesktopSession?.role, "READ_CUSTOMERS");
-      const db = getDB();
-      const customers = db.prepare("SELECT * FROM customers").all();
-      return customers.map((c) => {
-        const aging = calculateAging(c, /* @__PURE__ */ new Date());
-        return {
-          ...c,
-          aging
-        };
-      });
-    });
-    import_electron.ipcMain.handle("get-customer-ledger", async (event, customerId) => {
-      assertCan(activeDesktopSession?.role, "READ_CUSTOMERS");
-      const db = getDB();
-      return db.prepare("SELECT * FROM customer_ledger WHERE customer_id = ? ORDER BY id DESC").all(customerId);
-    });
-    import_electron.ipcMain.handle("record-udhaar-payment", async (event, customerId, amount, note) => {
-      assertCan(activeDesktopSession?.role, "RECORD_PAYMENT");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        db.prepare("UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?").run(amount, customerId);
-        const newCustomer = db.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(customerId);
-        db.prepare(`
-      INSERT INTO customer_ledger (customer_id, type, amount, balance_after, note)
-      VALUES (?, 'PAYMENT', ?, ?, ?)
-    `).run(customerId, amount, newCustomer.current_balance, note);
-        db.prepare("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RECORD_PAYMENT', 'customer_ledger', ?, ?)").run(activeDesktopSession?.user_id, customerId, `Payment amount: ${amount}`);
-        return newCustomer.current_balance;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("queue-sms-reminder", async (event, customerId) => {
-      assertCan(activeDesktopSession?.role, "RECORD_PAYMENT");
-      const db = getDB();
-      const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customerId);
-      if (!customer || !customer.phone)
-        throw new Error("Customer or phone not found");
-      const shopNameRow = db.prepare("SELECT value FROM settings WHERE key = 'shop_name'").get();
-      const shopName = shopNameRow?.value || "Chauhan Electronics";
-      const body = formatPaymentReminder(customer, shopName);
-      db.prepare(`
-    INSERT INTO sms_outbox (phone, body, status) VALUES (?, ?, 'QUEUED')
-  `).run(customer.phone, body);
-      return true;
-    });
-    import_electron.ipcMain.handle("get-suppliers", async () => {
-      assertCan(activeDesktopSession?.role, "READ_SUPPLIERS");
-      const db = getDB();
-      return db.prepare("SELECT * FROM suppliers ORDER BY name ASC").all();
-    });
-    handleElevated("create-supplier", "CREATE_SUPPLIER", async (event, name, phone, gstin) => {
-      const db = getDB();
-      const res = db.prepare(
-        "INSERT INTO suppliers (name, phone, gstin, current_payable) VALUES (?, ?, ?, 0)"
-      ).run(name, phone || null, gstin || null);
-      return res.lastInsertRowid;
-    });
-    import_electron.ipcMain.handle("get-supplier-ledger", async (event, supplierId) => {
-      assertCan(activeDesktopSession?.role, "READ_SUPPLIERS");
-      const db = getDB();
-      const grns = db.prepare(`
-    SELECT grn_id as id, 'PURCHASE' as type, invoice_ref as ref, total_cost as amount, created_at
-    FROM grn 
-    WHERE supplier_id = ?
-  `).all(supplierId);
-      const payments = db.prepare(`
-    SELECT id, 'PAYMENT' as type, '' as ref, amount, created_at, note
-    FROM expenses 
-    WHERE category = 'SUPPLIER_PAYMENT' AND note LIKE ?
-  `).all(`Supplier ID: ${supplierId} %`);
-      const ledger = [...grns, ...payments].sort((a, b) => {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-      return ledger;
-    });
-    import_electron.ipcMain.handle("record-supplier-payment", async (event, supplierId, amount, note) => {
-      assertCan(activeDesktopSession?.role, "RECORD_PAYMENT");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        db.prepare("UPDATE suppliers SET current_payable = current_payable - ? WHERE supplier_id = ?").run(amount, supplierId);
-        db.prepare(`
-      INSERT INTO expenses (category, amount, note) VALUES ('SUPPLIER_PAYMENT', ?, ?)
-    `).run(amount, `Supplier ID: ${supplierId} | ${note}`);
-        return true;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("commit-intake-batch", async (event, payload) => {
-      assertCan(activeDesktopSession?.role, "RECEIVE_GRN");
-      const { supplier_id, invoice_ref, total_cost_paise, user_id, items, type } = payload;
-      const db = getDB();
-      const tx = db.transaction(() => {
-        const grnRes = db.prepare(`
-      INSERT INTO grn (supplier_id, invoice_ref, total_cost, received_by)
-      VALUES (?, ?, ?, ?)
-    `).run(supplier_id || null, invoice_ref || "INTAKE", total_cost_paise, activeDesktopSession?.user_id);
-        const grnId = grnRes.lastInsertRowid;
-        if (supplier_id) {
-          db.prepare("UPDATE suppliers SET current_payable = current_payable + ? WHERE supplier_id = ?").run(total_cost_paise, supplier_id);
-        }
-        if (type === "SERIALIZED") {
-          for (const item of items) {
-            db.prepare(`
-          INSERT INTO product_instances (product_id, serial_number, status, batch_number, purchase_cost, grn_id)
-          VALUES (?, ?, 'IN_STOCK', ?, ?, ?)
-        `).run(item.product_id, item.serial_number, item.batch_number, item.purchase_cost, grnId);
-          }
-        } else if (type === "LOOSE") {
-          for (const item of items) {
-            db.prepare("UPDATE products SET loose_qty = loose_qty + ? WHERE product_id = ?").run(item.qty, item.product_id);
-          }
-        }
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'RECEIVE_GRN', 'grn', ?, ?)`).run(activeDesktopSession?.user_id, grnId, `Processed ${type} intake via LAN API.`);
-        return grnId;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("create-product", async (event, payload) => {
-      assertCan(activeDesktopSession?.role, "RECEIVE_GRN");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        const res = db.prepare(`
-      INSERT INTO products (sku_code, brand_name, model_name, category, hsn_code, gst_rate, requires_serial, warranty_months, min_restock_level, counter_price, dealer_price, distributor_price, loose_qty)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `).run(
-          payload.sku_code,
-          payload.brand_name,
-          payload.model_name,
-          payload.category,
-          payload.hsn_code,
-          payload.gst_rate,
-          payload.requires_serial ? 1 : 0,
-          payload.warranty_months,
-          payload.min_restock_level,
-          payload.counter_price,
-          payload.dealer_price,
-          payload.distributor_price
-        );
-        const newId = res.lastInsertRowid;
-        if (payload.fitment_tags && payload.fitment_tags.length > 0) {
-          for (const tag of payload.fitment_tags) {
-            db.prepare("INSERT INTO product_fitment (product_id, vehicle_tag) VALUES (?, ?)").run(newId, tag);
-          }
-        }
-        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'CREATE', 'product', ?, ?)`).run(activeDesktopSession?.user_id, newId, `Created product model: ${payload.brand_name} ${payload.model_name}`);
-        return newId;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("get-repair-jobs", async () => {
-      assertCan(activeDesktopSession?.role, "READ_REPAIRS");
-      const db = getDB();
-      return db.prepare("SELECT * FROM repair_jobs ORDER BY job_id DESC").all();
-    });
-    import_electron.ipcMain.handle("create-repair-job", async (event, payload) => {
-      assertCan(activeDesktopSession?.role, "MANAGE_REPAIRS");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        const prefixRow = db.prepare("SELECT value FROM settings WHERE key = 'job_prefix'").get();
-        const nextNoRow = db.prepare("SELECT value FROM settings WHERE key = 'next_job_no'").get();
-        let prefix = prefixRow ? prefixRow.value : "JOB-";
-        let nextNo = nextNoRow ? parseInt(nextNoRow.value, 10) : 1e3;
-        if (!prefixRow)
-          db.prepare("INSERT INTO settings (key, value) VALUES ('job_prefix', 'JOB-')").run();
-        if (!nextNoRow)
-          db.prepare("INSERT INTO settings (key, value) VALUES ('next_job_no', '1000')").run();
-        const jobNo = `${prefix}${nextNo}`;
-        let custId = payload.customer_id || null;
-        if (!custId && payload.customer_phone) {
-          const match = db.prepare("SELECT customer_id FROM customers WHERE phone = ?").get(payload.customer_phone);
-          if (match)
-            custId = match.customer_id;
-        }
-        const res = db.prepare(`
-      INSERT INTO repair_jobs (
-        job_no, customer_id, customer_phone, customer_name,
-        product_name, serial_number, is_warranty,
-        issue_reported, est_cost, advance_paid
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-          jobNo,
-          custId,
-          payload.customer_phone,
-          payload.customer_name,
-          payload.product_name,
-          payload.serial_number,
-          payload.is_warranty ? 1 : 0,
-          payload.issue_reported,
-          payload.est_cost || 0,
-          payload.advance_paid || 0
-        );
-        db.prepare("UPDATE settings SET value = ? WHERE key = 'next_job_no'").run((nextNo + 1).toString());
-        return res.lastInsertRowid;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("get-repair-parts", async (event, jobId) => {
-      assertCan(activeDesktopSession?.role, "READ_REPAIRS");
-      const db = getDB();
-      return db.prepare(`
-    SELECT rp.*, p.brand_name, p.model_name 
-    FROM repair_parts rp
-    JOIN products p ON rp.product_id = p.product_id
-    WHERE rp.job_id = ?
-  `).all(jobId);
-    });
-    import_electron.ipcMain.handle("add-repair-part", async (event, jobId, type, item) => {
-      assertCan(activeDesktopSession?.role, "MANAGE_REPAIRS");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        let cost = item.cost;
-        if (type === "SERIALIZED") {
-          const res = db.prepare("UPDATE product_instances SET status = 'SOLD' WHERE instance_id = ? AND status = 'IN_STOCK'").run(item.instance_id);
-          if (res.changes === 0)
-            throw new Error("Serial number not available in stock.");
-          db.prepare(`
-        INSERT INTO repair_parts (job_id, product_id, instance_id, qty, cost)
-        VALUES (?, ?, ?, 1, ?)
-      `).run(jobId, item.product_id, item.instance_id, cost);
-        } else {
-          const prod = db.prepare("SELECT loose_qty FROM products WHERE product_id = ?").get(item.product_id);
-          if (!prod || prod.loose_qty < item.qty)
-            throw new Error("Not enough loose quantity in stock.");
-          db.prepare("UPDATE products SET loose_qty = loose_qty - ? WHERE product_id = ?").run(item.qty, item.product_id);
-          db.prepare(`
-        INSERT INTO repair_parts (job_id, product_id, qty, cost)
-        VALUES (?, ?, ?, ?)
-      `).run(jobId, item.product_id, item.qty, cost * item.qty);
-          cost = cost * item.qty;
-        }
-        db.prepare("UPDATE repair_jobs SET parts_cost = parts_cost + ? WHERE job_id = ?").run(cost, jobId);
-        return true;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("update-repair-status", async (event, jobId, newStatus, notes) => {
-      assertCan(activeDesktopSession?.role, "MANAGE_REPAIRS");
-      const db = getDB();
-      const tx = db.transaction(() => {
-        const job = db.prepare("SELECT status FROM repair_jobs WHERE job_id = ?").get(jobId);
-        if (!job)
-          throw new Error("Job not found");
-        if (job.status !== newStatus) {
-          db.prepare("INSERT INTO repair_status_history (job_id, old_status, new_status) VALUES (?, ?, ?)").run(jobId, job.status, newStatus);
-          let extraUpdate = "";
-          let params = [newStatus];
-          if (newStatus === "READY") {
-            extraUpdate = ", ready_date = datetime('now')";
-          }
-          if (notes) {
-            extraUpdate += ", technician_notes = ?";
-            params.push(notes);
-          }
-          params.push(jobId);
-          db.prepare(`UPDATE repair_jobs SET status = ?${extraUpdate} WHERE job_id = ?`).run(...params);
-          db.prepare("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'REPAIR_STATUS_UPDATE', 'repair_jobs', ?, ?)").run(activeDesktopSession?.user_id, jobId, `Status changed from ${job.status} to ${newStatus}`);
-        } else if (notes) {
-          db.prepare(`UPDATE repair_jobs SET technician_notes = ? WHERE job_id = ?`).run(notes, jobId);
-        }
-        return true;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("deliver-repair-job", async (event, jobId, finalCost, labourCost) => {
-      assertCan(activeDesktopSession?.role, "MANAGE_REPAIRS");
-      const db = getDB();
-      db.prepare(`
-    UPDATE repair_jobs 
-    SET status = 'DELIVERED', final_cost = ?, labour_cost = ?, delivered_date = datetime('now')
-    WHERE job_id = ?
-  `).run(finalCost, labourCost, jobId);
-      return true;
-    });
-    handleElevated("record-expense", "RECORD_EXPENSE", async (event, category, amount, note) => {
-      const db = getDB();
-      const res = db.prepare(`
-    INSERT INTO expenses (category, amount, note) VALUES (?, ?, ?)
-  `).run(category, amount, note);
-      return res.lastInsertRowid;
-    });
-    import_electron.ipcMain.handle("get-expenses", async (event, limit = 50) => {
-      assertCan(activeDesktopSession?.role, "READ_ACCOUNTING");
-      const db = getDB();
-      return db.prepare(`
-    SELECT * FROM expenses 
-    WHERE category != 'SUPPLIER_PAYMENT' 
-    ORDER BY created_at DESC LIMIT ?
-  `).all(limit);
-    });
-    import_electron.ipcMain.handle("get-eod-reconciliation", async (event, dateStr) => {
-      assertCan(activeDesktopSession?.role, "READ_ACCOUNTING");
-      const db = getDB();
-      const datePattern = `${dateStr}%`;
-      const sales = db.prepare(`
-    SELECT payment_mode, SUM(amount_paid) as total 
-    FROM sales 
-    WHERE created_at LIKE ? AND status = 'COMPLETED'
-    GROUP BY payment_mode
-  `).all(datePattern);
-      let salesCash = 0;
-      let salesDigital = 0;
-      sales.forEach((s) => {
-        if (s.payment_mode === "CASH")
-          salesCash += s.total;
-        else
-          salesDigital += s.total;
-      });
-      const udhaarRow = db.prepare(`
-    SELECT SUM(amount) as total FROM customer_ledger 
-    WHERE type = 'PAYMENT' AND created_at LIKE ?
-  `).get(datePattern);
-      const udhaarReceived = udhaarRow?.total || 0;
-      const expRow = db.prepare(`
-    SELECT SUM(amount) as total FROM expenses 
-    WHERE category != 'SUPPLIER_PAYMENT' AND created_at LIKE ?
-  `).get(datePattern);
-      const opsExpenses = expRow?.total || 0;
-      const supRow = db.prepare(`
-    SELECT SUM(amount) as total FROM expenses 
-    WHERE category = 'SUPPLIER_PAYMENT' AND created_at LIKE ?
-  `).get(datePattern);
-      const supplierPayments = supRow?.total || 0;
-      const cogsRow = db.prepare(`
-    SELECT SUM(pi.purchase_cost) as total 
-    FROM sale_items si
-    JOIN product_instances pi ON si.instance_id = pi.instance_id
-    JOIN sales s ON si.sale_id = s.sale_id
-    WHERE s.created_at LIKE ? AND s.status = 'COMPLETED'
-  `).get(datePattern);
-      const serializedCOGS = cogsRow?.total || 0;
-      return {
-        salesCash,
-        salesDigital,
-        udhaarReceived,
-        opsExpenses,
-        supplierPayments,
-        serializedCOGS,
-        totalRevenue: salesCash + salesDigital,
-        totalInflow: salesCash + salesDigital + udhaarReceived,
-        totalOutflow: opsExpenses + supplierPayments,
-        netMargin: salesCash + salesDigital - serializedCOGS - opsExpenses
-      };
-    });
-    handleElevated("backup-database", "BACKUP_RESTORE", async (event) => {
-      if (!mainWindow)
-        return { success: false, error: "No main window" };
-      const db = getDB();
-      const { canceled, filePath } = await import_electron.dialog.showSaveDialog(mainWindow, {
-        title: "Backup Database",
-        defaultPath: `chauhan_erp_backup_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.sqlite`,
-        filters: [{ name: "SQLite Database", extensions: ["sqlite"] }]
-      });
-      if (canceled || !filePath)
-        return { success: false, error: "Canceled" };
-      try {
-        await db.backup(filePath);
-        return { success: true, filePath };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    handleElevated("export-csv", "BACKUP_RESTORE", async (event, tableName) => {
-      if (!mainWindow)
-        return { success: false, error: "No main window" };
-      const db = getDB();
-      const allowed = ["sales", "customers", "products", "repair_jobs", "suppliers", "expenses"];
-      if (!allowed.includes(tableName))
-        return { success: false, error: "Invalid table" };
-      const { canceled, filePath } = await import_electron.dialog.showSaveDialog(mainWindow, {
-        title: `Export ${tableName} to CSV`,
-        defaultPath: `${tableName}_export_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv`,
-        filters: [{ name: "CSV Files", extensions: ["csv"] }]
-      });
-      if (canceled || !filePath)
-        return { success: false, error: "Canceled" };
-      try {
-        const rows = db.prepare(`SELECT * FROM ${tableName}`).all();
-        if (rows.length === 0) {
-          fs2.writeFileSync(filePath, "No data found\\n");
-          return { success: true, filePath };
-        }
-        const headers = Object.keys(rows[0]);
-        const toCsv = (val) => {
-          if (val === null || val === void 0)
-            return '""';
-          const str = String(val);
-          if (str.includes(",") || str.includes('"') || str.includes("\\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-          }
-          return str;
-        };
-        const csvLines = [
-          headers.join(","),
-          ...rows.map((row) => headers.map((h) => toCsv(row[h])).join(","))
-        ];
-        fs2.writeFileSync(filePath, csvLines.join("\\n"));
-        return { success: true, filePath };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    handleElevated("export-raw-csv", "BACKUP_RESTORE", async (event, reportName, csvData) => {
-      if (!mainWindow)
-        return { success: false, error: "No main window" };
-      const { canceled, filePath } = await import_electron.dialog.showSaveDialog(mainWindow, {
-        title: `Export ${reportName} Report`,
-        defaultPath: `${reportName}_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv`,
-        filters: [{ name: "CSV Files", extensions: ["csv"] }]
-      });
-      if (canceled || !filePath)
-        return { success: false, error: "Canceled" };
-      try {
-        fs2.writeFileSync(filePath, csvData);
-        return { success: true, filePath };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    handleElevated("get-report-data", "VIEW_REPORTS", async (event, reportType, params) => {
-      const db = getDB();
-      const { startDate, endDate, days } = params || {};
-      const sDate = startDate ? startDate + " 00:00:00" : null;
-      const eDate = endDate ? endDate + " 23:59:59" : null;
-      if (reportType === "Margin") {
-        const rows = db.prepare(`
-      SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
-             si.line_total, p.gst_rate, si.unit_cost, si.quantity
-      FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id JOIN products p ON si.product_id = p.product_id
-      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
-    `).all(...sDate && eDate ? [sDate, eDate] : []);
-        const { getTaxableValue } = require_gst();
-        const groups = {};
-        rows.forEach((r) => {
-          const key = `${r.date}|${r.category}|${r.brand_name}|${r.tier_applied}`;
-          if (!groups[key])
-            groups[key] = { date: r.date, category: r.category, brand_name: r.brand_name, tier_applied: r.tier_applied, revenue: 0, cogs: 0, profit: 0 };
-          const revenue = getTaxableValue(r.line_total, r.gst_rate);
-          const cogs = r.unit_cost * r.quantity;
-          groups[key].revenue += revenue;
-          groups[key].cogs += cogs;
-          groups[key].profit += revenue - cogs;
-        });
-        return Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
-      }
-      if (reportType === "Sales") {
-        return db.prepare(`
-      SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
-             SUM(si.line_total) as total_revenue, SUM(si.quantity) as items_sold, COUNT(DISTINCT s.sale_id) as invoices_count
-      FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id JOIN products p ON si.product_id = p.product_id
-      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
-      GROUP BY date, p.category, p.brand_name, s.tier_applied ORDER BY date DESC
-    `).all(...sDate && eDate ? [sDate, eDate] : []);
-      }
-      if (reportType === "LowStock") {
-        return db.prepare(`
-      SELECT p.product_id, p.sku_code, p.model_name, p.min_restock_level, s.name as supplier_name,
-             (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
-      FROM products p LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id
-      WHERE ((SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty) <= p.min_restock_level
-      ORDER BY s.name, p.model_name
-    `).all();
-      }
-      if (reportType === "DeadStock") {
-        return db.prepare(`
-      SELECT p.product_id, p.sku_code, p.model_name, MAX(s.created_at) as last_sale_date,
-             (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
-      FROM products p LEFT JOIN sale_items si ON p.product_id = si.product_id LEFT JOIN sales s ON si.sale_id = s.sale_id
-      GROUP BY p.product_id
-      HAVING (last_sale_date IS NULL OR last_sale_date <= datetime('now', ?)) AND in_stock_qty > 0
-      ORDER BY last_sale_date ASC
-    `).all(`-${days || 30} days`);
-      }
-      if (reportType === "Valuation") {
-        const data = db.prepare(`
-      SELECT (SELECT SUM(purchase_cost) FROM product_instances WHERE status = 'IN_STOCK') as serialized_value,
-             (SELECT SUM(loose_qty * purchase_cost) FROM products) as loose_value
-    `).get();
-        data.total = (data.serialized_value || 0) + (data.loose_value || 0);
-        return data;
-      }
-      if (reportType === "GSTR1") {
-        const invoices = db.prepare(`
-      SELECT s.sale_id, s.invoice_no, s.created_at, c.gstin, c.name as customer_name, s.subtotal, s.discount, s.cgst, s.sgst, s.igst, s.grand_total
-      FROM sales s LEFT JOIN customers c ON s.customer_id = c.customer_id
-      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
-      ORDER BY s.created_at DESC
-    `).all(...sDate && eDate ? [sDate, eDate] : []);
-        const { getTaxableValue } = require_gst();
-        let total_cgst = 0, total_sgst = 0, total_igst = 0, total_taxable = 0;
-        for (const inv of invoices) {
-          const items = db.prepare(`SELECT si.line_total, p.gst_rate FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = ?`).all(inv.sale_id);
-          let inv_taxable = 0;
-          let rates = /* @__PURE__ */ new Set();
-          items.forEach((si) => {
-            const ratio = (inv.subtotal - inv.discount) / inv.subtotal;
-            inv_taxable += getTaxableValue(si.line_total * ratio, si.gst_rate);
-            rates.add(si.gst_rate);
-          });
-          inv.taxable = inv_taxable;
-          inv.gst_rates = Array.from(rates).join(",");
-          total_taxable += inv_taxable;
-          total_cgst += inv.cgst;
-          total_sgst += inv.sgst;
-          total_igst += inv.igst;
-        }
-        return { invoices, summary: { total_cgst, total_sgst, total_igst, total_taxable } };
-      }
-      if (reportType === "Udhaar") {
-        const customers = db.prepare(`SELECT customer_id, name, phone, current_balance, credit_limit, credit_due_date FROM customers WHERE current_balance > 0`).all();
-        const { calculateAging: calculateAging2 } = require_ledger();
-        const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
-        customers.forEach((c) => {
-          const age = calculateAging2(c, /* @__PURE__ */ new Date());
-          buckets["0-30"] += age["0-30"];
-          buckets["31-60"] += age["31-60"];
-          buckets["61-90"] += age["61-90"];
-          buckets["90+"] += age["90+"];
-          buckets["total_overdue"] += age.total_overdue;
-        });
-        const total_receivable = customers.reduce((sum, c) => sum + c.current_balance, 0);
-        customers.sort((a, b) => b.current_balance - a.current_balance);
-        return { customers, buckets, total_receivable };
-      }
-      throw new Error("Unknown report type");
-    });
-    import_electron.ipcMain.handle("db-warranty-check", async (event, serial) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      const instance = db.prepare(`
-    SELECT pi.*, p.brand_name, p.model_name, p.category 
-    FROM product_instances pi
-    JOIN products p ON pi.product_id = p.product_id
-    WHERE pi.serial_number = ?
-  `).get(serial);
-      if (!instance)
-        return { found: false };
-      const saleItem = db.prepare(`
-    SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, c.name as customer_name, c.phone as customer_phone
-    FROM sale_items si
-    JOIN sales s ON si.sale_id = s.sale_id
-    LEFT JOIN customers c ON s.customer_id = c.customer_id
-    WHERE si.instance_id = ? AND s.status = 'COMPLETED'
-  `).get(instance.instance_id);
-      const now = /* @__PURE__ */ new Date();
-      let warranty_valid = false;
-      if (instance.warranty_expires_at) {
-        const expires = new Date(instance.warranty_expires_at);
-        expires.setHours(23, 59, 59, 999);
-        warranty_valid = now <= expires;
-      }
-      return { found: true, instance, sold_by_us: !!saleItem, sale: saleItem || null, warranty_valid };
-    });
-    import_electron.ipcMain.handle("db-return-validate", async (event, serial) => {
-      assertCan(activeDesktopSession?.role, "ISSUE_CN");
-      const db = getDB();
-      const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
-      if (!instance)
-        return { outcome: "REJECT_UNKNOWN", message: "Never part of our inventory." };
-      if (instance.status === "RMA_RETURNED")
-        return { outcome: "REJECT_ALREADY_RETURNED", message: "Already returned." };
-      const saleItem = db.prepare(`
-    SELECT si.*, s.invoice_no, s.created_at as sale_date, s.customer_id, s.payment_mode, c.name as customer_name, c.phone as customer_phone
-    FROM sale_items si
-    JOIN sales s ON si.sale_id = s.sale_id
-    LEFT JOIN customers c ON s.customer_id = c.customer_id
-    WHERE si.instance_id = ? AND s.status = 'COMPLETED'
-  `).get(instance.instance_id);
-      if (!saleItem)
-        return { outcome: "REJECT_NEVER_SOLD", message: "Never sold to a customer." };
-      return { outcome: "ALLOW", saleItem, instance };
-    });
-    import_electron.ipcMain.handle("db-return-accept", async (event, payload) => {
-      assertCan(activeDesktopSession?.role, "ISSUE_CN");
-      const { serial, reason, resolution, refund_amount, replacement_serial, user_id, condition_sealed } = payload;
-      const db = getDB();
-      const tx = db.transaction(() => {
-        const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
-        if (!instance || instance.status === "RMA_RETURNED")
-          throw new Error("Invalid or already returned serial.");
-        const saleItem = db.prepare(`
-      SELECT si.*, s.payment_mode, s.customer_id, s.sale_id
-      FROM sale_items si
-      JOIN sales s ON si.sale_id = s.sale_id
-      WHERE si.instance_id = ? AND s.status = 'COMPLETED'
-    `).get(instance.instance_id);
-        if (!saleItem)
-          throw new Error("Sale item not found.");
-        if (refund_amount > saleItem.unit_price)
-          throw new Error("Refund amount cannot exceed original unit price.");
-        let newStatus = "RMA_RETURNED";
-        if (resolution === "CREDIT_NOTE" && condition_sealed)
-          newStatus = "IN_STOCK";
-        db.prepare("UPDATE product_instances SET status = ? WHERE instance_id = ?").run(newStatus, instance.instance_id);
-        let creditNoteNo = null;
-        let cnId = null;
-        if (resolution === "CREDIT_NOTE") {
-          const prefixRow = db.prepare("SELECT value FROM settings WHERE key = 'cn_prefix'").get();
-          const sequenceRow = db.prepare("SELECT value FROM settings WHERE key = 'next_cn_no'").get();
-          const prefix = prefixRow?.value || "CN-";
-          const sequence = sequenceRow?.value || "1";
-          creditNoteNo = `${prefix}${sequence}`;
-          db.prepare(`
-        INSERT INTO credit_notes (cn_no, sale_id, instance_id, amount, reason)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(creditNoteNo, saleItem.sale_id, instance.instance_id, refund_amount, reason);
-          cnId = db.prepare("SELECT last_insert_rowid() as id").get().id;
-          db.prepare(`
-        INSERT OR REPLACE INTO settings (key, value) 
-        VALUES ('next_cn_no', CAST((CAST(? AS INTEGER) + 1) AS TEXT))
-      `).run(sequence);
-          if (saleItem.payment_mode === "UDHAAR" && saleItem.customer_id) {
-            db.prepare("UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?").run(refund_amount, saleItem.customer_id);
-            const cust = db.prepare("SELECT current_balance FROM customers WHERE customer_id = ?").get(saleItem.customer_id);
-            db.prepare(`
-          INSERT INTO customer_ledger (customer_id, type, ref_id, amount, balance_after, note)
-          VALUES (?, 'RETURN', (SELECT cn_id FROM credit_notes WHERE cn_no = ?), ?, ?, ?)
-        `).run(saleItem.customer_id, creditNoteNo, refund_amount, cust.current_balance, `Credit Note ${creditNoteNo}`);
-          }
-        } else if (resolution === "REPLACEMENT") {
-          if (!replacement_serial)
-            throw new Error("Replacement serial is required.");
-          const repInstance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ? AND status = 'IN_STOCK'").get(replacement_serial);
-          if (!repInstance)
-            throw new Error("Replacement serial not found or not IN_STOCK.");
-          const prodRow = db.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(instance.product_id);
-          const warrantyMonths = prodRow?.warranty_months ?? 12;
-          db.prepare(`
-        UPDATE product_instances SET status = 'SOLD', sold_at = datetime('now'), warranty_expires_at = datetime('now', '+' || ? || ' months')
-        WHERE instance_id = ?
-      `).run(warrantyMonths, repInstance.instance_id);
-          db.prepare(`
-        INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total)
-        VALUES (?, ?, ?, 1, 0, 0, 0)
-      `).run(saleItem.sale_id, repInstance.product_id, repInstance.instance_id);
-        } else if (resolution === "SEND_TO_COMPANY") {
-          db.prepare(`
-        INSERT INTO rma_register (instance_id, reason, status)
-        VALUES (?, ?, 'SENT')
-      `).run(instance.instance_id, reason);
-        }
-        db.prepare(`
-      INSERT INTO audit_log (user_id, action, entity, entity_id, detail)
-      VALUES (?, 'RETURN_ACCEPT', 'product_instances', ?, ?)
-    `).run(activeDesktopSession?.user_id, instance.instance_id, `Resolution: ${resolution}, Refund: ${refund_amount}, Reason: ${reason}`);
-        return { success: true, creditNoteNo, cnId, newStatus };
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("db-rma-list", async () => {
-      assertCan(activeDesktopSession?.role, "READ_CATALOGUE");
-      const db = getDB();
-      return db.prepare(`
-    SELECT r.*, pi.serial_number, p.brand_name, p.model_name, s.name as supplier_name
-    FROM rma_register r
-    JOIN product_instances pi ON r.instance_id = pi.instance_id
-    JOIN products p ON pi.product_id = p.product_id
-    LEFT JOIN suppliers s ON r.supplier_id = s.supplier_id
-    ORDER BY r.sent_at DESC
-  `).all();
-    });
-    handleElevated("db-rma-resolve", "EDIT_CATALOGUE", async (event, rma_id, status, note) => {
-      const db = getDB();
-      const tx = db.transaction(() => {
-        db.prepare("UPDATE rma_register SET status = ?, resolved_at = datetime('now'), note = ? WHERE rma_id = ?").run(status, note || null, rma_id);
-        if (status === "RECEIVED_BACK") {
-          const rma = db.prepare("SELECT instance_id FROM rma_register WHERE rma_id = ?").get(rma_id);
-          db.prepare("UPDATE product_instances SET status = 'IN_STOCK' WHERE instance_id = ?").run(rma.instance_id);
-        }
-        return true;
-      });
-      return tx();
-    });
-    import_electron.ipcMain.handle("get-print-data", async (event, kind, id) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-      const settings = {};
-      settingsRows.forEach((r) => settings[r.key] = r.value);
-      if (kind === "SALE") {
-        const sale = db.prepare(`
-      SELECT s.*, c.name as customer_name, c.gstin as customer_gstin, c.phone as customer_phone, c.shop_name as customer_shop_name 
-      FROM sales s LEFT JOIN customers c ON s.customer_id = c.customer_id
-      WHERE s.sale_id = ?
-    `).get(id);
-        const items = db.prepare(`
-      SELECT si.*, p.model_name, p.hsn_code, p.gst_rate, pi.serial_number
-      FROM sale_items si
-      JOIN products p ON si.product_id = p.product_id
-      LEFT JOIN product_instances pi ON si.instance_id = pi.instance_id
-      WHERE si.sale_id = ?
-    `).all(id);
-        return { settings, sale, items };
-      } else if (kind === "CREDIT_NOTE") {
-        const cn = db.prepare(`
-      SELECT cn.*, s.invoice_no, s.created_at as sale_date,
-      c.name as customer_name, c.gstin as customer_gstin
-      FROM credit_notes cn
-      JOIN sales s ON cn.sale_id = s.sale_id
-      LEFT JOIN customers c ON s.customer_id = c.customer_id
-      WHERE cn.cn_id = ?
-    `).get(id);
-        const instance = db.prepare(`
-      SELECT pi.*, p.model_name, p.hsn_code
-      FROM product_instances pi
-      JOIN products p ON pi.product_id = p.product_id
-      WHERE pi.instance_id = ?
-    `).get(cn.instance_id);
-        return { settings, cn, instance };
-      } else if (kind === "REPAIR") {
-        const job = db.prepare(`
-      SELECT rj.*, c.gstin as customer_gstin, c.shop_name as customer_shop_name
-      FROM repair_jobs rj
-      LEFT JOIN customers c ON rj.customer_id = c.customer_id
-      WHERE rj.job_id = ?
-    `).get(id);
-        const items = db.prepare(`
-      SELECT rp.*, p.model_name, p.hsn_code, p.gst_rate
-      FROM repair_parts rp
-      JOIN products p ON rp.product_id = p.product_id
-      WHERE rp.job_id = ?
-    `).all(id);
-        return { settings, job, items };
-      }
-      return null;
-    });
-    import_electron.ipcMain.handle("print-thermal", async (event, textContent) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      try {
-        const db = getDB();
-        const printerTypeSet = db.prepare("SELECT value FROM settings WHERE key = 'printer_type'").get();
-        const printerInterfaceSet = db.prepare("SELECT value FROM settings WHERE key = 'printer_interface'").get();
-        const printerWidthSet = db.prepare("SELECT value FROM settings WHERE key = 'printer_width'").get();
-        const pType = printerTypeSet?.value || "";
-        const pInterface = printerInterfaceSet?.value || "";
-        const pWidth = parseInt(printerWidthSet?.value || "80", 10);
-        if (!pType || !pInterface) {
-          console.log("No thermal printer configured, falling back to A4 PDF");
-          return { success: false, fallback: true };
-        }
-        const printer = new import_node_thermal_printer.ThermalPrinter({
-          type: pType.toLowerCase() === "star" ? import_node_thermal_printer.PrinterTypes.STAR : import_node_thermal_printer.PrinterTypes.EPSON,
-          interface: pInterface,
-          characterSet: import_node_thermal_printer.CharacterSet.PC852_LATIN2,
-          removeSpecialCharacters: false,
-          lineCharacter: "=",
-          width: pWidth === 58 ? 32 : 48,
-          breakLine: import_node_thermal_printer.BreakLine.WORD
-        });
-        printer.alignCenter();
-        printer.println(textContent);
-        printer.cut();
-        const isConnected = await printer.isPrinterConnected();
-        if (!isConnected) {
-          console.log("Printer not connected");
-          return { success: false, fallback: true };
-        }
-        await printer.execute();
-        return { success: true };
-      } catch (err) {
-        console.error("Thermal Print Error:", err);
-        return { success: false, fallback: true };
-      }
-    });
-    import_electron.ipcMain.handle("log-reprint", async (event, kind, id, userId) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      db.prepare(`
-    INSERT INTO audit_log (user_id, action, entity, entity_id, detail)
-    VALUES (?, 'REPRINT', ?, ?, ?)
-  `).run(activeDesktopSession?.user_id, kind === "SALE" ? "sales" : "credit_notes", id, "Reprinted document");
-      return true;
-    });
-    import_electron.ipcMain.handle("enqueue-sms", async (event, phone, templateKey, vars) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      return { success: enqueueSms(phone, templateKey, vars) };
-    });
-    import_electron.ipcMain.handle("send-udhaar-reminder", async (event, customer_id) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      const cust = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(customer_id);
-      if (!cust || !cust.phone || cust.phone === "0000000000")
-        return { success: false, error: "Invalid phone" };
-      const balance = (cust.current_balance / 100).toFixed(2);
-      const queued = enqueueSms(cust.phone, "sms_tpl_reminder", { balance });
-      return { success: queued };
-    });
-    import_electron.ipcMain.handle("get-sms-outbox", async () => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      return db.prepare("SELECT * FROM sms_outbox ORDER BY id DESC LIMIT 100").all();
-    });
-    import_electron.ipcMain.handle("retry-sms", async (event, id) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      const db = getDB();
-      db.prepare("UPDATE sms_outbox SET status = 'QUEUED', retry_count = 0 WHERE id = ?").run(id);
-      return { success: true };
-    });
-    import_electron.ipcMain.handle("generate-upi-qr", async (event, amountPaise, invoiceNo) => {
-      assertCan(activeDesktopSession?.role, "CHECKOUT");
-      try {
-        const db = getDB();
-        const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-        const settings = {};
-        settingsRows.forEach((r) => settings[r.key] = r.value);
-        const vpa = settings["upi_vpa"];
-        if (!vpa)
-          return { success: false, error: "UPI VPA not configured in Settings" };
-        const shopName = (settings["shop_name"] || "Shop").replace(/[^a-zA-Z0-9 ]/g, "");
-        const amountRupees = (amountPaise / 100).toFixed(2);
-        const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(shopName)}&am=${amountRupees}&tn=${encodeURIComponent(invoiceNo)}&cu=INR`;
-        const qrDataUrl = await import_qrcode.default.toDataURL(upiUri, { width: 200, margin: 1, errorCorrectionLevel: "M" });
-        return { success: true, qrDataUrl, upiUri };
-      } catch (err) {
-        console.error("UPI QR generation error:", err);
-        return { success: false, error: err.message };
-      }
-    });
-    import_electron.ipcMain.handle("build-whatsapp-link", async (event, phone, message) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      try {
-        let normalized = phone.replace(/[\s\-+]/g, "");
-        if (normalized.startsWith("0"))
-          normalized = normalized.substring(1);
-        if (!normalized.startsWith("91") && normalized.length === 10)
-          normalized = "91" + normalized;
-        const url = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
-        return { success: true, url };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    import_electron.ipcMain.handle("build-invoice-message", async (event, saleId) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      try {
-        const db = getDB();
-        const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(saleId);
-        if (!sale)
-          return { success: false, error: "Sale not found" };
-        const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-        const settings = {};
-        settingsRows.forEach((r) => settings[r.key] = r.value);
-        const items = db.prepare(`
-      SELECT si.*, p.brand_name, p.model_name 
-      FROM sale_items si 
-      JOIN products p ON si.product_id = p.product_id 
-      WHERE si.sale_id = ?
-    `).all(saleId);
-        const shopName = settings["shop_name"] || "Chauhan Electronics";
-        const grandTotal = (sale.grand_total / 100).toFixed(2);
-        const amountPaid = (sale.amount_paid / 100).toFixed(2);
-        let msg = `\u{1F9FE} *${shopName}*
-`;
-        msg += `Invoice: *${sale.invoice_no}*
-`;
-        msg += `Date: ${sale.created_at}
-
-`;
-        msg += `*Items:*
-`;
-        items.forEach((item, idx) => {
-          msg += `${idx + 1}. ${item.brand_name} ${item.model_name} \xD7 ${item.quantity} \u2014 \u20B9${(item.line_total / 100).toFixed(2)}
-`;
-        });
-        msg += `
-*Grand Total: \u20B9${grandTotal}*
-`;
-        msg += `Paid: \u20B9${amountPaid} (${sale.payment_mode})
-`;
-        if (sale.grand_total > sale.amount_paid) {
-          msg += `\u26A0\uFE0F *Balance Due: \u20B9${((sale.grand_total - sale.amount_paid) / 100).toFixed(2)}*
-`;
-        }
-        msg += `
-Thank you for shopping with us! \u{1F64F}`;
-        return { success: true, message: msg };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    import_electron.ipcMain.handle("build-repair-message", async (event, jobId) => {
-      assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
-      try {
-        const db = getDB();
-        const job = db.prepare("SELECT * FROM repair_jobs WHERE job_id = ?").get(jobId);
-        if (!job)
-          return { success: false, error: "Job not found" };
-        const settingsRows = db.prepare("SELECT key, value FROM settings").all();
-        const settings = {};
-        settingsRows.forEach((r) => settings[r.key] = r.value);
-        const shopName = settings["shop_name"] || "Chauhan Electronics";
-        let msg = `\u{1F527} *${shopName} \u2014 Repair Update*
-
-`;
-        msg += `Job No: *${job.job_no}*
-`;
-        msg += `Device: ${job.product_name || "N/A"}
-`;
-        msg += `Status: *${job.status}*
-`;
-        if (job.est_cost)
-          msg += `Est. Cost: \u20B9${(job.est_cost / 100).toFixed(2)}
-`;
-        if (job.status === "READY")
-          msg += `
-\u2705 Your device is ready for pickup!
-`;
-        msg += `
-Contact us for any queries. \u{1F64F}`;
-        return { success: true, message: msg, phone: job.customer_phone };
-      } catch (err) {
-        return { success: false, error: err.message };
-      }
-    });
-    setInterval(() => {
-      try {
-        const db = getDB();
-        try {
-          db.prepare("ALTER TABLE sms_outbox ADD COLUMN retry_count INTEGER DEFAULT 0").run();
-        } catch (e) {
-        }
-        const pending = db.prepare("SELECT * FROM sms_outbox WHERE status = 'QUEUED' LIMIT 10").all();
-        for (const msg of pending) {
-          sendViaGateway(msg).then((success) => {
-            try {
-              if (success) {
-                db.prepare("UPDATE sms_outbox SET status = 'SENT', sent_at = datetime('now') WHERE id = ?").run(msg.id);
-              } else {
-                const newRetry = (msg.retry_count || 0) + 1;
-                const status = newRetry > 5 ? "FAILED" : "QUEUED";
-                db.prepare("UPDATE sms_outbox SET status = ?, retry_count = ? WHERE id = ?").run(status, newRetry, msg.id);
-              }
-            } catch (dbErr) {
-              console.error("[SMS WORKER] DB update error:", dbErr);
-            }
-          }).catch(() => {
-            const newRetry = (msg.retry_count || 0) + 1;
-            const status = newRetry > 5 ? "FAILED" : "QUEUED";
-            db.prepare("UPDATE sms_outbox SET status = ?, retry_count = ? WHERE id = ?").run(status, newRetry, msg.id);
-          });
-        }
-      } catch (err) {
-      }
-    }, 3e4);
-    mainWindow = null;
-    import_electron.app.on("ready", () => {
-      createWindow();
-      startExpressServer();
-    });
-    import_electron.app.on("window-all-closed", () => {
-      if (activeConfig.backupDir) {
-        try {
-          console.log("Performing auto-backup on window close...");
-          performBackup(activeConfig.backupDir);
-          console.log("Auto-backup complete.");
-        } catch (e) {
-          console.error("Auto-backup failed on exit", e);
-        }
-      }
-      if (process.platform !== "darwin") {
-        import_electron.app.quit();
-      }
-    });
-    import_electron.app.on("activate", () => {
-      if (mainWindow === null) {
-        createWindow();
-      }
-    });
-  }
-});
-
-// test_security.ts
-var import_node_assert = __toESM(require("node:assert"));
-var import_module = __toESM(require("module"));
-var import_bcryptjs = __toESM(require("bcryptjs"));
-var import_fs = __toESM(require("fs"));
-init_api();
-init_db();
-init_permissions();
-var originalRequire = import_module.default.prototype.require;
-var mockIpcHandlers = /* @__PURE__ */ new Map();
-var mockIsPackaged = false;
-import_module.default.prototype.require = function(request) {
-  if (request === "electron") {
-    return {
-      app: {
-        get isPackaged() {
-          return mockIsPackaged;
-        },
-        getPath: (p) => "/tmp/erp",
-        on: () => {
-        },
-        whenReady: () => Promise.resolve()
-      },
-      ipcMain: {
-        handle: (channel, listener) => {
-          mockIpcHandlers.set(channel, listener);
-        },
-        on: () => {
-        }
-      },
-      BrowserWindow: class {
-        webContents = { send: () => {
-        } };
-      }
-    };
-  }
-  if (request === "node-thermal-printer") {
-    return {
-      ThermalPrinter: class {
-      },
-      PrinterTypes: { EPSON: 1 },
-      CharacterSet: { PC858_EURO: 1 }
-    };
-  }
-  if (request.startsWith("@chauhan-erp/core/")) {
-    const pkgPath = request.replace("@chauhan-erp/core/", "packages/core/");
-    return originalRequire.apply(this, [require("path").resolve(__dirname, pkgPath + ".js")]);
-  }
-  if (request.includes("packages/core")) {
-    return originalRequire.apply(this, [require("path").resolve(__dirname, "packages/core/index.js")]);
-  }
-  return originalRequire.apply(this, arguments);
-};
-process.resourcesPath = "/tmp/erp";
-init_main();
 function mockRequest(app2, method, url, headers = {}, body = {}) {
   return new Promise((resolve) => {
-    let responseBody = "";
     let responseStatus = 200;
     const req = {
       method,
@@ -34872,248 +28697,128 @@ function mockRequest(app2, method, url, headers = {}, body = {}) {
         responseStatus = code;
         return res;
       },
-      json: (data) => {
-        responseBody = data;
-        resolve({ status: responseStatus, body: data });
-      },
-      send: (data) => {
-        responseBody = data;
-        resolve({ status: responseStatus, body: data });
-      },
+      json: (data) => resolve({ status: responseStatus, data }),
+      send: (data) => resolve({ status: responseStatus, data }),
       setHeader: () => {
       },
-      end: () => {
-        resolve({ status: responseStatus, body: responseBody });
-      }
+      end: () => resolve({ status: responseStatus, data: null })
     };
     app2(req, res, (err) => {
       if (err)
-        resolve({ status: 500, body: err.message });
+        resolve({ status: 500, data: err.message });
       else
-        resolve({ status: 404, body: "Not found" });
+        resolve({ status: 404, data: "Not found" });
     });
   });
 }
-async function run() {
-  console.log("--- Chauhan ERP Dynamic Security Test Suite ---");
-  initDB(":memory:", import_fs.default.readFileSync("./packages/core/schema.sql", "utf8"));
-  const db = getDB();
-  db.exec("PRAGMA foreign_keys = OFF;");
-  db.prepare("DELETE FROM audit_log").run();
-  db.prepare("DELETE FROM repair_jobs").run();
-  db.prepare("DELETE FROM customer_ledger").run();
-  db.prepare("DELETE FROM customers").run();
-  db.prepare("DELETE FROM users").run();
-  db.exec("PRAGMA foreign_keys = ON;");
-  const hash = import_bcryptjs.default.hashSync("1234", 10);
-  const resOwner = db.prepare("INSERT INTO users (name, pin_hash, role) VALUES ('owner', ?, 'OWNER')").run(hash);
-  const ownerId = resOwner.lastInsertRowid;
-  const resCashier = db.prepare("INSERT INTO users (name, pin_hash, role) VALUES ('cashier', ?, 'CASHIER')").run(hash);
-  const sessionStore2 = /* @__PURE__ */ new Map();
-  let appDev = createApiServer({
-    getDB: () => getDB(),
-    sessionStore: sessionStore2,
-    isPackaged: false
-  });
-  let results = { pass: 0, fail: 0 };
-  function report(name, passed, error) {
-    if (passed) {
-      console.log(`PASS: ${name}`);
-      results.pass++;
-    } else {
-      console.log(`FAIL: ${name} ${error ? "(" + error + ")" : ""}`);
-      results.fail++;
-    }
-  }
-  try {
-    const r1 = await mockRequest(appDev, "POST", "/api/sales/checkout", {}, { items: [] });
-    import_node_assert.default.strictEqual(r1.status, 401);
-    report("SEC1 - POST /api/sales/checkout with no auth -> 401", true);
-  } catch (e) {
-    report("SEC1 - POST /api/sales/checkout with no auth -> 401", false, e.message);
-  }
-  try {
-    const r2 = await mockRequest(appDev, "POST", "/api/sales/checkout", { authorization: "Bearer garbage" }, { items: [] });
-    import_node_assert.default.strictEqual(r2.status, 401);
-    report("SEC2 - protected route with garbage token -> 401", true);
-  } catch (e) {
-    report("SEC2 - protected route with garbage token -> 401", false, e.message);
-  }
-  let token = "";
-  try {
-    const rLogin = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "1234" });
-    import_node_assert.default.strictEqual(rLogin.status, 200);
-    import_node_assert.default.ok(rLogin.body.token);
-    token = rLogin.body.token;
-    const rCheck = await mockRequest(appDev, "POST", "/api/sales/checkout", { authorization: `Bearer ${token}` }, {
-      customer_id: null,
-      total_paise: 100,
-      mode: "CASH",
-      items: []
-    });
-    import_node_assert.default.ok(rCheck.status !== 401 && rCheck.status !== 403, `Status was ${rCheck.status}`);
-    report("SEC3 - valid PIN returns token; protected req with token -> 2xx/4xx(not 401)", true);
-  } catch (e) {
-    report("SEC3 - valid PIN returns token; protected req with token -> 2xx/4xx(not 401)", false, e.message);
-  }
-  try {
-    const rh = await mockRequest(appDev, "GET", "/api/health");
-    const rp = await mockRequest(appDev, "GET", "/api/ping");
-    import_node_assert.default.strictEqual(rh.status, 200);
-    import_node_assert.default.strictEqual(rp.status, 200);
-    report("SEC4 - /health, /ping reachable WITHOUT token -> 2xx", true);
-  } catch (e) {
-    report("SEC4 - /health, /ping reachable WITHOUT token -> 2xx", false, e.message);
-  }
-  try {
-    db.prepare("PRAGMA foreign_keys = OFF").run();
-    db.prepare("DELETE FROM users").run();
-    db.prepare("PRAGMA foreign_keys = ON").run();
-    const hash2 = import_bcryptjs.default.hashSync("1234", 10);
-    const newOwnerId = db.prepare(`INSERT INTO users (name, role, pin_hash) VALUES ('Sec5 Owner', 'OWNER', ?)`).run(hash2).lastInsertRowid;
-    const newCashierId = db.prepare(`INSERT INTO users (name, role, pin_hash) VALUES ('Sec5 Cashier', 'CASHIER', ?)`).run(hash2).lastInsertRowid;
-    const rOwnerLogin = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "1234", username: "Sec5 Owner" });
-    db.prepare(`UPDATE users SET pin_hash = ? WHERE user_id = ?`).run(import_bcryptjs.default.hashSync("5555", 10), newOwnerId);
-    db.prepare(`UPDATE users SET pin_hash = ? WHERE user_id = ?`).run(import_bcryptjs.default.hashSync("6666", 10), newCashierId);
-    const rOwnerLogin2 = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "5555" });
-    const oToken = rOwnerLogin2.body.token;
-    const rCashierLogin2 = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "6666" });
-    const cToken = rCashierLogin2.body.token;
-    const rDevOwner = await mockRequest(appDev, "POST", "/api/dev/ipc", { authorization: `Bearer ${oToken}` }, { channel: "get-db-config" });
-    import_node_assert.default.ok(rDevOwner.status >= 200 && rDevOwner.status < 300, `Owner /api/dev/ipc expected 2xx, got ${rDevOwner.status}`);
-    const rDevCashier = await mockRequest(appDev, "POST", "/api/dev/ipc", { authorization: `Bearer ${cToken}` }, { channel: "get-db-config" });
-    import_node_assert.default.strictEqual(rDevCashier.status, 403, `Cashier /api/dev/ipc expected 403, got ${rDevCashier.status}`);
-    const elevatedHandlers = [
-      "db-query",
-      "db-get",
-      "db-run",
-      "db-transaction",
-      "select-directory",
-      "select-file",
-      "backup-now",
-      "restore-db",
-      "backup-database",
-      "export-csv",
-      "set-db-config"
-    ];
-    await mockIpcHandlers.get("verify-desktop-pin")(null, "6666");
-    for (const handler of elevatedHandlers) {
-      try {
-        const fn = mockIpcHandlers.get(handler);
-        if (fn) {
-          await fn(null, ...[null, null, null]);
-          import_node_assert.default.fail(`Handler ${handler} did not throw 403 for CASHIER`);
-        }
-      } catch (err) {
-        if (err.name === "AssertionError")
-          throw err;
-        import_node_assert.default.ok(err.message.includes("Forbidden"), `Handler ${handler} threw non-forbidden error: ${err.message}`);
-      }
-    }
-    await mockIpcHandlers.get("verify-desktop-pin")(null, "5555");
-    for (const handler of elevatedHandlers) {
-      try {
-        const fn = mockIpcHandlers.get(handler);
-        if (fn) {
-          await fn(null, ...[null, null, null]);
-        }
-      } catch (err) {
-        import_node_assert.default.ok(!err.message.includes("Forbidden"), `Owner threw forbidden on ${handler}`);
-      }
-    }
-    report("SEC5 - CASHIER token on OWNER-only route -> 403", true);
-  } catch (e) {
-    report("SEC5 - CASHIER token on OWNER-only route -> 403", false, e.message);
-  }
-  try {
-    const rCashierLogin = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "6666" });
-    const cToken = rCashierLogin.body.token;
-    const rReportCashier = await mockRequest(appDev, "GET", "/api/reports/margin", { authorization: `Bearer ${cToken}` });
-    import_node_assert.default.strictEqual(rReportCashier.status, 403, `Cashier /api/reports/margin expected 403, got ${rReportCashier.status}`);
-    const rOwnerLogin = await mockRequest(appDev, "POST", "/api/auth/login", {}, { pin: "5555" });
-    const oToken = rOwnerLogin.body.token;
-    const rReportOwner = await mockRequest(appDev, "GET", "/api/reports/margin", { authorization: `Bearer ${oToken}` });
-    import_node_assert.default.ok(rReportOwner.status >= 200 && rReportOwner.status < 300, `Owner /api/reports/margin expected 2xx, got ${rReportOwner.status}`);
-    report("R6 - CASHIER token on report route -> 403; OWNER -> 2xx", true);
-  } catch (e) {
-    report("R6 - CASHIER token on report route -> 403; OWNER -> 2xx", false, e.message);
-  }
-  try {
-    mockIsPackaged = true;
-    let appProd = createApiServer({
-      getDB: () => getDB(),
-      sessionStore: sessionStore2,
-      isPackaged: true
-    });
-    const rDev = await mockRequest(appProd, "POST", "/api/dev/ipc", { authorization: `Bearer ${token}` }, { channel: "get-db-config" });
-    import_node_assert.default.strictEqual(rDev.status, 404);
-    report("SEC6 - /api/dev/ipc is absent (404) in production", true);
-  } catch (e) {
-    report("SEC6 - /api/dev/ipc is absent (404) in production", false, e.message);
-  }
-  try {
-    import_node_assert.default.strictEqual(authorize("OWNER", "ISSUE_CN"), true);
-    import_node_assert.default.strictEqual(authorize("CASHIER", "ISSUE_CN"), true);
-    import_node_assert.default.strictEqual(authorize("TECHNICIAN", "MANAGE_REPAIRS"), true);
-    import_node_assert.default.strictEqual(authorize("CASHIER", "CHECKOUT"), true);
-    import_node_assert.default.strictEqual(authorize("OWNER", "VIEW_REPORTS"), true);
-    import_node_assert.default.strictEqual(authorize("CASHIER", "VIEW_REPORTS"), false);
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "CHECKOUT"), true, "SALESPERSON must be able to CHECKOUT");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "READ_CATALOGUE"), true, "SALESPERSON must read catalogue");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "READ_CUSTOMERS"), true, "SALESPERSON must read customers");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "READ_STOCK"), true, "SALESPERSON must read stock");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "VIEW_REPORTS"), false, "SALESPERSON must NOT view reports");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "BACKUP_RESTORE"), false, "SALESPERSON must NOT backup/restore");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "USER_MGMT"), false, "SALESPERSON must NOT manage users");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "SHOW_COST"), false, "SALESPERSON must NOT see cost/margin");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "ISSUE_CN"), false, "SALESPERSON must NOT issue credit notes");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "VOID_SALE"), false, "SALESPERSON must NOT void sales");
-    import_node_assert.default.strictEqual(authorize("SALESPERSON", "EDIT_PRICE"), false, "SALESPERSON must NOT edit prices");
-    report("SEC7 - authorize(role, action) across the grid incl. SALESPERSON", true);
-  } catch (e) {
-    report("SEC7 - authorize(role, action) across the grid incl. SALESPERSON", false, e.message);
-  }
-  try {
-    db.prepare("INSERT INTO users (name, pin_hash, role) VALUES ('owner2', ?, 'OWNER')").run(hash);
-    const verifyPin = mockIpcHandlers.get("verify-desktop-pin");
-    const ownerInfo = await verifyPin(null, "1234");
-    db.prepare("DELETE FROM users").run();
-    const specificId = 999;
-    db.prepare("INSERT INTO users (user_id, name, pin_hash, role) VALUES (?, 'admin', ?, 'OWNER')").run(specificId, hash);
-    await verifyPin(null, "1234");
-    const custId = db.prepare("INSERT INTO customers (name, phone) VALUES ('C', '123')").run().lastInsertRowid;
-    const jobId = db.prepare("INSERT INTO repair_jobs (customer_phone, status) VALUES ('123', 'PENDING')").run().lastInsertRowid;
-    const updateRepairStatus = mockIpcHandlers.get("update-repair-status");
-    await updateRepairStatus(null, jobId, "IN_REPAIR", "started");
-    const recordUdhaar = mockIpcHandlers.get("record-udhaar-payment");
-    await recordUdhaar(null, custId, 500, "test payment");
-    const logs = db.prepare("SELECT * FROM audit_log ORDER BY id ASC").all();
-    let passSec8 = true;
-    for (const log of logs) {
-      if (log.user_id === 1 && specificId !== 1) {
-        passSec8 = false;
-      }
-      import_node_assert.default.strictEqual(log.user_id, specificId, `Audit log user_id was ${log.user_id}, expected ${specificId}`);
-    }
-    report("SEC8 - repair status & udhaar payment write audit_log with session user_id", passSec8);
-  } catch (e) {
-    report("SEC8 - repair status & udhaar payment write audit_log with session user_id", false, e.message);
-  }
-  console.log(`
-Result: ${results.pass} passed, ${results.fail} failed.`);
-  console.log("\n--- SUMMARY TABLE ---");
-  const p = (cond) => cond ? "PASS" : "FAIL";
-  console.log(`SEC1: ${p(results.pass >= 1)}`);
-  console.log(`SEC2: ${p(results.pass >= 2)}`);
-  console.log(`SEC3: ${p(results.pass >= 3)}`);
-  console.log(`SEC4: ${p(results.pass >= 4)}`);
-  console.log(`SEC5: ${p(results.pass >= 5)}`);
-  console.log(`SEC6: ${p(results.pass >= 6)}`);
-  console.log(`SEC7: ${p(results.pass >= 7)}`);
-  console.log(`SEC8: ${p(results.pass >= 8)}`);
-  console.log(`repair-status: MATCH`);
+async function request(method, path, token, body) {
+  const headers = { "content-type": "application/json", ...token ? { authorization: `Bearer ${token}` } : {} };
+  return mockRequest(app, method, path, headers, body || {});
 }
-run().catch((e) => console.error(e));
+async function runTests() {
+  console.log("Starting Mobile Flow Tests...");
+  try {
+    let res = await request("POST", "/api/auth/login", "", { pin: "1111" });
+    const ownerToken = res.data.token;
+    res = await request("POST", "/api/auth/login", "", { pin: "2222" });
+    const salespersonToken = res.data.token;
+    res = await request("GET", "/api/products/serial/SN123", ownerToken);
+    import_assert.default.ok(res.data.product.purchase_cost !== void 0, "OWNER should see purchase_cost");
+    res = await request("GET", "/api/products/serial/SN123", salespersonToken);
+    import_assert.default.ok(res.data.product.purchase_cost === void 0, "SALESPERSON should NOT see purchase_cost");
+    console.log("MT-COST: PASS");
+    res = await request("POST", "/api/sales/validate-price", salespersonToken, {
+      product_id: 1,
+      instance_id: 1,
+      final_price: 104e4
+    });
+    import_assert.default.strictEqual(res.data.allowed, false, "Should reject below floor");
+    console.log("MT-FLOOR: PASS");
+    res = await request("POST", "/api/sales/validate-price", salespersonToken, {
+      product_id: 1,
+      instance_id: 1,
+      final_price: 125e4
+    });
+    if (!res.data.allowed)
+      console.error("validate-price returned false! Res:", res);
+    import_assert.default.strictEqual(res.data.allowed, true, "Should allow above floor and within discount");
+    console.log("MT-DISCOUNT: PASS");
+    res = await request("POST", "/api/sales/admin-override", ownerToken, {
+      admin_pin: "1111",
+      product_id: 1,
+      instance_id: 1,
+      final_price: 104e4,
+      note: "Override"
+    });
+    const overrideToken = res.data.override_token;
+    import_assert.default.ok(overrideToken, "Should generate override token");
+    const auditRow = db.prepare("SELECT * FROM audit_log WHERE action = 'PRICE_OVERRIDE'").get();
+    import_assert.default.strictEqual(auditRow.user_id, 1, "Audit log must show Admin ID");
+    res = await request("POST", "/api/sales/checkout", salespersonToken, {
+      customer_id: 1,
+      tier_applied: "COUNTER",
+      payment_mode: "CASH",
+      cart: [{ product_id: 1, instance_id: 1, quantity: 1, price: 15e5, discount: 46e4, override_token: overrideToken }]
+    });
+    import_assert.default.strictEqual(res.data.success, true, "Checkout should succeed with override");
+    const saleRow = db.prepare("SELECT * FROM sales").get();
+    import_assert.default.strictEqual(saleRow.sold_by, 2, "MT-ATTRIB: Sale should be attributed to Salesperson (ID: 2)");
+    console.log("MT-ATTRIB: PASS");
+    res = await request("POST", "/api/sales/checkout", salespersonToken, {
+      customer_id: 1,
+      tier_applied: "COUNTER",
+      payment_mode: "CASH",
+      cart: [{ product_id: 1, instance_id: 1, quantity: 1, price: 15e5, discount: 0 }]
+    });
+    if (res.status !== 409)
+      console.error("DOUBLESELL FAILED. Res:", res);
+    import_assert.default.strictEqual(res.status, 409, "Second checkout of same serial must return 409");
+    console.log("MT-DOUBLESELL: PASS");
+    res = await request("GET", "/api/reports/margin", salespersonToken);
+    import_assert.default.strictEqual(res.status, 403, "SALESPERSON should get 403 on reports");
+    console.log("MT-TOTALS: PASS");
+    res = await request("POST", "/api/sales/checkout", salespersonToken, {
+      customer_id: 2,
+      tier_applied: "DEALER",
+      payment_mode: "CASH",
+      cart: [{ product_id: 2, instance_id: null, quantity: 1, price: 1400, discount: 0 }]
+    });
+    import_assert.default.strictEqual(res.data.success, true, "Should allow DEALER price checkout");
+    const tierRow = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(res.data.saleId);
+    import_assert.default.strictEqual(tierRow.tier_applied, "DEALER", "Tier should be DEALER");
+    console.log("MT-TIER: PASS");
+    res = await request("POST", "/api/sales/checkout", salespersonToken, {
+      customer_id: 4,
+      tier_applied: "COUNTER",
+      payment_mode: "UDHAAR",
+      cart: [{ product_id: 2, instance_id: null, quantity: 1, price: 1500, discount: 0 }]
+    });
+    import_assert.default.strictEqual(res.status, 402, "Should block overdue/over-limit Udhaar sale");
+    res = await request("POST", "/api/sales/admin-override", ownerToken, {
+      admin_pin: "1111",
+      override_type: "UDHAAR",
+      customer_id: 4,
+      note: "MT Test"
+    });
+    const udhaarToken = res.data.override_token;
+    import_assert.default.ok(udhaarToken, "Should generate Udhaar override token");
+    const auditUdhaar = db.prepare("SELECT * FROM audit_log WHERE action = 'UDHAAR_OVERRIDE'").get();
+    import_assert.default.strictEqual(auditUdhaar.user_id, 1, "Audit log must show Admin ID for Udhaar override");
+    res = await request("POST", "/api/sales/checkout", salespersonToken, {
+      customer_id: 4,
+      tier_applied: "COUNTER",
+      payment_mode: "UDHAAR",
+      udhaar_override_token: udhaarToken,
+      cart: [{ product_id: 2, instance_id: null, quantity: 1, price: 1500, discount: 0 }]
+    });
+    import_assert.default.strictEqual(res.data.success, true, "Should succeed with Udhaar override token");
+    console.log("MT-UDHAAR: PASS");
+  } catch (e) {
+    console.error("TEST FAILED:", e.message);
+    process.exit(1);
+  }
+}
+runTests();
 /*! Bundled license information:
 
 depd/index.js:

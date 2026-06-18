@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { LayoutDashboard, Package, FolderInput, Settings as SettingsIcon, Terminal, Wifi, CloudOff, Lock, ShoppingCart, Users, Truck, Wrench, Calculator, ShieldCheck, CornerUpLeft, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Package, FolderInput, Settings as SettingsIcon, Terminal, Wifi, CloudOff, Lock, ShoppingCart, Users, Truck, Wrench, Calculator, ShieldCheck, CornerUpLeft, ClipboardList, BarChart2, FileText } from 'lucide-react';
 import Dashboard from './views/Dashboard';
 import Catalogue from './views/Catalogue';
 import StockIn from './views/StockIn';
@@ -15,6 +15,9 @@ import RMARegister from './views/RMARegister';
 import Outbox from './views/Outbox';
 import PrintView from './views/PrintView';
 import Reports from './views/Reports';
+import InsightsDashboard from './views/InsightsDashboard';
+import SmartReorder from './views/SmartReorder';
+import Quotations from './views/Quotations';
 import * as bcrypt from 'bcryptjs';
 
 export default function App() {
@@ -87,15 +90,10 @@ export default function App() {
 
   const checkFirstRun = async () => {
     try {
-      const db = window.electronAPI;
-      const res = await db.invoke('db-query', "SELECT value FROM settings WHERE key = 'first_run'");
-      if (res && res.length > 0 && res[0].value === '0') {
-        setFirstRun(false);
-      } else {
-        setFirstRun(true);
-      }
+      const res = await window.electronAPI.invoke('check-first-run');
+      setFirstRun(res.firstRun);
     } catch (e) {
-      console.error('Failed to query settings, showing wizard', e);
+      console.error('Failed to check first_run, showing wizard', e);
       setFirstRun(true);
     }
   };
@@ -141,7 +139,7 @@ export default function App() {
         { sql: "INSERT OR IGNORE INTO customers (name, phone, tier, credit_limit, current_balance) VALUES ('Counter Customer', '0000000000', 'COUNTER', 0, 0)", params: [] }
       ];
 
-      await db.invoke('db-transaction', queries);
+      await db.invoke('initialize-setup', queries);
       setFirstRun(false);
       fetchSystemInfo();
     } catch (err: any) {
@@ -457,16 +455,45 @@ export default function App() {
               <Calculator size={16} />
               <span>Accounts <kbd className="text-[9px] bg-zinc-800 text-zinc-500 px-1 py-0.2 rounded border border-zinc-750 ml-auto font-mono">F10</kbd></span>
             </button>
+            <button
+              onClick={() => setActiveView('Quotations')}
+              className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded text-sm font-medium font-mono uppercase transition-colors ${
+                activeView === 'Quotations' ? 'bg-amber-400/10 border border-amber-400/20 text-amber-400' : 'text-zinc-400 hover:bg-zinc-850 hover:text-zinc-250 border border-transparent'
+              }`}
+            >
+              <FileText size={16} />
+              <span>Quotations <kbd className="text-[9px] bg-zinc-800 text-zinc-500 px-1 py-0.2 rounded border border-zinc-750 ml-auto font-mono">F11</kbd></span>
+            </button>
             {currentUser?.role === 'OWNER' && (
-              <button
-                onClick={() => setActiveView('Reports')}
-                className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded text-sm font-medium font-mono uppercase transition-colors ${
-                  activeView === 'Reports' ? 'bg-emerald-400/10 border border-emerald-400/20 text-emerald-400' : 'text-emerald-500/50 hover:bg-zinc-850 hover:text-emerald-400 border border-transparent'
-                }`}
-              >
-                <ClipboardList size={16} />
-                <span>Reports</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setActiveView('Insights')}
+                  className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded text-sm font-medium font-mono uppercase transition-colors ${
+                    activeView === 'Insights' ? 'bg-amber-400/10 border border-amber-400/20 text-amber-400' : 'text-amber-500/50 hover:bg-zinc-850 hover:text-amber-400 border border-transparent'
+                  }`}
+                >
+                  <BarChart2 size={16} />
+                  <span>Insights</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('Reorder')}
+                  className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded text-sm font-medium font-mono uppercase transition-colors ${
+                    activeView === 'Reorder' ? 'bg-amber-400/10 border border-amber-400/20 text-amber-400' : 'text-amber-500/50 hover:bg-zinc-850 hover:text-amber-400 border border-transparent'
+                  }`}
+                >
+                  <Package size={16} />
+                  <span>Smart Reorder</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('Reports')}
+                  className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded text-sm font-medium font-mono uppercase transition-colors ${
+                    activeView === 'Reports' ? 'bg-emerald-400/10 border border-emerald-400/20 text-emerald-400' : 'text-emerald-500/50 hover:bg-zinc-850 hover:text-emerald-400 border border-transparent'
+                  }`}
+                >
+                  <ClipboardList size={16} />
+                  <span>Reports</span>
+                </button>
+              </>
             )}
             <button
               onClick={() => setActiveView('Warranty')}
@@ -557,8 +584,11 @@ export default function App() {
           {activeView === 'Warranty' && <Warranty />}
           {activeView === 'Returns' && <Returns />}
           {activeView === 'RMARegister' && <RMARegister />}
+          {activeView === 'Quotations' && <Quotations />}
           {activeView === 'Outbox' && <Outbox />}
           {activeView === 'Reports' && currentUser?.role === 'OWNER' && <Reports />}
+          {activeView === 'Insights' && currentUser?.role === 'OWNER' && <InsightsDashboard />}
+          {activeView === 'Reorder' && currentUser?.role === 'OWNER' && <SmartReorder />}
         </div>
       </main>
     </div>

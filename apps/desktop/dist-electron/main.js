@@ -5,6 +5,13 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -21,6 +28,88 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// ../../packages/core/gst.ts
+var gst_exports = {};
+__export(gst_exports, {
+  calculateGSTSplit: () => calculateGSTSplit,
+  getTaxableValue: () => getTaxableValue
+});
+function calculateGSTSplit(taxableAmountPaise, gstRate, shopStateCode, customerGSTIN) {
+  let customerStateCode = shopStateCode;
+  if (customerGSTIN && customerGSTIN.trim().length >= 2) {
+    const code = customerGSTIN.trim().substring(0, 2);
+    if (/^\d+$/.test(code)) {
+      customerStateCode = code;
+    }
+  }
+  const totalTaxPaise = Math.round(taxableAmountPaise * gstRate / 100);
+  if (customerStateCode === shopStateCode) {
+    const halfTax = Math.round(totalTaxPaise / 2);
+    return {
+      cgst: halfTax,
+      sgst: totalTaxPaise - halfTax,
+      // handle odd-paise division correctly
+      igst: 0
+    };
+  } else {
+    return {
+      cgst: 0,
+      sgst: 0,
+      igst: totalTaxPaise
+    };
+  }
+}
+function getTaxableValue(lineTotalPaise, gstRate) {
+  return Math.round(lineTotalPaise / (1 + gstRate / 100));
+}
+var init_gst = __esm({
+  "../../packages/core/gst.ts"() {
+    "use strict";
+  }
+});
+
+// ../../packages/core/ledger.ts
+var ledger_exports = {};
+__export(ledger_exports, {
+  calculateAging: () => calculateAging,
+  isCustomerOverdue: () => isCustomerOverdue
+});
+function calculateAging(customer, currentDate = /* @__PURE__ */ new Date()) {
+  const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
+  if (customer.current_balance <= 0 || !customer.credit_due_date) {
+    return buckets;
+  }
+  const dueDate = new Date(customer.credit_due_date);
+  const diffTime = currentDate.getTime() - dueDate.getTime();
+  const diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
+  if (diffDays <= 0) {
+    return buckets;
+  }
+  buckets.total_overdue = customer.current_balance;
+  if (diffDays <= 30) {
+    buckets["0-30"] = customer.current_balance;
+  } else if (diffDays <= 60) {
+    buckets["31-60"] = customer.current_balance;
+  } else if (diffDays <= 90) {
+    buckets["61-90"] = customer.current_balance;
+  } else {
+    buckets["90+"] = customer.current_balance;
+  }
+  return buckets;
+}
+function isCustomerOverdue(customer, currentDate = /* @__PURE__ */ new Date()) {
+  if (customer.current_balance <= 0 || !customer.credit_due_date)
+    return false;
+  const dueDate = new Date(customer.credit_due_date);
+  return currentDate.getTime() > dueDate.getTime();
+}
+var init_ledger = __esm({
+  "../../packages/core/ledger.ts"() {
+    "use strict";
+  }
+});
 
 // electron/main.ts
 var import_electron = require("electron");
@@ -31,7 +120,6 @@ var import_node_thermal_printer = require("node-thermal-printer");
 
 // ../../packages/core/db.ts
 var import_better_sqlite3 = __toESM(require("better-sqlite3"));
-var bcrypt = __toESM(require("bcryptjs"));
 var dbInstance = null;
 function getDB() {
   if (!dbInstance) {
@@ -54,13 +142,13 @@ function initDB(dbPath, schemaSql2) {
   return dbInstance;
 }
 function seedDB(db) {
+  db.pragma("foreign_keys = OFF");
   const insertSetting = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)");
-  insertSetting.run("first_run", "0");
-  insertSetting.run("shop_name", "Chauhan Electronics");
-  insertSetting.run("address", "12, SP Road, Bengaluru, Karnataka - 560002");
-  insertSetting.run("gstin", "29ABCDE1234F1Z5");
+  insertSetting.run("first_run", "1");
+  insertSetting.run("shop_name", "");
+  insertSetting.run("address", "");
+  insertSetting.run("gstin", "");
   insertSetting.run("state_code", "29");
-  insertSetting.run("invoice_prefix", "CE/26/");
   insertSetting.run("next_invoice_no", "1001");
   insertSetting.run("job_prefix", "JOB/26/");
   insertSetting.run("next_job_no", "2001");
@@ -68,13 +156,6 @@ function seedDB(db) {
   insertSetting.run("currency", "INR");
   insertSetting.run("sms_enabled", "0");
   insertSetting.run("online_lookup", "0");
-  const insertUser = db.prepare("INSERT INTO users (name, pin_hash, role, active) VALUES (?, ?, ?, 1)");
-  const ownerPinHash = bcrypt.hashSync("1234", 10);
-  const cashierPinHash = bcrypt.hashSync("5678", 10);
-  const techPinHash = bcrypt.hashSync("9012", 10);
-  insertUser.run("Nishant Chauhan", ownerPinHash, "OWNER");
-  insertUser.run("SP Road Cashier", cashierPinHash, "CASHIER");
-  insertUser.run("Repair Tech", techPinHash, "TECHNICIAN");
   const insertCustomer = db.prepare(`
     INSERT INTO customers (name, phone, shop_name, tier, gstin, credit_limit, current_balance, credit_due_date)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -151,32 +232,12 @@ function seedDB(db) {
     VALUES (?, ?, ?)
   `);
   insertRepairHistory.run(1, "PENDING", "IN_REPAIR");
+  db.pragma("foreign_keys = ON");
 }
 
-// ../../packages/core/ledger.ts
-function calculateAging(customer, currentDate = /* @__PURE__ */ new Date()) {
-  const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
-  if (customer.current_balance <= 0 || !customer.credit_due_date) {
-    return buckets;
-  }
-  const dueDate = new Date(customer.credit_due_date);
-  const diffTime = currentDate.getTime() - dueDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
-  if (diffDays <= 0) {
-    return buckets;
-  }
-  buckets.total_overdue = customer.current_balance;
-  if (diffDays <= 30) {
-    buckets["0-30"] = customer.current_balance;
-  } else if (diffDays <= 60) {
-    buckets["31-60"] = customer.current_balance;
-  } else if (diffDays <= 90) {
-    buckets["61-90"] = customer.current_balance;
-  } else {
-    buckets["90+"] = customer.current_balance;
-  }
-  return buckets;
-}
+// ../../packages/core/index.ts
+init_gst();
+init_ledger();
 
 // ../../packages/core/sms.ts
 function formatPaymentReminder(customer, shopName) {
@@ -185,11 +246,20 @@ function formatPaymentReminder(customer, shopName) {
 }
 
 // ../../packages/core/permissions.ts
-function authorize(role, action) {
+var globalOverrides = {};
+function setPermissionsOverrides(overrides) {
+  globalOverrides = overrides;
+}
+function authorize(role, action, overrides) {
   if (!role)
     return false;
   if (role === "OWNER")
     return true;
+  const activeOverrides = overrides || globalOverrides;
+  const overrideKey = `${role}_${action}`;
+  if (activeOverrides && activeOverrides[overrideKey] !== void 0) {
+    return activeOverrides[overrideKey];
+  }
   switch (action) {
     case "EDIT_PRICE":
     case "OVERRIDE_CREDIT":
@@ -197,16 +267,20 @@ function authorize(role, action) {
     case "REFUND_EDIT":
     case "BACKUP_RESTORE":
     case "USER_MGMT":
+    case "VIEW_REPORTS":
       return false;
     case "EDIT_CATALOGUE":
       return role === "STOCK";
     case "CREATE_SUPPLIER":
       return role === "CASHIER" || role === "STOCK";
+    case "SHOW_COST":
+      return false;
     case "RECORD_EXPENSE":
     case "RECORD_PAYMENT":
-    case "CHECKOUT":
     case "ISSUE_CN":
       return role === "CASHIER";
+    case "CHECKOUT":
+      return role === "CASHIER" || role === "SALESPERSON";
     case "RECEIVE_GRN":
       return role === "STOCK";
     case "MANAGE_REPAIRS":
@@ -218,7 +292,7 @@ function authorize(role, action) {
     case "READ_STOCK":
       return true;
     case "READ_CUSTOMERS":
-      return role === "CASHIER";
+      return role === "CASHIER" || role === "SALESPERSON";
     case "READ_SUPPLIERS":
       return role === "CASHIER" || role === "STOCK";
     case "READ_REPAIRS":
@@ -229,9 +303,9 @@ function authorize(role, action) {
       return false;
   }
 }
-function assertCan(role, action) {
-  if (!authorize(role, action)) {
-    throw new Error(`Forbidden: Role ${role || "UNAUTHENTICATED"} is not allowed to perform ${action}`);
+function assertCan(role, action, overrides) {
+  if (!authorize(role, action, overrides)) {
+    throw new Error(`Unauthorized: Role ${role} cannot perform ${action}`);
   }
 }
 
@@ -243,6 +317,35 @@ var import_express = __toESM(require("express"));
 var import_cors = __toESM(require("cors"));
 var import_os = __toESM(require("os"));
 var fs = __toESM(require("fs"));
+var overrideTokens = /* @__PURE__ */ new Map();
+var tokenCleanupInterval = setInterval(() => {
+  const now = Date.now();
+  overrideTokens.forEach((v, k) => {
+    if (v.expires < now)
+      overrideTokens.delete(k);
+  });
+}, 6e4);
+if (tokenCleanupInterval.unref)
+  tokenCleanupInterval.unref();
+function getMaxDiscountPct(role) {
+  if (role === "OWNER")
+    return 100;
+  if (role === "CASHIER")
+    return 20;
+  return 10;
+}
+function getPriceFloor(product, instance) {
+  const cost = instance?.purchase_cost ?? product?.purchase_cost ?? 0;
+  return Math.ceil(cost * 1.05);
+}
+function safeProd(product, role) {
+  if (!product)
+    return product;
+  if (authorize(role, "SHOW_COST"))
+    return product;
+  const { purchase_cost, ...rest } = product;
+  return rest;
+}
 function createApiServer(options) {
   const { getDB: getDB2, sessionStore: sessionStore2, isPackaged, mainWindow: mainWindow2, activeConfig: activeConfig2, configPath: configPath2, initDB: initDB2, schemaSql: schemaSql2 } = options;
   const app2 = (0, import_express.default)();
@@ -285,9 +388,9 @@ function createApiServer(options) {
     try {
       const db = getDB2();
       const users = db.prepare("SELECT * FROM users WHERE active = 1").all();
-      const bcrypt2 = require("bcryptjs");
+      const bcrypt = require("bcryptjs");
       const crypto = require("crypto");
-      const matchedUser = users.find((u) => bcrypt2.compareSync(pin, u.pin_hash));
+      const matchedUser = users.find((u) => bcrypt.compareSync(pin, u.pin_hash));
       if (matchedUser) {
         const token = crypto.randomBytes(32).toString("hex");
         sessionStore2.set(token, { user_id: matchedUser.user_id, role: matchedUser.role, issuedAt: Date.now() });
@@ -320,10 +423,63 @@ function createApiServer(options) {
         } else {
           stock = product.loose_qty || 0;
         }
-        res.json({ success: true, product, stock });
+        res.json({ success: true, product: safeProd(product, req.session?.role), stock });
       } else {
         res.status(404).json({ success: false, error: "Product not found" });
       }
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.post("/api/sales/recommendations", requireRole("CHECKOUT"), (req, res) => {
+    try {
+      const db = getDB2();
+      const productIds = req.body.productIds || [];
+      if (productIds.length === 0) {
+        return res.json({ success: true, recommendations: [] });
+      }
+      const placeholders = productIds.map(() => "?").join(",");
+      const query = `
+        SELECT p.product_id, p.brand_name, p.model_name, p.sku_code, p.category, COUNT(DISTINCT si.sale_id) as frequency
+        FROM sale_items si
+        JOIN products p ON p.product_id = si.product_id
+        WHERE si.sale_id IN (
+          SELECT sale_id FROM sale_items WHERE product_id IN (${placeholders})
+        )
+        AND si.product_id NOT IN (${placeholders})
+        GROUP BY si.product_id
+        ORDER BY frequency DESC
+        LIMIT 3
+      `;
+      const results = db.prepare(query).all(...productIds, ...productIds);
+      const recommendations = results.map((r) => {
+        const fullProd = db.prepare(`SELECT counter_price FROM products WHERE product_id = ?`).get(r.product_id);
+        return {
+          ...r,
+          price: fullProd.counter_price
+        };
+      });
+      res.json({ success: true, recommendations });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.get("/api/products/serial/:serial", requireRole("READ_CATALOGUE"), (req, res) => {
+    try {
+      const db = getDB2();
+      const { serial } = req.params;
+      const instance = db.prepare("SELECT * FROM product_instances WHERE serial_number = ?").get(serial);
+      if (!instance)
+        return res.status(404).json({ success: false, error: "Serial not found" });
+      const product = db.prepare("SELECT * FROM products WHERE product_id = ?").get(instance.product_id);
+      if (!product)
+        return res.status(404).json({ success: false, error: "Product not found" });
+      res.json({
+        success: true,
+        product: safeProd(product, req.session?.role),
+        instance: { instance_id: instance.instance_id, serial_number: instance.serial_number, status: instance.status },
+        stock: instance.status === "IN_STOCK" ? 1 : 0
+      });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -351,7 +507,7 @@ function createApiServer(options) {
       const product = db.prepare("SELECT * FROM products WHERE sku_code = ?").get(sku);
       if (product) {
         const tags = db.prepare("SELECT vehicle_tag FROM product_fitment WHERE product_id = ?").all(product.product_id).map((row) => row.vehicle_tag);
-        res.json({ found: true, product: { ...product, fitment_tags: tags } });
+        res.json({ found: true, product: { ...safeProd(product, req.session?.role), fitment_tags: tags } });
       } else {
         res.json({ found: false });
       }
@@ -369,6 +525,15 @@ function createApiServer(options) {
       } else {
         res.json({ found: false });
       }
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.get("/api/customers", requireRole("READ_CUSTOMERS"), (req, res) => {
+    try {
+      const db = getDB2();
+      const customers = db.prepare("SELECT customer_id, name, phone, tier, gstin, credit_limit, current_balance, credit_due_date FROM customers ORDER BY name").all();
+      res.json({ success: true, customers });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -451,8 +616,71 @@ function createApiServer(options) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
+  app2.post("/api/sales/validate-price", requireRole("CHECKOUT"), (req, res) => {
+    try {
+      const { product_id, instance_id, final_price } = req.body;
+      const role = req.session?.role;
+      const db = getDB2();
+      const product = db.prepare("SELECT * FROM products WHERE product_id = ?").get(product_id);
+      if (!product)
+        return res.status(404).json({ success: false, error: "Product not found" });
+      const instance = instance_id ? db.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(instance_id) : null;
+      const tierPrice = product.counter_price || 0;
+      const floor = getPriceFloor(product, instance);
+      const maxDiscount = getMaxDiscountPct(role);
+      const discountPct = tierPrice > 0 ? (tierPrice - final_price) / tierPrice * 100 : 0;
+      const belowFloor = final_price < floor;
+      const overMaxDiscount = discountPct > maxDiscount;
+      const allowed = !belowFloor && !overMaxDiscount;
+      res.json({
+        allowed,
+        needs_override: !allowed,
+        reason: belowFloor ? "Price is below minimum margin floor" : overMaxDiscount ? `Discount exceeds your ${maxDiscount}% limit` : null
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.post("/api/sales/admin-override", requireRole("CHECKOUT"), (req, res) => {
+    try {
+      const { admin_pin, product_id, instance_id, final_price, note, override_type, customer_id } = req.body;
+      const db = getDB2();
+      const bcrypt = require("bcryptjs");
+      const crypto = require("crypto");
+      const admins = db.prepare("SELECT * FROM users WHERE active = 1 AND role IN ('OWNER', 'CASHIER')").all();
+      const admin = admins.find((u) => bcrypt.compareSync(admin_pin, u.pin_hash));
+      if (!admin)
+        return res.status(401).json({ success: false, error: "Invalid admin PIN" });
+      if (admin.role !== "OWNER") {
+        return res.status(403).json({ success: false, error: "Only OWNER can authorize overrides" });
+      }
+      const token = crypto.randomBytes(16).toString("hex");
+      if (override_type === "UDHAAR") {
+        overrideTokens.set(token, {
+          admin_user_id: admin.user_id,
+          admin_name: admin.name,
+          expires: Date.now() + 5 * 60 * 1e3,
+          is_udhaar: true,
+          customer_id
+        });
+        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'UDHAAR_OVERRIDE', 'customer', ?, ?)`).run(admin.user_id, customer_id, `Override by ${admin.name}: note=${note ?? ""}`);
+      } else {
+        overrideTokens.set(token, {
+          admin_user_id: admin.user_id,
+          admin_name: admin.name,
+          expires: Date.now() + 5 * 60 * 1e3,
+          product_id,
+          final_price
+        });
+        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'PRICE_OVERRIDE', 'product', ?, ?)`).run(admin.user_id, product_id, `Override by ${admin.name}: final_price=${final_price}, instance=${instance_id ?? "loose"}, note=${note ?? ""}`);
+      }
+      res.json({ success: true, override_token: token, approved_by: admin.name });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
   app2.post("/api/sales/checkout", requireRole("CHECKOUT"), (req, res) => {
-    const { customer_id, tier_applied, cart, discount, payment_mode, amount_paid } = req.body;
+    const { customer_id, tier_applied, cart, discount, payment_mode, amount_paid, udhaar_override_token, trade_in_discount, trade_in_desc } = req.body;
     const userId = req.session.user_id;
     if (!cart || cart.length === 0) {
       return res.status(400).json({ success: false, error: "Cart is empty." });
@@ -467,15 +695,25 @@ function createApiServer(options) {
         subtotal += (item.price - item.discount) * item.quantity;
       });
       const discountVal = discount || 0;
-      const grandTotal = Math.max(0, subtotal - discountVal);
+      const tradeInVal = trade_in_discount || 0;
+      const grandTotal = Math.max(0, subtotal - discountVal - tradeInVal);
       if (payment_mode === "UDHAAR") {
         if (customer.phone === "0000000000")
           return res.status(400).json({ success: false, error: "Cannot sell on credit (Udhaar) to Counter Customer." });
-        if (customer.credit_due_date && new Date(customer.credit_due_date) < /* @__PURE__ */ new Date() && customer.current_balance > 0)
-          return res.status(400).json({ success: false, error: `Customer has an overdue balance since ${customer.credit_due_date}.` });
-        const debt = grandTotal - (amount_paid || 0);
-        if (customer.current_balance + debt > customer.credit_limit)
-          return res.status(400).json({ success: false, error: "Credit limit exceeded." });
+        let validUdhaarOverride = false;
+        if (udhaar_override_token) {
+          const tData = overrideTokens.get(udhaar_override_token);
+          if (tData && tData.expires > Date.now() && tData.is_udhaar) {
+            validUdhaarOverride = true;
+          }
+        }
+        if (!validUdhaarOverride) {
+          if (customer.credit_due_date && new Date(customer.credit_due_date) < /* @__PURE__ */ new Date() && customer.current_balance > 0)
+            return res.status(402).json({ success: false, error: `Customer has an overdue balance since ${customer.credit_due_date}.`, needs_override: true });
+          const debt = grandTotal - (amount_paid || 0);
+          if (customer.current_balance + debt > customer.credit_limit)
+            return res.status(402).json({ success: false, error: "Credit limit exceeded.", needs_override: true });
+        }
       }
       const shopStateRow = db.prepare("SELECT value FROM settings WHERE key = 'state_code'").get();
       const shopState = shopStateRow?.value || "29";
@@ -512,15 +750,29 @@ function createApiServer(options) {
         const saleRes = db.prepare(
           `INSERT INTO sales (
             invoice_no, customer_id, tier_applied, subtotal, discount, 
-            cgst, sgst, igst, grand_total, amount_paid, payment_mode, sold_by
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(invoiceNo, customer.customer_id, tier_applied || "COUNTER", subtotal, discountVal, cgstTotal, sgstTotal, igstTotal, grandTotal, paidPaise, payment_mode, userId);
+            cgst, sgst, igst, grand_total, amount_paid, payment_mode, trade_in_discount, trade_in_desc, sold_by
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).run(invoiceNo, customer.customer_id, tier_applied || "COUNTER", subtotal, discountVal, cgstTotal, sgstTotal, igstTotal, grandTotal, paidPaise, payment_mode, tradeInVal, trade_in_desc || null, userId);
         const saleId = saleRes.lastInsertRowid;
+        if (tradeInVal > 0 && trade_in_desc) {
+          db.prepare(
+            `INSERT INTO trade_ins (sale_id, customer_id, item_desc, estimated_value, status) VALUES (?, ?, ?, ?, 'RECEIVED')`
+          ).run(saleId, customer.customer_id, trade_in_desc, tradeInVal);
+        }
         cart.forEach((item) => {
           if (item.instance_id) {
             const inst = db.prepare("SELECT * FROM product_instances WHERE instance_id = ?").get(item.instance_id);
-            if (!inst || inst.status !== "IN_STOCK")
-              throw new Error(`Serial instance ${item.instance_id} is not in stock.`);
+            if (!inst || inst.status !== "IN_STOCK") {
+              const err = new Error(`Serial ${item.instance_id} is not available (already sold or not in stock).`);
+              err.statusCode = 409;
+              throw err;
+            }
+            if (item.override_token) {
+              const ov = overrideTokens.get(item.override_token);
+              if (!ov || ov.expires < Date.now())
+                throw new Error(`Override token expired for item ${item.instance_id}`);
+              overrideTokens.delete(item.override_token);
+            }
             db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).run(saleId, item.product_id, item.instance_id, item.price, item.discount, item.price - item.discount, inst.purchase_cost || 0);
             const prodRow = db.prepare("SELECT warranty_months FROM products WHERE product_id = ?").get(item.product_id);
             const warrantyMonths = prodRow?.warranty_months ?? 12;
@@ -529,6 +781,12 @@ function createApiServer(options) {
             const prodRow = db.prepare("SELECT loose_qty, purchase_cost FROM products WHERE product_id = ?").get(item.product_id);
             if (!prodRow || prodRow.loose_qty < item.quantity)
               throw new Error(`Insufficient loose stock for product ID ${item.product_id}. Available: ${prodRow?.loose_qty || 0}`);
+            if (item.override_token) {
+              const ov = overrideTokens.get(item.override_token);
+              if (!ov || ov.expires < Date.now())
+                throw new Error(`Override token expired for loose item ${item.product_id}`);
+              overrideTokens.delete(item.override_token);
+            }
             db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, NULL, ?, ?, ?, ?, ?)`).run(saleId, item.product_id, item.quantity, item.price, item.discount, (item.price - item.discount) * item.quantity, prodRow.purchase_cost || 0);
             db.prepare(`UPDATE products SET loose_qty = loose_qty - ? WHERE product_id = ?`).run(item.quantity, item.product_id);
           }
@@ -545,7 +803,86 @@ function createApiServer(options) {
       const txResult = checkoutTx();
       res.json({ success: true, ...txResult });
     } catch (err) {
+      const status = err.statusCode === 409 ? 409 : 500;
+      res.status(status).json({ success: false, error: err.message });
+    }
+  });
+  app2.post("/api/sales/:id/print", requireRole("CHECKOUT"), async (req, res) => {
+    try {
+      const db = getDB2();
+      const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(req.params.id);
+      if (!sale)
+        return res.status(404).json({ success: false, error: "Sale not found." });
+      const { printReceipt } = require("./printer");
+      printReceipt(req.params.id, db).catch((e) => console.error("Print error:", e));
+      res.json({ success: true, message: "Print job dispatched" });
+    } catch (err) {
       res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.post("/api/quotations", requireRole("CHECKOUT"), (req, res) => {
+    const { customer_id, customer_name, customer_phone, items } = req.body;
+    try {
+      const db = getDB2();
+      let totalTaxable = 0, totalCgst = 0, totalSgst = 0, totalIgst = 0;
+      const isIgst = false;
+      for (const item of items) {
+        totalTaxable += item.taxable_value;
+        if (isIgst) {
+          totalIgst += item.tax_amt;
+        } else {
+          totalCgst += Math.round(item.tax_amt / 2);
+          totalSgst += Math.round(item.tax_amt / 2);
+        }
+      }
+      const grandTotal = totalTaxable + totalCgst + totalSgst + totalIgst;
+      const validUntil = /* @__PURE__ */ new Date();
+      validUntil.setDate(validUntil.getDate() + 7);
+      const tx = db.transaction(() => {
+        const qno = `QT-${Date.now()}`;
+        const insertQ = db.prepare(`
+          INSERT INTO quotations (quotation_no, customer_id, customer_name, customer_phone, total_taxable, total_cgst, total_sgst, total_igst, grand_total, valid_until)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        const info = insertQ.run(qno, customer_id, customer_name, customer_phone, totalTaxable, totalCgst, totalSgst, totalIgst, grandTotal, validUntil.toISOString());
+        const qId2 = info.lastInsertRowid;
+        const insertItem = db.prepare(`
+          INSERT INTO quotation_items (quotation_id, product_id, quantity, unit_price, discount, tax_rate, taxable_value, cgst_amt, sgst_amt, igst_amt, total_amt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const item of items) {
+          const itemCgst = isIgst ? 0 : Math.round(item.tax_amt / 2);
+          const itemSgst = isIgst ? 0 : Math.round(item.tax_amt / 2);
+          const itemIgst = isIgst ? item.tax_amt : 0;
+          insertItem.run(
+            qId2,
+            item.product_id,
+            item.quantity,
+            item.price,
+            item.discount,
+            item.tax_rate,
+            item.taxable_value,
+            itemCgst,
+            itemSgst,
+            itemIgst,
+            item.taxable_value + item.tax_amt
+          );
+        }
+        return qId2;
+      });
+      const qId = tx();
+      res.json({ success: true, quotationId: qId });
+    } catch (e) {
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+  app2.get("/api/quotations", requireRole("CHECKOUT"), (req, res) => {
+    try {
+      const db = getDB2();
+      const list = db.prepare(`SELECT * FROM quotations ORDER BY quotation_id DESC LIMIT 50`).all();
+      res.json({ success: true, data: list });
+    } catch (e) {
+      res.status(500).json({ success: false, error: e.message });
     }
   });
   if (!isPackaged) {
@@ -695,31 +1032,178 @@ function createApiServer(options) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
-  const ownerOnly = requireRole("BACKUP_RESTORE");
+  const ownerOnly = requireRole("VIEW_REPORTS");
+  app2.get("/api/reports/insights", ownerOnly, (req, res) => {
+    try {
+      const db = getDB2();
+      const marginByBrand = db.prepare(`
+        SELECT p.brand_name, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.unit_cost * si.quantity) as cogs,
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.brand_name
+        ORDER BY margin DESC
+      `).all();
+      const marginByCategory = db.prepare(`
+        SELECT p.category, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.category
+        ORDER BY margin DESC
+      `).all();
+      const marginByTier = db.prepare(`
+        SELECT s.tier_applied, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY s.tier_applied
+        ORDER BY margin DESC
+      `).all();
+      const bestMovers = db.prepare(`
+        SELECT p.brand_name, p.model_name, SUM(si.quantity) as qty_sold, SUM(si.line_total) as revenue
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.product_id
+        ORDER BY qty_sold DESC
+        LIMIT 5
+      `).all();
+      const slowMovers = db.prepare(`
+        SELECT p.brand_name, p.model_name, COUNT(pi.instance_id) as current_stock
+        FROM products p
+        JOIN product_instances pi ON pi.product_id = p.product_id
+        WHERE pi.status = 'IN_STOCK'
+        AND p.product_id NOT IN (
+          SELECT product_id FROM sale_items si
+          JOIN sales s ON s.sale_id = si.sale_id
+          WHERE s.created_at >= date('now', '-30 days')
+        )
+        GROUP BY p.product_id
+        ORDER BY current_stock DESC
+        LIMIT 5
+      `).all();
+      const topDealers = db.prepare(`
+        SELECT c.name, SUM(s.grand_total) as total_revenue
+        FROM sales s
+        JOIN customers c ON s.customer_id = c.customer_id
+        WHERE s.status = 'COMPLETED' AND s.tier_applied IN ('DEALER', 'DISTRIBUTOR')
+        GROUP BY c.customer_id
+        ORDER BY total_revenue DESC
+        LIMIT 5
+      `).all();
+      const salesByHour = db.prepare(`
+        SELECT strftime('%H', created_at) as hour, SUM(grand_total) as revenue, COUNT(sale_id) as transactions
+        FROM sales
+        WHERE status = 'COMPLETED'
+        GROUP BY hour
+        ORDER BY hour ASC
+      `).all();
+      res.json({ success: true, insights: {
+        marginByBrand,
+        marginByCategory,
+        marginByTier,
+        bestMovers,
+        slowMovers,
+        topDealers,
+        salesByHour
+      } });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.get("/api/reports/smart-reorder", ownerOnly, (req, res) => {
+    try {
+      const db = getDB2();
+      const targetDays = parseInt(req.query.days || "15", 10);
+      const query = `
+        WITH recent_sales AS (
+          SELECT si.product_id, SUM(si.quantity) as sold_last_30_days
+          FROM sale_items si
+          JOIN sales s ON s.sale_id = si.sale_id
+          WHERE s.status = 'COMPLETED' AND s.created_at >= date('now', '-30 days')
+          GROUP BY si.product_id
+        ),
+        current_inventory AS (
+          SELECT p.product_id, p.brand_name, p.model_name, p.sku_code, p.category,
+                 (CASE WHEN p.requires_serial = 1 THEN (
+                   SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK'
+                 ) ELSE p.loose_qty END) as current_stock,
+                 p.min_restock_level
+          FROM products p
+        )
+        SELECT ci.product_id, ci.brand_name, ci.model_name, ci.sku_code, ci.category, ci.current_stock,
+               COALESCE(rs.sold_last_30_days, 0) as sold_last_30,
+               ci.min_restock_level
+        FROM current_inventory ci
+        LEFT JOIN recent_sales rs ON ci.product_id = rs.product_id
+      `;
+      const results = db.prepare(query).all();
+      const suggestions = [];
+      for (const r of results) {
+        const velocity = r.sold_last_30 / 30;
+        const projectedDemand = velocity * targetDays;
+        let targetStock = Math.max(projectedDemand, r.min_restock_level);
+        if (r.current_stock < targetStock) {
+          let suggestedOrder = Math.ceil(targetStock - r.current_stock);
+          suggestions.push({
+            ...r,
+            velocity: velocity.toFixed(2),
+            suggested_order: suggestedOrder,
+            target_stock: Math.ceil(targetStock)
+          });
+        }
+      }
+      res.json({ success: true, suggestions: suggestions.sort((a, b) => b.suggested_order - a.suggested_order) });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
   app2.get("/api/reports/margin", ownerOnly, (req, res) => {
     const { startDate, endDate } = req.query;
     try {
       const db = getDB2();
       const query = `
         SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
-               SUM(si.line_total) as revenue,
-               SUM(si.unit_cost * si.quantity) as cogs,
-               SUM(si.line_total - (si.unit_cost * si.quantity)) as profit
+               si.line_total, p.gst_rate, si.unit_cost, si.quantity
         FROM sale_items si
         JOIN sales s ON si.sale_id = s.sale_id
         JOIN products p ON si.product_id = p.product_id
         WHERE s.status != 'CANCELLED'
         ${startDate ? `AND s.created_at >= ?` : ""}
         ${endDate ? `AND s.created_at <= ?` : ""}
-        GROUP BY date, p.category, p.brand_name, s.tier_applied
-        ORDER BY date DESC
       `;
       const params = [];
       if (startDate)
         params.push(startDate + " 00:00:00");
       if (endDate)
         params.push(endDate + " 23:59:59");
-      res.json({ success: true, data: db.prepare(query).all(...params) });
+      const rows = db.prepare(query).all(...params);
+      const { getTaxableValue: getTaxableValue2 } = (init_gst(), __toCommonJS(gst_exports));
+      const groups = {};
+      rows.forEach((r) => {
+        const key = `${r.date}|${r.category}|${r.brand_name}|${r.tier_applied}`;
+        if (!groups[key]) {
+          groups[key] = { date: r.date, category: r.category, brand_name: r.brand_name, tier_applied: r.tier_applied, revenue: 0, cogs: 0, profit: 0 };
+        }
+        const revenue = getTaxableValue2(r.line_total, r.gst_rate);
+        const cogs = r.unit_cost * r.quantity;
+        groups[key].revenue += revenue;
+        groups[key].cogs += cogs;
+        groups[key].profit += revenue - cogs;
+      });
+      const data = Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
+      res.json({ success: true, data });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -810,8 +1294,7 @@ function createApiServer(options) {
       const db = getDB2();
       const query = `
         SELECT s.sale_id, s.invoice_no, s.created_at, c.gstin, c.name as customer_name,
-               s.subtotal, s.discount, s.cgst, s.sgst, s.igst, s.grand_total,
-               (SELECT GROUP_CONCAT(DISTINCT p.gst_rate) FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = s.sale_id) as gst_rates
+               s.subtotal, s.discount, s.cgst, s.sgst, s.igst, s.grand_total
         FROM sales s
         LEFT JOIN customers c ON s.customer_id = c.customer_id
         WHERE s.status != 'CANCELLED'
@@ -825,23 +1308,28 @@ function createApiServer(options) {
       if (endDate)
         params.push(endDate + " 23:59:59");
       const invoices = db.prepare(query).all(...params);
-      let total_cgst = 0, total_sgst = 0, total_igst = 0;
-      invoices.forEach((inv) => {
+      const { getTaxableValue: getTaxableValue2 } = (init_gst(), __toCommonJS(gst_exports));
+      let total_cgst = 0, total_sgst = 0, total_igst = 0, total_taxable = 0;
+      for (const inv of invoices) {
+        const items = db.prepare(`SELECT si.line_total, p.gst_rate FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = ?`).all(inv.sale_id);
+        let inv_taxable = 0;
+        let rates = /* @__PURE__ */ new Set();
+        items.forEach((si) => {
+          const ratio = (inv.subtotal - inv.discount) / inv.subtotal;
+          const discountedLineTotal = si.line_total * ratio;
+          inv_taxable += getTaxableValue2(discountedLineTotal, si.gst_rate);
+          rates.add(si.gst_rate);
+        });
+        inv.taxable = inv_taxable;
+        inv.gst_rates = Array.from(rates).join(",");
+        total_taxable += inv_taxable;
         total_cgst += inv.cgst;
         total_sgst += inv.sgst;
         total_igst += inv.igst;
-      });
+      }
       res.json({
         success: true,
-        data: {
-          invoices,
-          summary: {
-            total_cgst,
-            total_sgst,
-            total_igst,
-            total_taxable: invoices.reduce((sum, i) => sum + (i.grand_total - i.cgst - i.sgst - i.igst), 0)
-          }
-        }
+        data: { invoices, summary: { total_cgst, total_sgst, total_igst, total_taxable } }
       });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -854,10 +1342,42 @@ function createApiServer(options) {
         SELECT customer_id, name, phone, current_balance, credit_limit, credit_due_date
         FROM customers
         WHERE current_balance > 0
-        ORDER BY current_balance DESC
       `).all();
+      const { calculateAging: calculateAging2 } = (init_ledger(), __toCommonJS(ledger_exports));
+      const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
+      customers.forEach((c) => {
+        const age = calculateAging2(c, /* @__PURE__ */ new Date());
+        buckets["0-30"] += age["0-30"];
+        buckets["31-60"] += age["31-60"];
+        buckets["61-90"] += age["61-90"];
+        buckets["90+"] += age["90+"];
+        buckets["total_overdue"] += age.total_overdue;
+      });
       const total_receivable = customers.reduce((sum, c) => sum + c.current_balance, 0);
-      res.json({ success: true, data: { customers, total_receivable } });
+      customers.sort((a, b) => b.current_balance - a.current_balance);
+      res.json({ success: true, data: { customers, buckets, total_receivable } });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.get("/api/upi-accounts", requireRole("CHECKOUT"), (req, res) => {
+    try {
+      const db = getDB2();
+      const accounts = db.prepare("SELECT * FROM upi_accounts WHERE is_active = 1").all();
+      if (accounts.length === 0) {
+        return res.json({ success: true, data: [{ id: 0, name: "Default UPI", upi_id: "default@upi" }] });
+      }
+      res.json({ success: true, data: accounts });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app2.post("/api/upi-accounts", ownerOnly, (req, res) => {
+    try {
+      const { name, upi_id, merchant_code } = req.body;
+      const db = getDB2();
+      db.prepare(`INSERT INTO upi_accounts (name, upi_id, merchant_code) VALUES (?, ?, ?)`).run(name, upi_id, merchant_code || null);
+      res.json({ success: true });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -866,7 +1386,11 @@ function createApiServer(options) {
 }
 
 // electron/main.ts
+import_electron.app.setPath("userData", path.join(__dirname, "../../local_db_data"));
 var userDataPath = import_electron.app.getPath("userData");
+if (!fs2.existsSync(userDataPath)) {
+  fs2.mkdirSync(userDataPath, { recursive: true });
+}
 var configPath = path.join(userDataPath, "db-config.json");
 var activeConfig = {
   dbPath: path.join(userDataPath, "chauhan-erp.db"),
@@ -940,6 +1464,16 @@ try {
     if (!siCols.find((c) => c.name === "unit_cost")) {
       db.prepare("ALTER TABLE sale_items ADD COLUMN unit_cost INTEGER DEFAULT 0").run();
       console.log("Migration: added unit_cost to sale_items");
+      db.prepare(`
+        UPDATE sale_items
+        SET unit_cost = (
+          SELECT pi.purchase_cost 
+          FROM product_instances pi 
+          WHERE pi.instance_id = sale_items.instance_id
+        )
+        WHERE instance_id IS NOT NULL AND unit_cost = 0;
+      `).run();
+      console.log("Migration: backfilled unit_cost for serialized items");
     }
   } catch (migErr) {
     console.error("Migration error (reports):", migErr);
@@ -947,6 +1481,25 @@ try {
 } catch (err) {
   console.error("Failed to initialize database", err);
 }
+function loadPermissions() {
+  try {
+    const db = getDB();
+    const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'perm_%'").all();
+    const overrides = {};
+    rows.forEach((r) => {
+      const parts = r.key.split("_");
+      if (parts.length >= 3) {
+        const role = parts[1];
+        const action = parts.slice(2).join("_");
+        overrides[`${role}_${action}`] = r.value === "true";
+      }
+    });
+    setPermissionsOverrides(overrides);
+  } catch (err) {
+    console.error("Failed to load permission overrides:", err);
+  }
+}
+loadPermissions();
 var activeDesktopSession = null;
 function handleElevated(channel, action, handler) {
   import_electron.ipcMain.handle(channel, async (event, ...args) => {
@@ -976,8 +1529,8 @@ function startExpressServer() {
 import_electron.ipcMain.handle("verify-desktop-pin", (e, pin) => {
   const db = getDB();
   const users = db.prepare("SELECT * FROM users WHERE active = 1").all();
-  const bcrypt2 = require("bcryptjs");
-  const matchedUser = users.find((u) => bcrypt2.compareSync(pin, u.pin_hash));
+  const bcrypt = require("bcryptjs");
+  const matchedUser = users.find((u) => bcrypt.compareSync(pin, u.pin_hash));
   if (matchedUser) {
     const userPayload = { user_id: matchedUser.user_id, role: matchedUser.role, name: matchedUser.name };
     activeDesktopSession = userPayload;
@@ -988,6 +1541,9 @@ import_electron.ipcMain.handle("verify-desktop-pin", (e, pin) => {
 import_electron.ipcMain.handle("desktop-logout", () => {
   activeDesktopSession = null;
   return true;
+});
+import_electron.ipcMain.handle("get-session", () => {
+  return activeDesktopSession;
 });
 function getLocalIpAddress() {
   const interfaces = os2.networkInterfaces();
@@ -1010,6 +1566,30 @@ function performBackup(backupFolder) {
   fs2.copyFileSync(activeConfig.dbPath, destinationPath);
   return destinationPath;
 }
+var lastBackupDate = "";
+setInterval(() => {
+  try {
+    const now = /* @__PURE__ */ new Date();
+    if (now.getHours() >= 21) {
+      const todayStr = now.toISOString().split("T")[0];
+      if (lastBackupDate !== todayStr && activeConfig.backupDir) {
+        if (!fs2.existsSync(activeConfig.backupDir)) {
+          fs2.mkdirSync(activeConfig.backupDir, { recursive: true });
+        }
+        const dest = performBackup(activeConfig.backupDir);
+        lastBackupDate = todayStr;
+        console.log(`Automated cron backup succeeded for ${todayStr}: ${dest}`);
+      }
+    }
+  } catch (err) {
+    console.error("Automated cron backup failed:", err);
+  }
+}, 5 * 60 * 1e3);
+import_electron.ipcMain.handle("check-first-run", async () => {
+  const db = getDB();
+  const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get();
+  return { firstRun: !row || row.value !== "0" };
+});
 handleElevated("db-query", "BACKUP_RESTORE", async (event, sql, params = []) => {
   const db = getDB();
   return db.prepare(sql).all(...params);
@@ -1028,6 +1608,30 @@ handleElevated("db-run", "BACKUP_RESTORE", async (event, sql, params = []) => {
 });
 handleElevated("db-transaction", "BACKUP_RESTORE", async (event, queries) => {
   const db = getDB();
+  const runTx = db.transaction((txQueries) => {
+    const results = [];
+    for (const q of txQueries) {
+      results.push(db.prepare(q.sql).run(...q.params));
+    }
+    return results;
+  });
+  const res = runTx(queries);
+  if (queries.some((q) => q.sql.toLowerCase().includes("settings"))) {
+    loadPermissions();
+  }
+  return res;
+});
+import_electron.ipcMain.handle("initialize-setup", async (event, queries) => {
+  const db = getDB();
+  const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get();
+  const alreadyDone = row && row.value === "0";
+  if (alreadyDone) {
+    const ownerExists = db.prepare("SELECT user_id FROM users WHERE role = 'OWNER' LIMIT 1").get();
+    if (ownerExists) {
+      throw new Error("Setup already completed");
+    }
+    db.prepare("UPDATE settings SET value = '1' WHERE key = 'first_run'").run();
+  }
   const runTx = db.transaction((txQueries) => {
     const results = [];
     for (const q of txQueries) {
@@ -1529,6 +2133,113 @@ handleElevated("export-raw-csv", "BACKUP_RESTORE", async (event, reportName, csv
     return { success: false, error: err.message };
   }
 });
+handleElevated("get-report-data", "VIEW_REPORTS", async (event, reportType, params) => {
+  const db = getDB();
+  const { startDate, endDate, days } = params || {};
+  const sDate = startDate ? startDate + " 00:00:00" : null;
+  const eDate = endDate ? endDate + " 23:59:59" : null;
+  if (reportType === "Margin") {
+    const rows = db.prepare(`
+      SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
+             si.line_total, p.gst_rate, si.unit_cost, si.quantity
+      FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id JOIN products p ON si.product_id = p.product_id
+      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
+    `).all(...sDate && eDate ? [sDate, eDate] : []);
+    const { getTaxableValue: getTaxableValue2 } = (init_gst(), __toCommonJS(gst_exports));
+    const groups = {};
+    rows.forEach((r) => {
+      const key = `${r.date}|${r.category}|${r.brand_name}|${r.tier_applied}`;
+      if (!groups[key])
+        groups[key] = { date: r.date, category: r.category, brand_name: r.brand_name, tier_applied: r.tier_applied, revenue: 0, cogs: 0, profit: 0 };
+      const revenue = getTaxableValue2(r.line_total, r.gst_rate);
+      const cogs = r.unit_cost * r.quantity;
+      groups[key].revenue += revenue;
+      groups[key].cogs += cogs;
+      groups[key].profit += revenue - cogs;
+    });
+    return Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
+  }
+  if (reportType === "Sales") {
+    return db.prepare(`
+      SELECT date(s.created_at) as date, p.category, p.brand_name, s.tier_applied,
+             SUM(si.line_total) as total_revenue, SUM(si.quantity) as items_sold, COUNT(DISTINCT s.sale_id) as invoices_count
+      FROM sale_items si JOIN sales s ON si.sale_id = s.sale_id JOIN products p ON si.product_id = p.product_id
+      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
+      GROUP BY date, p.category, p.brand_name, s.tier_applied ORDER BY date DESC
+    `).all(...sDate && eDate ? [sDate, eDate] : []);
+  }
+  if (reportType === "LowStock") {
+    return db.prepare(`
+      SELECT p.product_id, p.sku_code, p.model_name, p.min_restock_level, s.name as supplier_name,
+             (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
+      FROM products p LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id
+      WHERE ((SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty) <= p.min_restock_level
+      ORDER BY s.name, p.model_name
+    `).all();
+  }
+  if (reportType === "DeadStock") {
+    return db.prepare(`
+      SELECT p.product_id, p.sku_code, p.model_name, MAX(s.created_at) as last_sale_date,
+             (SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK') + p.loose_qty as in_stock_qty
+      FROM products p LEFT JOIN sale_items si ON p.product_id = si.product_id LEFT JOIN sales s ON si.sale_id = s.sale_id
+      GROUP BY p.product_id
+      HAVING (last_sale_date IS NULL OR last_sale_date <= datetime('now', ?)) AND in_stock_qty > 0
+      ORDER BY last_sale_date ASC
+    `).all(`-${days || 30} days`);
+  }
+  if (reportType === "Valuation") {
+    const data = db.prepare(`
+      SELECT (SELECT SUM(purchase_cost) FROM product_instances WHERE status = 'IN_STOCK') as serialized_value,
+             (SELECT SUM(loose_qty * purchase_cost) FROM products) as loose_value
+    `).get();
+    data.total = (data.serialized_value || 0) + (data.loose_value || 0);
+    return data;
+  }
+  if (reportType === "GSTR1") {
+    const invoices = db.prepare(`
+      SELECT s.sale_id, s.invoice_no, s.created_at, c.gstin, c.name as customer_name, s.subtotal, s.discount, s.cgst, s.sgst, s.igst, s.grand_total
+      FROM sales s LEFT JOIN customers c ON s.customer_id = c.customer_id
+      WHERE s.status != 'CANCELLED' ${sDate ? "AND s.created_at >= ?" : ""} ${eDate ? "AND s.created_at <= ?" : ""}
+      ORDER BY s.created_at DESC
+    `).all(...sDate && eDate ? [sDate, eDate] : []);
+    const { getTaxableValue: getTaxableValue2 } = (init_gst(), __toCommonJS(gst_exports));
+    let total_cgst = 0, total_sgst = 0, total_igst = 0, total_taxable = 0;
+    for (const inv of invoices) {
+      const items = db.prepare(`SELECT si.line_total, p.gst_rate FROM sale_items si JOIN products p ON si.product_id = p.product_id WHERE si.sale_id = ?`).all(inv.sale_id);
+      let inv_taxable = 0;
+      let rates = /* @__PURE__ */ new Set();
+      items.forEach((si) => {
+        const ratio = (inv.subtotal - inv.discount) / inv.subtotal;
+        inv_taxable += getTaxableValue2(si.line_total * ratio, si.gst_rate);
+        rates.add(si.gst_rate);
+      });
+      inv.taxable = inv_taxable;
+      inv.gst_rates = Array.from(rates).join(",");
+      total_taxable += inv_taxable;
+      total_cgst += inv.cgst;
+      total_sgst += inv.sgst;
+      total_igst += inv.igst;
+    }
+    return { invoices, summary: { total_cgst, total_sgst, total_igst, total_taxable } };
+  }
+  if (reportType === "Udhaar") {
+    const customers = db.prepare(`SELECT customer_id, name, phone, current_balance, credit_limit, credit_due_date FROM customers WHERE current_balance > 0`).all();
+    const { calculateAging: calculateAging2 } = (init_ledger(), __toCommonJS(ledger_exports));
+    const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0, total_overdue: 0 };
+    customers.forEach((c) => {
+      const age = calculateAging2(c, /* @__PURE__ */ new Date());
+      buckets["0-30"] += age["0-30"];
+      buckets["31-60"] += age["31-60"];
+      buckets["61-90"] += age["61-90"];
+      buckets["90+"] += age["90+"];
+      buckets["total_overdue"] += age.total_overdue;
+    });
+    const total_receivable = customers.reduce((sum, c) => sum + c.current_balance, 0);
+    customers.sort((a, b) => b.current_balance - a.current_balance);
+    return { customers, buckets, total_receivable };
+  }
+  throw new Error("Unknown report type");
+});
 import_electron.ipcMain.handle("db-warranty-check", async (event, serial) => {
   assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
   const db = getDB();
@@ -1652,6 +2363,35 @@ import_electron.ipcMain.handle("db-return-accept", async (event, payload) => {
   });
   return tx();
 });
+import_electron.ipcMain.handle("db-void-sale", async (event, saleId) => {
+  assertCan(activeDesktopSession?.role, "VOID_SALE");
+  const db = getDB();
+  const tx = db.transaction(() => {
+    const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(saleId);
+    if (!sale)
+      throw new Error(`Sale #${saleId} not found.`);
+    if (sale.status === "CANCELLED")
+      throw new Error(`Sale #${saleId} is already voided.`);
+    db.prepare("UPDATE sales SET status = 'CANCELLED' WHERE sale_id = ?").run(saleId);
+    const items = db.prepare("SELECT * FROM sale_items WHERE sale_id = ?").all(saleId);
+    for (const item of items) {
+      if (item.instance_id) {
+        db.prepare("UPDATE product_instances SET status = 'IN_STOCK' WHERE instance_id = ?").run(item.instance_id);
+      } else {
+        db.prepare("UPDATE products SET loose_qty = loose_qty + ? WHERE product_id = ?").run(item.quantity, item.product_id);
+      }
+    }
+    if (sale.payment_mode === "UDHAAR") {
+      const debt = sale.grand_total - sale.amount_paid;
+      if (debt > 0 && sale.customer_id) {
+        db.prepare("UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?").run(debt, sale.customer_id);
+      }
+    }
+    db.prepare("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, ?, ?, ?, ?)").run(activeDesktopSession?.user_id || 1, "DELETE", "sales", saleId, `Voided sale #${saleId} and restored inventory.`);
+    return { success: true };
+  });
+  return tx();
+});
 import_electron.ipcMain.handle("db-rma-list", async () => {
   assertCan(activeDesktopSession?.role, "READ_CATALOGUE");
   const db = getDB();
@@ -1663,6 +2403,11 @@ import_electron.ipcMain.handle("db-rma-list", async () => {
     LEFT JOIN suppliers s ON r.supplier_id = s.supplier_id
     ORDER BY r.sent_at DESC
   `).all();
+});
+handleElevated("db-rma-dispatch", "EDIT_CATALOGUE", async (event, rma_id, supplier_id, tracking_id) => {
+  const db = getDB();
+  db.prepare("UPDATE rma_register SET supplier_id = ?, tracking_id = ? WHERE rma_id = ?").run(supplier_id || null, tracking_id || null, rma_id);
+  return { success: true };
 });
 handleElevated("db-rma-resolve", "EDIT_CATALOGUE", async (event, rma_id, status, note) => {
   const db = getDB();
@@ -1696,6 +2441,32 @@ import_electron.ipcMain.handle("get-print-data", async (event, kind, id) => {
       WHERE si.sale_id = ?
     `).all(id);
     return { settings, sale, items };
+  } else if (kind === "QUOTATION") {
+    const sale = db.prepare(`
+      SELECT q.*, c.name as customer_name, c.gstin as customer_gstin, c.phone as customer_phone, c.shop_name as customer_shop_name 
+      FROM quotations q LEFT JOIN customers c ON q.customer_id = c.customer_id
+      WHERE q.quotation_id = ?
+    `).get(id);
+    const items = db.prepare(`
+      SELECT qi.*, p.model_name, p.hsn_code, p.gst_rate
+      FROM quotation_items qi
+      JOIN products p ON qi.product_id = p.product_id
+      WHERE qi.quotation_id = ?
+    `).all(id);
+    if (sale) {
+      sale.invoice_no = sale.quotation_no;
+      sale.payment_mode = "PROFORMA";
+      sale.is_quotation = true;
+    }
+    const mappedItems = items.map((i) => ({
+      ...i,
+      price: i.unit_price,
+      tax_amt: i.total_amt - i.taxable_value
+    }));
+    return { settings, sale, items: mappedItems };
+  } else if (kind === "LABEL") {
+    const product = db.prepare(`SELECT * FROM products WHERE product_id = ?`).get(id);
+    return { settings, product };
   } else if (kind === "CREDIT_NOTE") {
     const cn = db.prepare(`
       SELECT cn.*, s.invoice_no, s.created_at as sale_date,
@@ -1775,6 +2546,82 @@ import_electron.ipcMain.handle("log-reprint", async (event, kind, id, userId) =>
     VALUES (?, 'REPRINT', ?, ?, ?)
   `).run(activeDesktopSession?.user_id, kind === "SALE" ? "sales" : "credit_notes", id, "Reprinted document");
   return true;
+});
+import_electron.ipcMain.handle("export-einvoice-json", async (event, sale_id) => {
+  assertCan(activeDesktopSession?.role, "READ_DASHBOARD");
+  try {
+    const db = getDB();
+    const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(sale_id);
+    if (!sale)
+      return { success: false, error: "Sale not found" };
+    const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(sale.customer_id);
+    const items = db.prepare(`
+      SELECT si.*, p.hsn_code, p.gst_rate, p.model_name
+      FROM sale_items si
+      JOIN products p ON si.product_id = p.product_id
+      WHERE si.sale_id = ?
+    `).all(sale_id);
+    const einvoicePayload = {
+      Version: "1.1",
+      TranDtls: {
+        TaxSch: "GST",
+        SupTyp: "B2B",
+        RegRev: "Y"
+      },
+      DocDtls: {
+        Typ: "INV",
+        No: sale.invoice_no,
+        Dt: sale.created_at.split(" ")[0]
+      },
+      SellerDtls: {
+        LglNm: "Chauhan Electronics",
+        GSTIN: "29XXXXXXXXXXXXX",
+        StateCode: "29"
+      },
+      BuyerDtls: {
+        LglNm: customer?.name || "Counter Customer",
+        GSTIN: customer?.gstin || "URP",
+        StateCode: "29",
+        // Fallback, could be extracted from GSTIN
+        PhNo: customer?.phone
+      },
+      ItemList: items.map((item, idx) => ({
+        SlNo: (idx + 1).toString(),
+        PrdDesc: item.model_name,
+        IsServc: "N",
+        HsnCd: item.hsn_code || "8543",
+        Qty: item.quantity,
+        Unit: "NOS",
+        UnitPrice: (item.unit_price / 100).toFixed(2),
+        TotAmt: (item.unit_price * item.quantity / 100).toFixed(2),
+        Discount: (item.line_discount / 100).toFixed(2),
+        PreTaxVal: ((item.unit_price * item.quantity - item.line_discount) / 100).toFixed(2),
+        AssAmt: (item.line_total / 100).toFixed(2),
+        GstRt: item.gst_rate || 18,
+        TotItemVal: (item.line_total / 100).toFixed(2)
+      })),
+      ValDtls: {
+        AssVal: (sale.subtotal / 100).toFixed(2),
+        CgstVal: (sale.cgst / 100).toFixed(2),
+        SgstVal: (sale.sgst / 100).toFixed(2),
+        IgstVal: (sale.igst / 100).toFixed(2),
+        Discount: (sale.discount / 100).toFixed(2),
+        TotInvVal: (sale.grand_total / 100).toFixed(2)
+      }
+    };
+    const { canceled, filePath } = await import_electron.dialog.showSaveDialog({
+      title: "Save E-Invoice JSON",
+      defaultPath: `e-invoice-${sale.invoice_no.replace(/\\/ / g, "-")}.json`,
+      filters: [{ name: "JSON", extensions: ["json"] }]
+    });
+    if (canceled || !filePath)
+      return { success: false, canceled: true };
+    fs2.writeFileSync(filePath, JSON.stringify(einvoicePayload, null, 2));
+    return { success: true, filePath };
+  } catch (err) {
+    console.error("E-Invoice Export Error:", err);
+    return { success: false, error: err.message };
+  }
 });
 function enqueueSms(phone, templateKey, vars, channel = "SMS") {
   try {

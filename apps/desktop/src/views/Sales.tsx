@@ -49,6 +49,8 @@ export default function Sales() {
 
   // Billing Math
   const [globalDiscount, setGlobalDiscount] = useState<number | ''>('');
+  const [tradeInDiscount, setTradeInDiscount] = useState<number | ''>('');
+  const [tradeInDesc, setTradeInDesc] = useState<string>('');
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'UPI' | 'CARD' | 'UDHAAR'>('CASH');
   const [amountPaidInput, setAmountPaidInput] = useState<string>(''); // in INR
 
@@ -105,6 +107,10 @@ export default function Sales() {
     return () => removeListener();
   }, []);
 
+  const [session, setSession] = useState<any>(null);
+  const [canEditPrice, setCanEditPrice] = useState(false);
+  const [canOverrideCredit, setCanOverrideCredit] = useState(false);
+
   const fetchSettings = async () => {
     try {
       const db = window.electronAPI;
@@ -116,6 +122,21 @@ export default function Sales() {
       if (conf.shop_name) {
         setShopSettings(conf);
       }
+
+      const sess = await db.invoke('get-session');
+      setSession(sess);
+
+      if (sess?.role === 'OWNER') {
+        setCanEditPrice(true);
+        setCanOverrideCredit(true);
+      } else if (sess?.role === 'CASHIER') {
+        setCanEditPrice(conf['perm_CASHIER_EDIT_PRICE'] === 'true');
+        setCanOverrideCredit(conf['perm_CASHIER_OVERRIDE_CREDIT'] === 'true');
+      } else {
+        setCanEditPrice(false);
+        setCanOverrideCredit(false);
+      }
+
     } catch (e) {
       console.error('Failed to load shop settings', e);
     }
@@ -375,6 +396,7 @@ export default function Sales() {
   const calculateTaxSplits = () => {
     const subtotal = calculateCartSubtotal();
     const discountVal = globalDiscount ? Math.round(Number(globalDiscount) * 100) : 0;
+    const tradeInVal = tradeInDiscount ? Math.round(Number(tradeInDiscount) * 100) : 0;
     const taxableSubtotal = Math.max(0, subtotal - discountVal);
 
     let cgstTotal = 0;
@@ -419,7 +441,7 @@ export default function Sales() {
       sgst: sgstTotal,
       igst: igstTotal,
       taxableAmount: Math.max(0, taxableSubtotal - (cgstTotal + sgstTotal + igstTotal)),
-      grandTotal: taxableSubtotal
+      grandTotal: Math.max(0, taxableSubtotal - tradeInVal)
     };
   };
 
@@ -476,15 +498,15 @@ export default function Sales() {
 
     if (isOverdue) {
       return {
-        blocked: true,
-        reason: `Overdue account! Last due date was ${activeCustomer.credit_due_date}. Please clear pending balance of ₹${(current/100).toLocaleString('en-IN')}.`
+        blocked: !canOverrideCredit,
+        reason: `Overdue account! Last due date was ${activeCustomer.credit_due_date}. Please clear pending balance of ₹${(current/100).toLocaleString('en-IN')}. ${canOverrideCredit ? '(Override active)' : ''}`
       };
     }
 
     if (activeCustomer.phone !== '0000000000' && nextBalance > limit) {
       return {
-        blocked: true,
-        reason: `Exceeds credit limit! Current debt is ₹${(current/100).toLocaleString('en-IN')} / Credit limit is ₹${(limit/100).toLocaleString('en-IN')}.`
+        blocked: !canOverrideCredit,
+        reason: `Exceeds credit limit! Current debt is ₹${(current/100).toLocaleString('en-IN')} / Credit limit is ₹${(limit/100).toLocaleString('en-IN')}. ${canOverrideCredit ? '(Override active)' : ''}`
       };
     }
 
@@ -519,6 +541,7 @@ export default function Sales() {
       
       // Calculate split detail
       const discountVal = globalDiscount ? Math.round(Number(globalDiscount) * 100) : 0;
+      const tradeInVal = tradeInDiscount ? Math.round(Number(tradeInDiscount) * 100) : 0;
       const subtotal = calculateCartSubtotal();
       
       // Amount paid
@@ -539,8 +562,8 @@ export default function Sales() {
       queries.push({
         sql: `INSERT INTO sales (
                 invoice_no, customer_id, tier_applied, subtotal, discount, 
-                cgst, sgst, igst, grand_total, amount_paid, payment_mode, sold_by
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                cgst, sgst, igst, grand_total, amount_paid, payment_mode, trade_in_discount, trade_in_desc, sold_by
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         params: [
           invoiceNo,
           activeCustomer ? activeCustomer.customer_id : 1, // default to Counter Customer id 1
@@ -553,9 +576,25 @@ export default function Sales() {
           grandTotal,
           paidPaise,
           paymentMode,
-          1 // sold_by owner (user_id=1)
+          tradeInVal,
+          tradeInDesc || null,
+          session?.user_id || 1 // sold_by from session
         ]
       });
+
+      // 1b. Insert into trade_ins
+      if (tradeInVal > 0 && tradeInDesc) {
+        queries.push({
+          sql: `INSERT INTO trade_ins (sale_id, customer_id, item_desc, estimated_value, status) 
+                VALUES ((SELECT sale_id FROM sales WHERE invoice_no = ?), ?, ?, ?, 'RECEIVED')`,
+          params: [
+            invoiceNo,
+            activeCustomer ? activeCustomer.customer_id : 1,
+            tradeInDesc,
+            tradeInVal
+          ]
+        });
+      }
 
       // 2. Insert items and decrement inventory
       cart.forEach((item) => {
@@ -696,6 +735,8 @@ export default function Sales() {
       // Reset cart and transaction status
       setCart([]);
       setGlobalDiscount('');
+      setTradeInDiscount('');
+      setTradeInDesc('');
       setAmountPaidInput('');
       setCashTendered('');
       handleClearCustomer();
@@ -970,6 +1011,30 @@ export default function Sales() {
                         <option value="CARD">CARD</option>
                         <option value="UDHAAR">UDHAAR (Credit)</option>
                       </select>
+                    </div>
+                  </div>
+
+                  {/* Trade-In Row */}
+                  <div className="grid grid-cols-3 gap-3 bg-zinc-950 p-3 rounded border border-zinc-900 border-dashed">
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-mono text-zinc-400 uppercase">Old Item Trade-In (Desc)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Old Sony 32inch TV (Screen Scratched)"
+                        value={tradeInDesc}
+                        onChange={(e) => setTradeInDesc(e.target.value)}
+                        className="mt-1 w-full bg-zinc-900 border border-zinc-850 rounded px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-zinc-400 uppercase">Value (INR)</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 1500"
+                        value={tradeInDiscount}
+                        onChange={(e) => setTradeInDiscount(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="mt-1 w-full bg-zinc-900 border border-zinc-850 rounded px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-amber-400"
+                      />
                     </div>
                   </div>
 
@@ -1248,23 +1313,29 @@ export default function Sales() {
             <form onSubmit={handleSaveEditItemSubmit} className="p-5 space-y-4 text-xs font-mono">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-zinc-400 uppercase">Unit Price (INR)</label>
+                  <label className="block text-zinc-400 uppercase flex items-center gap-1">
+                    Unit Price (INR) {!canEditPrice && <Lock size={10} className="text-red-400" />}
+                  </label>
                   <input
                     type="number"
                     step="0.01"
+                    disabled={!canEditPrice}
                     value={editPrice}
                     onChange={(e) => setEditPrice(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-400"
+                    className={`mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none ${canEditPrice ? 'focus:border-amber-400' : 'opacity-60 cursor-not-allowed'}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-400 uppercase">Unit Discount (INR)</label>
+                  <label className="block text-zinc-400 uppercase flex items-center gap-1">
+                    Unit Discount (INR) {!canEditPrice && <Lock size={10} className="text-red-400" />}
+                  </label>
                   <input
                     type="number"
                     step="0.01"
+                    disabled={!canEditPrice}
                     value={editDiscount}
                     onChange={(e) => setEditDiscount(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-400"
+                    className={`mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-zinc-100 focus:outline-none ${canEditPrice ? 'focus:border-amber-400' : 'opacity-60 cursor-not-allowed'}`}
                   />
                 </div>
               </div>
@@ -1421,6 +1492,12 @@ export default function Sales() {
                     <div className="flex justify-between text-emerald-600 font-bold">
                       <span className="font-sans">Invoice Discount:</span>
                       <span>- {formatPrice(createdInvoice.header.discount)}</span>
+                    </div>
+                  )}
+                  {createdInvoice.header.trade_in_discount > 0 && (
+                    <div className="flex justify-between text-emerald-600 font-bold text-[11px]">
+                      <span className="font-sans">Trade-In Value:</span>
+                      <span>- {formatPrice(createdInvoice.header.trade_in_discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-sm border-t-2 border-black pt-2">

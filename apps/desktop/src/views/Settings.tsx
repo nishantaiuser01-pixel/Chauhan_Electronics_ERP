@@ -28,6 +28,11 @@ export default function Settings() {
     // X1: WhatsApp Business API
     whatsapp_api_enabled: 'false',
     whatsapp_api_key: '',
+    // Phase 4: Role Permissions
+    perm_CASHIER_EDIT_PRICE: 'false',
+    perm_CASHIER_OVERRIDE_CREDIT: 'false',
+    perm_CASHIER_ISSUE_CN: 'false',
+    perm_CASHIER_VOID_SALE: 'false',
   });
 
   const [dbConfig, setDbConfig] = useState({
@@ -76,6 +81,10 @@ export default function Settings() {
         sms_sender_id: settingsMap.sms_sender_id || '',
         whatsapp_api_enabled: settingsMap.whatsapp_api_enabled || 'false',
         whatsapp_api_key: settingsMap.whatsapp_api_key || '',
+        perm_CASHIER_EDIT_PRICE: settingsMap.perm_CASHIER_EDIT_PRICE || 'false',
+        perm_CASHIER_OVERRIDE_CREDIT: settingsMap.perm_CASHIER_OVERRIDE_CREDIT || 'false',
+        perm_CASHIER_ISSUE_CN: settingsMap.perm_CASHIER_ISSUE_CN || 'false',
+        perm_CASHIER_VOID_SALE: settingsMap.perm_CASHIER_VOID_SALE || 'false',
       });
 
       // Fetch DB config
@@ -479,6 +488,55 @@ export default function Settings() {
                   />
                 </div>
               )}
+            </div>
+
+            <h2 className="text-md font-bold font-mono text-amber-400 uppercase tracking-wider border-b border-zinc-800 pb-2 pt-2 mt-4">
+              Role Permissions (Cashier)
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950 p-4 rounded-lg border border-zinc-800">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="perm_CASHIER_EDIT_PRICE"
+                  checked={settings.perm_CASHIER_EDIT_PRICE === 'true'}
+                  onChange={(e) => setSettings({ ...settings, perm_CASHIER_EDIT_PRICE: e.target.checked ? 'true' : 'false' })}
+                  className="w-4 h-4 accent-amber-400"
+                />
+                <label htmlFor="perm_CASHIER_EDIT_PRICE" className="text-sm text-zinc-200">Edit Prices</label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="perm_CASHIER_OVERRIDE_CREDIT"
+                  checked={settings.perm_CASHIER_OVERRIDE_CREDIT === 'true'}
+                  onChange={(e) => setSettings({ ...settings, perm_CASHIER_OVERRIDE_CREDIT: e.target.checked ? 'true' : 'false' })}
+                  className="w-4 h-4 accent-amber-400"
+                />
+                <label htmlFor="perm_CASHIER_OVERRIDE_CREDIT" className="text-sm text-zinc-200">Override Credit Limit</label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="perm_CASHIER_ISSUE_CN"
+                  checked={settings.perm_CASHIER_ISSUE_CN === 'true'}
+                  onChange={(e) => setSettings({ ...settings, perm_CASHIER_ISSUE_CN: e.target.checked ? 'true' : 'false' })}
+                  className="w-4 h-4 accent-amber-400"
+                />
+                <label htmlFor="perm_CASHIER_ISSUE_CN" className="text-sm text-zinc-200">Issue Credit Notes</label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="perm_CASHIER_VOID_SALE"
+                  checked={settings.perm_CASHIER_VOID_SALE === 'true'}
+                  onChange={(e) => setSettings({ ...settings, perm_CASHIER_VOID_SALE: e.target.checked ? 'true' : 'false' })}
+                  className="w-4 h-4 accent-amber-400"
+                />
+                <label htmlFor="perm_CASHIER_VOID_SALE" className="text-sm text-zinc-200">Cancel/Void Sales</label>
+              </div>
             </div>
 
             <div className="flex justify-end pt-4">

@@ -1,4 +1,4 @@
-export async function triggerPrint(kind: 'SALE' | 'CREDIT_NOTE' | 'REPAIR', id: number, isReprint = false) {
+export async function triggerPrint(kind: 'SALE' | 'CREDIT_NOTE' | 'REPAIR' | 'QUOTATION', id: number, isReprint = false) {
   try {
     const data = await (window as any).ipcRenderer.invoke('get-print-data', kind, id);
     if (!data) return;

@@ -19,12 +19,23 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
   const [reprintId, setReprintId] = useState('');
   const [reprintKind, setReprintKind] = useState<'SALE'|'CREDIT_NOTE'>('SALE');
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
+    fetchSession();
     fetchStats();
     fetchLanInfo();
     fetchRecentLogs();
   }, []);
+
+  const fetchSession = async () => {
+    try {
+      const sess = await window.electronAPI.invoke('get-session');
+      setSession(sess);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -100,7 +111,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 ${session?.role === 'OWNER' ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4`}>
         <div className="border border-zinc-800 bg-zinc-900/20 p-5 rounded-lg hover:border-amber-400/30 transition-all duration-300">
           <div className="flex justify-between items-start">
             <div>
@@ -150,18 +161,20 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <p className="text-xs text-zinc-500 mt-4 font-mono font-medium">Service desk open</p>
         </div>
 
-        <div className="border border-zinc-800 bg-zinc-900/20 p-5 rounded-lg hover:border-amber-400/30 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs text-zinc-500 uppercase font-mono font-medium">Supplier Payables</p>
-              <h3 className="text-3xl font-semibold mt-2 font-mono text-emerald-400">{formatPaise(stats.supplierPayable)}</h3>
+        {session?.role === 'OWNER' && (
+          <div className="border border-zinc-800 bg-zinc-900/20 p-5 rounded-lg hover:border-amber-400/30 transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs text-zinc-500 uppercase font-mono font-medium">Supplier Payables</p>
+                <h3 className="text-3xl font-semibold mt-2 font-mono text-emerald-400">{formatPaise(stats.supplierPayable)}</h3>
+              </div>
+              <span className="p-2 bg-zinc-900 border border-zinc-800 rounded-md text-emerald-400">
+                <Shield size={20} />
+              </span>
             </div>
-            <span className="p-2 bg-zinc-900 border border-zinc-800 rounded-md text-emerald-400">
-              <Shield size={20} />
-            </span>
+            <p className="text-xs text-zinc-500 mt-4 font-mono font-medium">Purchasing ledger</p>
           </div>
-          <p className="text-xs text-zinc-500 mt-4 font-mono font-medium">Purchasing ledger</p>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -202,7 +215,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         <div className="border border-zinc-800 bg-zinc-900/10 p-6 rounded-lg space-y-4">
-          <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-amber-400">Quick Reprint</h2>
+          <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-amber-400">Reprint & Export</h2>
           <div className="space-y-3">
             <select 
               className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-zinc-100"
@@ -224,10 +237,47 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 onClick={() => {
                   if (reprintId) triggerPrint(reprintKind, parseInt(reprintId), true);
                 }}
+                title="Print Document"
                 className="bg-amber-400 hover:bg-amber-500 text-black px-3 py-2 rounded font-bold text-xs"
               >
                 <Printer size={14} />
               </button>
+              {reprintKind === 'SALE' && (
+                <>
+                  <button
+                    onClick={async () => {
+                      if (reprintId) {
+                        const res = await window.electronAPI.invoke('export-einvoice-json', parseInt(reprintId));
+                        if (res && res.success) alert(`Exported to: ${res.filePath}`);
+                        else if (res && !res.success) alert(`Export failed: ${res.error}`);
+                      }
+                    }}
+                    title="Export E-Invoice JSON"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded font-bold text-xs font-mono"
+                  >
+                    JSON
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (reprintId) {
+                        if (confirm(`Are you sure you want to VOID Sale #${reprintId}? This cannot be undone.`)) {
+                          try {
+                            const res = await window.electronAPI.invoke('db-void-sale', parseInt(reprintId));
+                            if (res.success) alert(`Sale #${reprintId} voided successfully.`);
+                            else alert(`Void failed: ${res.error}`);
+                          } catch (err: any) {
+                            alert(`Error: ${err.message}`);
+                          }
+                        }
+                      }
+                    }}
+                    title="Void Sale"
+                    className="bg-red-600 hover:bg-red-500 text-white px-3 py-2 rounded font-bold text-xs"
+                  >
+                    VOID
+                  </button>
+                </>
+              )}
             </div>
             <p className="text-[10px] text-zinc-500 uppercase">Find ID from Audit Log</p>
           </div>

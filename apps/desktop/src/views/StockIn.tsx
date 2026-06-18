@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Barcode, CheckCircle, PackagePlus, AlertCircle, Printer, Plus } from 'lucide-react';
-
+import { Barcode as BarcodeIcon, CheckCircle, PackagePlus, AlertCircle, Printer, Plus } from 'lucide-react';
+// Mock Barcode component since we cannot install the package offline
+const Barcode = ({ value, width, height, fontSize }: any) => (
+  <div className="border-4 border-black p-2 flex flex-col items-center justify-center bg-white w-full h-full">
+    <div className="flex-1 w-full flex overflow-hidden opacity-50 bg-[repeating-linear-gradient(90deg,#000_0px,#000_2px,transparent_2px,transparent_4px,#000_4px,#000_5px,transparent_5px,transparent_8px)]" />
+    <span className="font-mono font-bold mt-1 text-black" style={{ fontSize: fontSize || 12 }}>{value}</span>
+  </div>
+);
 export default function StockIn() {
   const [activeTab, setActiveTab] = useState<'scan' | 'label'>('scan');
   
@@ -358,7 +364,7 @@ export default function StockIn() {
           <div className="lg:col-span-1 border border-zinc-800 bg-zinc-900/10 p-6 rounded-lg space-y-6 self-start">
             <div className="space-y-2">
               <h2 className="text-md font-bold font-mono text-amber-400 uppercase tracking-wider flex items-center space-x-2">
-                <Barcode size={18} />
+                <BarcodeIcon size={18} />
                 <span>Scan Barcode SKU</span>
               </h2>
               <p className="text-xs text-zinc-500">
@@ -425,7 +431,7 @@ export default function StockIn() {
           <div className="lg:col-span-2 border border-zinc-800 bg-zinc-900/10 p-6 rounded-lg">
             {!activeProduct ? (
               <div className="flex flex-col items-center justify-center py-20 text-zinc-500 text-sm italic">
-                <Barcode size={48} className="text-zinc-800 mb-4" />
+                <BarcodeIcon size={48} className="text-zinc-800 mb-4" />
                 <p>No active scanning session.</p>
                 <p className="text-xs text-zinc-600 mt-1">Scan a barcode on the left to start receiving inventory.</p>
               </div>
@@ -653,7 +659,7 @@ export default function StockIn() {
 
                   <div className="flex items-end">
                     <button
-                      onClick={() => window.print()}
+                      onClick={() => window.open(`/#/print/LABEL/${selectedProdForLabel.product_id}?qty=${labelQty}`, '_blank', 'width=400,height=400')}
                       className="w-full flex items-center justify-center space-x-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-bold px-4 py-2 rounded text-sm transition-colors font-mono"
                     >
                       <Printer size={16} />
@@ -671,22 +677,9 @@ export default function StockIn() {
                   {selectedProdForLabel.brand_name} {selectedProdForLabel.model_name}
                 </span>
 
-                {/* Mock Barcode Block */}
-                <div className="my-4 flex flex-col items-center">
-                  <div className="h-10 w-44 flex items-stretch border-x border-black">
-                    {/* Simulated barcode stripes */}
-                    <div className="flex-1 bg-black mr-1"></div>
-                    <div className="w-1 bg-white mr-0.5"></div>
-                    <div className="w-2 bg-black mr-1"></div>
-                    <div className="w-0.5 bg-black mr-0.5"></div>
-                    <div className="flex-1 bg-black mr-1"></div>
-                    <div className="w-1.5 bg-black mr-1"></div>
-                    <div className="w-0.5 bg-black mr-0.5"></div>
-                    <div className="flex-1 bg-black mr-1"></div>
-                    <div className="w-2 bg-black mr-1"></div>
-                    <div className="w-0.5 bg-black"></div>
-                  </div>
-                  <span className="text-[11px] font-mono tracking-widest mt-1 select-all">{selectedProdForLabel.sku_code}</span>
+                {/* Barcode Block */}
+                <div className="my-2 flex flex-col items-center">
+                  <Barcode value={selectedProdForLabel.sku_code} format="CODE128" width={1.5} height={40} fontSize={12} margin={0} background="#ffffff" lineColor="#000000" />
                 </div>
 
                 <div className="flex justify-between w-full text-[10px] font-bold font-mono border-t border-zinc-200 pt-2">

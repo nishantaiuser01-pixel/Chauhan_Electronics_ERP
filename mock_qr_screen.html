@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock QR Scanner UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-white font-sans antialiased m-0 p-0 h-screen w-screen overflow-hidden flex flex-col max-w-md mx-auto relative border-x border-zinc-900">
+  
+  <!-- Header -->
+  <div class="p-4 bg-zinc-900 border-b border-zinc-800 flex justify-between items-center shrink-0">
+    <div>
+      <h1 class="text-lg font-bold font-mono tracking-widest text-zinc-100 uppercase flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+        POS Terminal
+      </h1>
+      <div class="text-xs text-zinc-500 font-mono mt-0.5 ml-4">
+        Salesperson • <span class="text-emerald-400">Online</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart List -->
+  <div class="flex-1 overflow-y-auto p-4 bg-zinc-950 pb-32">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl mb-4 overflow-hidden">
+      <div class="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <span class="text-xs font-mono font-bold text-zinc-400">CUSTOMER</span>
+      </div>
+      <div class="p-3">
+        <div class="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm font-mono rounded-lg px-3 py-2 flex justify-between items-center">
+          <span>Walk-in Customer</span>
+          <span class="text-amber-400 text-xs px-2 py-0.5 bg-amber-400/10 rounded">COUNTER</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="bg-zinc-950 border border-zinc-800 p-3 rounded-xl flex justify-between items-center relative overflow-hidden">
+        <div>
+          <div class="text-sm font-bold text-zinc-200">Sony Bravia 55" 4K TV</div>
+          <div class="text-xs text-zinc-500 font-mono flex items-center gap-2 mt-0.5">
+            <span class="line-through">₹1,50,000</span>
+            <span class="text-emerald-400 font-bold">₹1,25,000</span>
+          </div>
+        </div>
+        <button class="p-2 text-zinc-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Checkout -->
+  <div class="p-4 bg-zinc-900 border-t border-zinc-800 shrink-0 flex flex-col items-center">
+    
+    <div class="w-full bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col items-center mb-3">
+      <div class="w-full bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-mono rounded px-3 py-2 mb-4 flex justify-between items-center">
+        <span>Chauhan Electronics (chauhan@okhdfcbank)</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      
+      <!-- UPI QR Code -->
+      <div class="bg-white p-3 rounded-xl shadow-[0_0_20px_rgba(251,191,36,0.1)] mb-2">
+        <!-- Mock UPI QR code image using API -->
+        <img 
+          src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3Dchauhan%40okhdfcbank%26pn%3DChauhan%2520Electronics%26am%3D125000.00%26cu%3DINR" 
+          alt="UPI QR Code"
+          width="160"
+          height="160"
+          class="rounded"
+        />
+      </div>
+      <p class="text-[10px] text-zinc-500 font-mono text-center">
+        Scan to pay exactly ₹125000.00
+      </p>
+    </div>
+
+    <div class="flex gap-2 w-full mb-3">
+      <button class="flex-1 py-2 text-xs font-bold font-mono rounded-lg border transition-colors bg-zinc-950 text-zinc-500 border-zinc-800">CASH</button>
+      <button class="flex-1 py-2 text-xs font-bold font-mono rounded-lg border transition-colors bg-amber-400 text-zinc-950 border-amber-400">UPI</button>
+      <button class="flex-1 py-2 text-xs font-bold font-mono rounded-lg border transition-colors bg-zinc-950 text-zinc-500 border-zinc-800">UDHAAR</button>
+    </div>
+
+    <button class="w-full py-4 bg-emerald-500 text-zinc-950 font-bold font-mono rounded-xl">
+      COMPLETE SALE (UPI)
+    </button>
+  </div>
+
+</body>
+</html>

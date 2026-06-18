@@ -5,6 +5,32 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { authorize, Role } from '../../../packages/core';
 
+// Stage 2: in-memory override token store (TTL 5 min)
+const overrideTokens = new Map<string, { admin_user_id: number; admin_name: string; expires: number; product_id?: number; final_price?: number; is_udhaar?: boolean; customer_id?: number; }>();
+const tokenCleanupInterval = setInterval(() => { const now = Date.now(); overrideTokens.forEach((v, k) => { if (v.expires < now) overrideTokens.delete(k); }); }, 60_000);
+if (tokenCleanupInterval.unref) tokenCleanupInterval.unref();
+
+// Role-based max discount floor (pct)
+function getMaxDiscountPct(role: string): number {
+  if (role === 'OWNER') return 100;
+  if (role === 'CASHIER') return 20;
+  return 10; // SALESPERSON default
+}
+
+// Hub-side price floor — NEVER sent to client (cost + 5% min margin)
+function getPriceFloor(product: any, instance: any): number {
+  const cost = instance?.purchase_cost ?? product?.purchase_cost ?? 0;
+  return Math.ceil(cost * 1.05);
+}
+
+// Strip purchase_cost/margin for non-SHOW_COST roles
+function safeProd(product: any, role: string): any {
+  if (!product) return product;
+  if (authorize(role, 'SHOW_COST')) return product;
+  const { purchase_cost, ...rest } = product;
+  return rest;
+}
+
 export function createApiServer(options: {
   getDB: () => any;
   sessionStore: Map<string, any>;
@@ -98,7 +124,8 @@ export function createApiServer(options: {
         } else {
           stock = product.loose_qty || 0;
         }
-        res.json({ success: true, product, stock });
+        // Stage 2: strip cost for non-SHOW_COST roles
+        res.json({ success: true, product: safeProd(product, req.session?.role), stock });
       } else {
         res.status(404).json({ success: false, error: 'Product not found' });
       }
@@ -106,6 +133,69 @@ export function createApiServer(options: {
       res.status(500).json({ success: false, error: err.message });
     }
   });
+
+  // PHASE 1: Feature 3 - Checkout Attach-Recommendations
+  app.post('/api/sales/recommendations', requireRole('CHECKOUT'), (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const productIds: number[] = req.body.productIds || [];
+      if (productIds.length === 0) {
+        return res.json({ success: true, recommendations: [] });
+      }
+
+      const placeholders = productIds.map(() => '?').join(',');
+      
+      const query = `
+        SELECT p.product_id, p.brand_name, p.model_name, p.sku_code, p.category, COUNT(DISTINCT si.sale_id) as frequency
+        FROM sale_items si
+        JOIN products p ON p.product_id = si.product_id
+        WHERE si.sale_id IN (
+          SELECT sale_id FROM sale_items WHERE product_id IN (${placeholders})
+        )
+        AND si.product_id NOT IN (${placeholders})
+        GROUP BY si.product_id
+        ORDER BY frequency DESC
+        LIMIT 3
+      `;
+      
+      // Need to pass the array of productIds twice (once for IN subquery, once for NOT IN)
+      const results = db.prepare(query).all(...productIds, ...productIds);
+      
+      // Also fetch current pricing for recommendations (assuming counter tier for generic display)
+      const recommendations = results.map((r: any) => {
+        const fullProd = db.prepare(`SELECT counter_price FROM products WHERE product_id = ?`).get(r.product_id) as any;
+        return {
+          ...r,
+          price: fullProd.counter_price
+        };
+      });
+
+      res.json({ success: true, recommendations });
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Lookup by serial number (for mobile scan of individual unit)
+  app.get('/api/products/serial/:serial', requireRole('READ_CATALOGUE'), (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const { serial } = req.params;
+      const instance = db.prepare('SELECT * FROM product_instances WHERE serial_number = ?').get(serial) as any;
+      if (!instance) return res.status(404).json({ success: false, error: 'Serial not found' });
+      const product = db.prepare('SELECT * FROM products WHERE product_id = ?').get(instance.product_id) as any;
+      if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
+      res.json({
+        success: true,
+        product: safeProd(product, req.session?.role),
+        instance: { instance_id: instance.instance_id, serial_number: instance.serial_number, status: instance.status },
+        stock: instance.status === 'IN_STOCK' ? 1 : 0
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
 
   app.post('/api/cart/push', requireRole('CHECKOUT'), (req: any, res: any) => {
     try {
@@ -133,7 +223,8 @@ export function createApiServer(options: {
         const tags = db.prepare('SELECT vehicle_tag FROM product_fitment WHERE product_id = ?')
           .all(product.product_id)
           .map((row: any) => row.vehicle_tag);
-        res.json({ found: true, product: { ...product, fitment_tags: tags } });
+        // Stage 2: strip cost
+        res.json({ found: true, product: { ...safeProd(product, req.session?.role), fitment_tags: tags } });
       } else {
         res.json({ found: false });
       }
@@ -152,6 +243,17 @@ export function createApiServer(options: {
       } else {
         res.json({ found: false });
       }
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // List all customers (used by mobile customer selector)
+  app.get('/api/customers', requireRole('READ_CUSTOMERS'), (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const customers = db.prepare('SELECT customer_id, name, phone, tier, gstin, credit_limit, current_balance, credit_due_date FROM customers ORDER BY name').all();
+      res.json({ success: true, customers });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -242,8 +344,80 @@ export function createApiServer(options: {
     }
   });
 
+  // Stage 2+3: Hub-authoritative floor check — never reveals the floor to the client
+  app.post('/api/sales/validate-price', requireRole('CHECKOUT'), (req: any, res: any) => {
+    try {
+      const { product_id, instance_id, final_price } = req.body;
+      const role = req.session?.role;
+      const db = getDB();
+      const product = db.prepare('SELECT * FROM products WHERE product_id = ?').get(product_id) as any;
+      if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
+      const instance = instance_id ? db.prepare('SELECT * FROM product_instances WHERE instance_id = ?').get(instance_id) as any : null;
+      const tierPrice = product.counter_price || 0; // baseline; client sends the tier_price they expect
+      const floor = getPriceFloor(product, instance);
+      const maxDiscount = getMaxDiscountPct(role);
+      const discountPct = tierPrice > 0 ? ((tierPrice - final_price) / tierPrice) * 100 : 0;
+      const belowFloor = final_price < floor;
+      const overMaxDiscount = discountPct > maxDiscount;
+      const allowed = !belowFloor && !overMaxDiscount;
+      // Never send floor or cost — only allowed/blocked + reason
+      res.json({
+        allowed,
+        needs_override: !allowed,
+        reason: belowFloor ? 'Price is below minimum margin floor' : overMaxDiscount ? `Discount exceeds your ${maxDiscount}% limit` : null
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Stage 3: Admin PIN override — validates & logs; returns a short-lived override token
+  app.post('/api/sales/admin-override', requireRole('CHECKOUT'), (req: any, res: any) => {
+    try {
+      const { admin_pin, product_id, instance_id, final_price, note, override_type, customer_id } = req.body;
+      const db = getDB();
+      const bcrypt = require('bcryptjs');
+      const crypto = require('crypto');
+      // Find an OWNER or CASHIER user who matches the PIN
+      const admins = db.prepare("SELECT * FROM users WHERE active = 1 AND role IN ('OWNER', 'CASHIER')").all() as any[];
+      const admin = admins.find((u: any) => bcrypt.compareSync(admin_pin, u.pin_hash));
+      if (!admin) return res.status(401).json({ success: false, error: 'Invalid admin PIN' });
+      // Must be OWNER to override below-floor prices
+      if (admin.role !== 'OWNER') {
+        return res.status(403).json({ success: false, error: 'Only OWNER can authorize overrides' });
+      }
+      // Generate override token (5 min TTL)
+      const token = crypto.randomBytes(16).toString('hex');
+      
+      if (override_type === 'UDHAAR') {
+        overrideTokens.set(token, {
+          admin_user_id: admin.user_id,
+          admin_name: admin.name,
+          expires: Date.now() + 5 * 60 * 1000,
+          is_udhaar: true,
+          customer_id
+        });
+        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'UDHAAR_OVERRIDE', 'customer', ?, ?)`)
+          .run(admin.user_id, customer_id, `Override by ${admin.name}: note=${note ?? ''}`);
+      } else {
+        overrideTokens.set(token, {
+          admin_user_id: admin.user_id,
+          admin_name: admin.name,
+          expires: Date.now() + 5 * 60 * 1000,
+          product_id,
+          final_price
+        });
+        db.prepare(`INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'PRICE_OVERRIDE', 'product', ?, ?)`)
+          .run(admin.user_id, product_id, `Override by ${admin.name}: final_price=${final_price}, instance=${instance_id ?? 'loose'}, note=${note ?? ''}`);
+      }
+      res.json({ success: true, override_token: token, approved_by: admin.name });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   app.post('/api/sales/checkout', requireRole('CHECKOUT'), (req: any, res: any) => {
-    const { customer_id, tier_applied, cart, discount, payment_mode, amount_paid } = req.body;
+    const { customer_id, tier_applied, cart, discount, payment_mode, amount_paid, udhaar_override_token, trade_in_discount, trade_in_desc } = req.body;
     const userId = req.session.user_id;
     if (!cart || cart.length === 0) {
       return res.status(400).json({ success: false, error: 'Cart is empty.' });
@@ -258,13 +432,25 @@ export function createApiServer(options: {
         subtotal += (item.price - item.discount) * item.quantity;
       });
       const discountVal = discount || 0;
-      const grandTotal = Math.max(0, subtotal - discountVal);
+      const tradeInVal = trade_in_discount || 0;
+      const grandTotal = Math.max(0, subtotal - discountVal - tradeInVal);
 
       if (payment_mode === 'UDHAAR') {
         if (customer.phone === '0000000000') return res.status(400).json({ success: false, error: 'Cannot sell on credit (Udhaar) to Counter Customer.' });
-        if (customer.credit_due_date && new Date(customer.credit_due_date) < new Date() && customer.current_balance > 0) return res.status(400).json({ success: false, error: `Customer has an overdue balance since ${customer.credit_due_date}.` });
-        const debt = grandTotal - (amount_paid || 0);
-        if (customer.current_balance + debt > customer.credit_limit) return res.status(400).json({ success: false, error: 'Credit limit exceeded.' });
+        
+        let validUdhaarOverride = false;
+        if (udhaar_override_token) {
+          const tData = overrideTokens.get(udhaar_override_token);
+          if (tData && tData.expires > Date.now() && tData.is_udhaar) {
+            validUdhaarOverride = true;
+          }
+        }
+        
+        if (!validUdhaarOverride) {
+          if (customer.credit_due_date && new Date(customer.credit_due_date) < new Date() && customer.current_balance > 0) return res.status(402).json({ success: false, error: `Customer has an overdue balance since ${customer.credit_due_date}.`, needs_override: true });
+          const debt = grandTotal - (amount_paid || 0);
+          if (customer.current_balance + debt > customer.credit_limit) return res.status(402).json({ success: false, error: 'Credit limit exceeded.', needs_override: true });
+        }
       }
 
       const shopStateRow = db.prepare("SELECT value FROM settings WHERE key = 'state_code'").get() as any;
@@ -303,16 +489,32 @@ export function createApiServer(options: {
         const saleRes = db.prepare(
           `INSERT INTO sales (
             invoice_no, customer_id, tier_applied, subtotal, discount, 
-            cgst, sgst, igst, grand_total, amount_paid, payment_mode, sold_by
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(invoiceNo, customer.customer_id, tier_applied || 'COUNTER', subtotal, discountVal, cgstTotal, sgstTotal, igstTotal, grandTotal, paidPaise, payment_mode, userId);
+            cgst, sgst, igst, grand_total, amount_paid, payment_mode, trade_in_discount, trade_in_desc, sold_by
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).run(invoiceNo, customer.customer_id, tier_applied || 'COUNTER', subtotal, discountVal, cgstTotal, sgstTotal, igstTotal, grandTotal, paidPaise, payment_mode, tradeInVal, trade_in_desc || null, userId);
 
         const saleId = saleRes.lastInsertRowid;
+
+        if (tradeInVal > 0 && trade_in_desc) {
+          db.prepare(
+            `INSERT INTO trade_ins (sale_id, customer_id, item_desc, estimated_value, status) VALUES (?, ?, ?, ?, 'RECEIVED')`
+          ).run(saleId, customer.customer_id, trade_in_desc, tradeInVal);
+        }
 
         cart.forEach((item: any) => {
           if (item.instance_id) {
             const inst = db.prepare('SELECT * FROM product_instances WHERE instance_id = ?').get(item.instance_id) as any;
-            if (!inst || inst.status !== 'IN_STOCK') throw new Error(`Serial instance ${item.instance_id} is not in stock.`);
+            if (!inst || inst.status !== 'IN_STOCK') {
+              const err: any = new Error(`Serial ${item.instance_id} is not available (already sold or not in stock).`);
+              err.statusCode = 409;
+              throw err;
+            }
+            // Validate override token if price was flagged
+            if (item.override_token) {
+              const ov = overrideTokens.get(item.override_token);
+              if (!ov || ov.expires < Date.now()) throw new Error(`Override token expired for item ${item.instance_id}`);
+              overrideTokens.delete(item.override_token); // single-use
+            }
             db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, ?, 1, ?, ?, ?, ?)`).run(saleId, item.product_id, item.instance_id, item.price, item.discount, (item.price - item.discount), inst.purchase_cost || 0);
             const prodRow = db.prepare('SELECT warranty_months FROM products WHERE product_id = ?').get(item.product_id) as any;
             const warrantyMonths = prodRow?.warranty_months ?? 12;
@@ -320,6 +522,11 @@ export function createApiServer(options: {
           } else {
             const prodRow = db.prepare('SELECT loose_qty, purchase_cost FROM products WHERE product_id = ?').get(item.product_id) as any;
             if (!prodRow || prodRow.loose_qty < item.quantity) throw new Error(`Insufficient loose stock for product ID ${item.product_id}. Available: ${prodRow?.loose_qty || 0}`);
+            if (item.override_token) {
+              const ov = overrideTokens.get(item.override_token);
+              if (!ov || ov.expires < Date.now()) throw new Error(`Override token expired for loose item ${item.product_id}`);
+              overrideTokens.delete(item.override_token);
+            }
             db.prepare(`INSERT INTO sale_items (sale_id, product_id, instance_id, quantity, unit_price, line_discount, line_total, unit_cost) VALUES (?, ?, NULL, ?, ?, ?, ?, ?)`).run(saleId, item.product_id, item.quantity, item.price, item.discount, (item.price - item.discount) * item.quantity, prodRow.purchase_cost || 0);
             db.prepare(`UPDATE products SET loose_qty = loose_qty - ? WHERE product_id = ?`).run(item.quantity, item.product_id);
           }
@@ -340,7 +547,92 @@ export function createApiServer(options: {
       const txResult = checkoutTx();
       res.json({ success: true, ...txResult });
     } catch (err: any) {
+      const status = err.statusCode === 409 ? 409 : 500;
+      res.status(status).json({ success: false, error: err.message });
+    }
+  });
+
+  // Print endpoint for Mobile
+  app.post('/api/sales/:id/print', requireRole('CHECKOUT'), async (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const sale = db.prepare('SELECT * FROM sales WHERE sale_id = ?').get(req.params.id) as any;
+      if (!sale) return res.status(404).json({ success: false, error: 'Sale not found.' });
+      
+      const { printReceipt } = require('./printer');
+      // For now, fire and forget (it logs if it fails, we don't want to block the response if printer is offline)
+      printReceipt(req.params.id, db).catch((e: any) => console.error('Print error:', e));
+      
+      res.json({ success: true, message: 'Print job dispatched' });
+    } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // PHASE 2: Quotations
+  app.post('/api/quotations', requireRole('CHECKOUT'), (req: any, res: any) => {
+    const { customer_id, customer_name, customer_phone, items } = req.body;
+    try {
+      const db = getDB();
+      
+      let totalTaxable = 0, totalCgst = 0, totalSgst = 0, totalIgst = 0;
+      const isIgst = false; // Simplified: intra-state
+      
+      for (const item of items) {
+        totalTaxable += item.taxable_value;
+        if (isIgst) {
+          totalIgst += item.tax_amt;
+        } else {
+          totalCgst += Math.round(item.tax_amt / 2);
+          totalSgst += Math.round(item.tax_amt / 2);
+        }
+      }
+      
+      const grandTotal = totalTaxable + totalCgst + totalSgst + totalIgst;
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + 7); // Valid for 7 days
+      
+      const tx = db.transaction(() => {
+        const qno = `QT-${Date.now()}`; // basic quotation numbering
+        const insertQ = db.prepare(`
+          INSERT INTO quotations (quotation_no, customer_id, customer_name, customer_phone, total_taxable, total_cgst, total_sgst, total_igst, grand_total, valid_until)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        const info = insertQ.run(qno, customer_id, customer_name, customer_phone, totalTaxable, totalCgst, totalSgst, totalIgst, grandTotal, validUntil.toISOString());
+        
+        const qId = info.lastInsertRowid;
+        const insertItem = db.prepare(`
+          INSERT INTO quotation_items (quotation_id, product_id, quantity, unit_price, discount, tax_rate, taxable_value, cgst_amt, sgst_amt, igst_amt, total_amt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        
+        for (const item of items) {
+          const itemCgst = isIgst ? 0 : Math.round(item.tax_amt / 2);
+          const itemSgst = isIgst ? 0 : Math.round(item.tax_amt / 2);
+          const itemIgst = isIgst ? item.tax_amt : 0;
+          insertItem.run(
+            qId, item.product_id, item.quantity, item.price, item.discount, item.tax_rate,
+            item.taxable_value, itemCgst, itemSgst, itemIgst, item.taxable_value + item.tax_amt
+          );
+        }
+        
+        return qId;
+      });
+      
+      const qId = tx();
+      res.json({ success: true, quotationId: qId });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+
+  app.get('/api/quotations', requireRole('CHECKOUT'), (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const list = db.prepare(`SELECT * FROM quotations ORDER BY quotation_id DESC LIMIT 50`).all();
+      res.json({ success: true, data: list });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
     }
   });
 
@@ -488,6 +780,160 @@ export function createApiServer(options: {
 
   // ================= REPORTS & ANALYTICS (OWNER ONLY) =================
   const ownerOnly = requireRole('VIEW_REPORTS');
+
+  // PHASE 1: Feature 1 - Owner Insight Dashboard
+  app.get('/api/reports/insights', ownerOnly, (req: any, res: any) => {
+    try {
+      const db = getDB();
+      // 1. Margin by Brand
+      const marginByBrand = db.prepare(`
+        SELECT p.brand_name, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.unit_cost * si.quantity) as cogs,
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.brand_name
+        ORDER BY margin DESC
+      `).all();
+
+      // 2. Margin by Category
+      const marginByCategory = db.prepare(`
+        SELECT p.category, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.category
+        ORDER BY margin DESC
+      `).all();
+
+      // 3. Margin by Tier
+      const marginByTier = db.prepare(`
+        SELECT s.tier_applied, 
+               SUM(si.line_total) as revenue, 
+               SUM(si.line_total) - SUM(si.unit_cost * si.quantity) as margin
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY s.tier_applied
+        ORDER BY margin DESC
+      `).all();
+
+      // 4. Best Movers (Top 5 products by quantity sold)
+      const bestMovers = db.prepare(`
+        SELECT p.brand_name, p.model_name, SUM(si.quantity) as qty_sold, SUM(si.line_total) as revenue
+        FROM sale_items si
+        JOIN sales s ON s.sale_id = si.sale_id
+        JOIN products p ON p.product_id = si.product_id
+        WHERE s.status = 'COMPLETED'
+        GROUP BY p.product_id
+        ORDER BY qty_sold DESC
+        LIMIT 5
+      `).all();
+
+      // 5. Slow Movers (Products with 0 sales in last 30 days but IN_STOCK)
+      const slowMovers = db.prepare(`
+        SELECT p.brand_name, p.model_name, COUNT(pi.instance_id) as current_stock
+        FROM products p
+        JOIN product_instances pi ON pi.product_id = p.product_id
+        WHERE pi.status = 'IN_STOCK'
+        AND p.product_id NOT IN (
+          SELECT product_id FROM sale_items si
+          JOIN sales s ON s.sale_id = si.sale_id
+          WHERE s.created_at >= date('now', '-30 days')
+        )
+        GROUP BY p.product_id
+        ORDER BY current_stock DESC
+        LIMIT 5
+      `).all();
+
+      // 6. Top Dealers (By Revenue)
+      const topDealers = db.prepare(`
+        SELECT c.name, SUM(s.grand_total) as total_revenue
+        FROM sales s
+        JOIN customers c ON s.customer_id = c.customer_id
+        WHERE s.status = 'COMPLETED' AND s.tier_applied IN ('DEALER', 'DISTRIBUTOR')
+        GROUP BY c.customer_id
+        ORDER BY total_revenue DESC
+        LIMIT 5
+      `).all();
+
+      // 7. Sales by Hour
+      const salesByHour = db.prepare(`
+        SELECT strftime('%H', created_at) as hour, SUM(grand_total) as revenue, COUNT(sale_id) as transactions
+        FROM sales
+        WHERE status = 'COMPLETED'
+        GROUP BY hour
+        ORDER BY hour ASC
+      `).all();
+
+      res.json({ success: true, insights: {
+        marginByBrand, marginByCategory, marginByTier,
+        bestMovers, slowMovers, topDealers, salesByHour
+      }});
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // PHASE 1: Feature 2 - Smart Reorder Suggestions
+  app.get('/api/reports/smart-reorder', ownerOnly, (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const targetDays = parseInt(req.query.days || '15', 10);
+      
+      const query = `
+        WITH recent_sales AS (
+          SELECT si.product_id, SUM(si.quantity) as sold_last_30_days
+          FROM sale_items si
+          JOIN sales s ON s.sale_id = si.sale_id
+          WHERE s.status = 'COMPLETED' AND s.created_at >= date('now', '-30 days')
+          GROUP BY si.product_id
+        ),
+        current_inventory AS (
+          SELECT p.product_id, p.brand_name, p.model_name, p.sku_code, p.category,
+                 (CASE WHEN p.requires_serial = 1 THEN (
+                   SELECT COUNT(*) FROM product_instances pi WHERE pi.product_id = p.product_id AND pi.status = 'IN_STOCK'
+                 ) ELSE p.loose_qty END) as current_stock,
+                 p.min_restock_level
+          FROM products p
+        )
+        SELECT ci.product_id, ci.brand_name, ci.model_name, ci.sku_code, ci.category, ci.current_stock,
+               COALESCE(rs.sold_last_30_days, 0) as sold_last_30,
+               ci.min_restock_level
+        FROM current_inventory ci
+        LEFT JOIN recent_sales rs ON ci.product_id = rs.product_id
+      `;
+      
+      const results = db.prepare(query).all();
+      const suggestions = [];
+      
+      for (const r of results as any[]) {
+        const velocity = r.sold_last_30 / 30;
+        const projectedDemand = velocity * targetDays;
+        let targetStock = Math.max(projectedDemand, r.min_restock_level);
+        
+        if (r.current_stock < targetStock) {
+          let suggestedOrder = Math.ceil(targetStock - r.current_stock);
+          suggestions.push({
+            ...r,
+            velocity: velocity.toFixed(2),
+            suggested_order: suggestedOrder,
+            target_stock: Math.ceil(targetStock)
+          });
+        }
+      }
+      
+      res.json({ success: true, suggestions: suggestions.sort((a, b) => b.suggested_order - a.suggested_order) });
+    } catch(err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
   app.get('/api/reports/margin', ownerOnly, (req: any, res: any) => {
     const { startDate, endDate } = req.query;
@@ -683,6 +1129,28 @@ export function createApiServer(options: {
       customers.sort((a, b) => b.current_balance - a.current_balance);
       
       res.json({ success: true, data: { customers, buckets, total_receivable } });
+    } catch (err: any) { res.status(500).json({ success: false, error: err.message }); }
+  });
+
+  // ================= UPI ACCOUNTS =================
+  app.get('/api/upi-accounts', requireRole('CHECKOUT'), (req: any, res: any) => {
+    try {
+      const db = getDB();
+      const accounts = db.prepare('SELECT * FROM upi_accounts WHERE is_active = 1').all();
+      // If no accounts exist yet, return a default mock for backward compatibility
+      if (accounts.length === 0) {
+        return res.json({ success: true, data: [{ id: 0, name: 'Default UPI', upi_id: 'default@upi' }] });
+      }
+      res.json({ success: true, data: accounts });
+    } catch (err: any) { res.status(500).json({ success: false, error: err.message }); }
+  });
+
+  app.post('/api/upi-accounts', ownerOnly, (req: any, res: any) => {
+    try {
+      const { name, upi_id, merchant_code } = req.body;
+      const db = getDB();
+      db.prepare(`INSERT INTO upi_accounts (name, upi_id, merchant_code) VALUES (?, ?, ?)`).run(name, upi_id, merchant_code || null);
+      res.json({ success: true });
     } catch (err: any) { res.status(500).json({ success: false, error: err.message }); }
   });
 

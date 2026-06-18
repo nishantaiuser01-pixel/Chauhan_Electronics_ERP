@@ -6,4 +6,5 @@ export * from './gst';
 export * from './intake';
 export * from './ledger';
 export * from './sms';
-export * from './permissions';
+export { ROLES, ACTIONS, authorize, assertCan, setPermissionsOverrides } from './permissions';
+export type { Role, Action } from './permissions';

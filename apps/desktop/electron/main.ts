@@ -9,8 +9,12 @@ import { initDB, getDB, calculateAging, formatPaymentReminder } from '@chauhan-e
 import crypto from 'crypto';
 import QRCode from 'qrcode';
 
-// Paths & config
+// Setup userData path to be inside workspace due to EPERM restrictions on the OS
+app.setPath('userData', path.join(__dirname, '../../local_db_data'));
 const userDataPath = app.getPath('userData');
+if (!fs.existsSync(userDataPath)) {
+  fs.mkdirSync(userDataPath, { recursive: true });
+}
 const configPath = path.join(userDataPath, 'db-config.json');
 
 interface DbConfig {
@@ -132,7 +136,30 @@ try {
 
 // ================= EXPRESS API FOR MOBILE SCANNER =================
 import { createApiServer } from './api';
-import { assertCan } from '@chauhan-erp/core';
+import { assertCan, setPermissionsOverrides } from '@chauhan-erp/core';
+
+function loadPermissions() {
+  try {
+    const db = getDB();
+    const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'perm_%'").all() as any[];
+    const overrides: Record<string, boolean> = {};
+    rows.forEach((r: any) => {
+      // key format: perm_CASHIER_EDIT_PRICE
+      const parts = r.key.split('_');
+      if (parts.length >= 3) {
+        const role = parts[1];
+        const action = parts.slice(2).join('_');
+        overrides[`${role}_${action}`] = r.value === 'true';
+      }
+    });
+    setPermissionsOverrides(overrides);
+  } catch (err) {
+    console.error('Failed to load permission overrides:', err);
+  }
+}
+
+// Initial load
+loadPermissions();
 
 let activeDesktopSession: any = null;
 
@@ -180,6 +207,10 @@ ipcMain.handle('desktop-logout', () => {
   return true;
 });
 
+ipcMain.handle('get-session', () => {
+  return activeDesktopSession;
+});
+
 function getLocalIpAddress(): string {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
@@ -205,7 +236,37 @@ function performBackup(backupFolder: string): string {
   return destinationPath;
 }
 
+let lastBackupDate = '';
+
+// Automated background backup (cron job) - Daily at 9:00 PM (21:00)
+setInterval(() => {
+  try {
+    const now = new Date();
+    if (now.getHours() >= 21) {
+      const todayStr = now.toISOString().split('T')[0];
+      if (lastBackupDate !== todayStr && activeConfig.backupDir) {
+        if (!fs.existsSync(activeConfig.backupDir)) {
+          fs.mkdirSync(activeConfig.backupDir, { recursive: true });
+        }
+        const dest = performBackup(activeConfig.backupDir);
+        lastBackupDate = todayStr;
+        console.log(`Automated cron backup succeeded for ${todayStr}: ${dest}`);
+      }
+    }
+  } catch (err) {
+    console.error('Automated cron backup failed:', err);
+  }
+}, 5 * 60 * 1000); // Check every 5 minutes
+
 // IPC Handlers
+
+// Public: no auth needed — only reads the first_run flag, nothing sensitive
+ipcMain.handle('check-first-run', async () => {
+  const db = getDB();
+  const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get() as any;
+  return { firstRun: !row || row.value !== '0' };
+});
+
 handleElevated('db-query', 'BACKUP_RESTORE', async (event, sql: string, params: any[] = []) => {
   const db = getDB();
   return db.prepare(sql).all(...params);
@@ -227,6 +288,35 @@ handleElevated('db-run', 'BACKUP_RESTORE', async (event, sql: string, params: an
 
 handleElevated('db-transaction', 'BACKUP_RESTORE', async (event, queries: { sql: string; params: any[] }[]) => {
   const db = getDB();
+  const runTx = db.transaction((txQueries) => {
+    const results = [];
+    for (const q of txQueries) {
+      results.push(db.prepare(q.sql).run(...q.params));
+    }
+    return results;
+  });
+  const res = runTx(queries);
+  // Reload permissions if settings were updated
+  if (queries.some(q => q.sql.toLowerCase().includes('settings'))) {
+    loadPermissions();
+  }
+  return res;
+});
+
+ipcMain.handle('initialize-setup', async (event, queries: { sql: string; params: any[] }[]) => {
+  const db = getDB();
+  // Allow if no row exists OR if first_run is still '1'
+  const row = db.prepare("SELECT value FROM settings WHERE key = 'first_run'").get() as any;
+  const alreadyDone = row && row.value === '0';
+  if (alreadyDone) {
+    // Check if an OWNER user actually exists — if not, let it proceed (partial failure recovery)
+    const ownerExists = db.prepare("SELECT user_id FROM users WHERE role = 'OWNER' LIMIT 1").get();
+    if (ownerExists) {
+      throw new Error("Setup already completed");
+    }
+    // Partial failure: DB flag was set but user was not created — reset and retry
+    db.prepare("UPDATE settings SET value = '1' WHERE key = 'first_run'").run();
+  }
   const runTx = db.transaction((txQueries) => {
     const results = [];
     for (const q of txQueries) {
@@ -1100,6 +1190,47 @@ ipcMain.handle('db-return-accept', async (event, payload) => {
   return tx();
 });
 
+ipcMain.handle('db-void-sale', async (event, saleId: number) => {
+  assertCan(activeDesktopSession?.role, 'VOID_SALE');
+  
+  const db = getDB();
+  const tx = db.transaction(() => {
+    // 1. Check sale
+    const sale = db.prepare('SELECT * FROM sales WHERE sale_id = ?').get(saleId) as any;
+    if (!sale) throw new Error(`Sale #${saleId} not found.`);
+    if (sale.status === 'CANCELLED') throw new Error(`Sale #${saleId} is already voided.`);
+
+    // 2. Mark Cancelled
+    db.prepare("UPDATE sales SET status = 'CANCELLED' WHERE sale_id = ?").run(saleId);
+
+    // 3. Restore Inventory
+    const items = db.prepare('SELECT * FROM sale_items WHERE sale_id = ?').all(saleId) as any[];
+    for (const item of items) {
+      if (item.instance_id) {
+        db.prepare("UPDATE product_instances SET status = 'IN_STOCK' WHERE instance_id = ?").run(item.instance_id);
+      } else {
+        db.prepare('UPDATE products SET loose_qty = loose_qty + ? WHERE product_id = ?').run(item.quantity, item.product_id);
+      }
+    }
+
+    // 4. Revert Udhaar
+    if (sale.payment_mode === 'UDHAAR') {
+      const debt = sale.grand_total - sale.amount_paid;
+      if (debt > 0 && sale.customer_id) {
+        db.prepare('UPDATE customers SET current_balance = current_balance - ? WHERE customer_id = ?').run(debt, sale.customer_id);
+      }
+    }
+
+    // 5. Audit Log
+    db.prepare('INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, ?, ?, ?, ?)')
+      .run(activeDesktopSession?.user_id || 1, 'DELETE', 'sales', saleId, `Voided sale #${saleId} and restored inventory.`);
+
+    return { success: true };
+  });
+
+  return tx();
+});
+
 ipcMain.handle('db-rma-list', async () => {
   assertCan(activeDesktopSession?.role, 'READ_CATALOGUE');
   const db = getDB();
@@ -1111,6 +1242,12 @@ ipcMain.handle('db-rma-list', async () => {
     LEFT JOIN suppliers s ON r.supplier_id = s.supplier_id
     ORDER BY r.sent_at DESC
   `).all();
+});
+
+handleElevated('db-rma-dispatch', 'EDIT_CATALOGUE', async (event, rma_id, supplier_id, tracking_id) => {
+  const db = getDB();
+  db.prepare("UPDATE rma_register SET supplier_id = ?, tracking_id = ? WHERE rma_id = ?").run(supplier_id || null, tracking_id || null, rma_id);
+  return { success: true };
 });
 
 handleElevated('db-rma-resolve', 'EDIT_CATALOGUE', async (event, rma_id, status, note) => {
@@ -1151,6 +1288,38 @@ ipcMain.handle('get-print-data', async (event, kind, id) => {
     `).all(id) as any[];
 
     return { settings, sale, items };
+  } else if (kind === 'QUOTATION') {
+    const sale = db.prepare(`
+      SELECT q.*, c.name as customer_name, c.gstin as customer_gstin, c.phone as customer_phone, c.shop_name as customer_shop_name 
+      FROM quotations q LEFT JOIN customers c ON q.customer_id = c.customer_id
+      WHERE q.quotation_id = ?
+    `).get(id) as any;
+
+    const items = db.prepare(`
+      SELECT qi.*, p.model_name, p.hsn_code, p.gst_rate
+      FROM quotation_items qi
+      JOIN products p ON qi.product_id = p.product_id
+      WHERE qi.quotation_id = ?
+    `).all(id) as any[];
+
+    // Map quotation fields to match the sale format for the PrintView
+    if (sale) {
+      sale.invoice_no = sale.quotation_no;
+      sale.payment_mode = 'PROFORMA';
+      sale.is_quotation = true;
+    }
+    
+    // Map items format
+    const mappedItems = items.map(i => ({
+      ...i,
+      price: i.unit_price,
+      tax_amt: i.total_amt - i.taxable_value
+    }));
+
+    return { settings, sale, items: mappedItems };
+  } else if (kind === 'LABEL') {
+    const product = db.prepare(`SELECT * FROM products WHERE product_id = ?`).get(id) as any;
+    return { settings, product };
   } else if (kind === 'CREDIT_NOTE') {
     const cn = db.prepare(`
       SELECT cn.*, s.invoice_no, s.created_at as sale_date,
@@ -1241,6 +1410,86 @@ ipcMain.handle('log-reprint', async (event, kind, id, userId) => {
     VALUES (?, 'REPRINT', ?, ?, ?)
   `).run(activeDesktopSession?.user_id, kind === 'SALE' ? 'sales' : 'credit_notes', id, 'Reprinted document');
   return true;
+});
+
+ipcMain.handle('export-einvoice-json', async (event, sale_id: number) => {
+  assertCan(activeDesktopSession?.role, 'READ_DASHBOARD');
+  try {
+    const db = getDB();
+    const sale = db.prepare("SELECT * FROM sales WHERE sale_id = ?").get(sale_id) as any;
+    if (!sale) return { success: false, error: 'Sale not found' };
+    
+    const customer = db.prepare("SELECT * FROM customers WHERE customer_id = ?").get(sale.customer_id) as any;
+    const items = db.prepare(`
+      SELECT si.*, p.hsn_code, p.gst_rate, p.model_name
+      FROM sale_items si
+      JOIN products p ON si.product_id = p.product_id
+      WHERE si.sale_id = ?
+    `).all(sale_id) as any[];
+
+    // Extract basic E-Invoice schema structure
+    const einvoicePayload = {
+      Version: "1.1",
+      TranDtls: {
+        TaxSch: "GST",
+        SupTyp: "B2B",
+        RegRev: "Y"
+      },
+      DocDtls: {
+        Typ: "INV",
+        No: sale.invoice_no,
+        Dt: sale.created_at.split(' ')[0]
+      },
+      SellerDtls: {
+        LglNm: "Chauhan Electronics",
+        GSTIN: "29XXXXXXXXXXXXX",
+        StateCode: "29"
+      },
+      BuyerDtls: {
+        LglNm: customer?.name || "Counter Customer",
+        GSTIN: customer?.gstin || "URP",
+        StateCode: "29", // Fallback, could be extracted from GSTIN
+        PhNo: customer?.phone
+      },
+      ItemList: items.map((item, idx) => ({
+        SlNo: (idx + 1).toString(),
+        PrdDesc: item.model_name,
+        IsServc: "N",
+        HsnCd: item.hsn_code || "8543",
+        Qty: item.quantity,
+        Unit: "NOS",
+        UnitPrice: (item.unit_price / 100).toFixed(2),
+        TotAmt: ((item.unit_price * item.quantity) / 100).toFixed(2),
+        Discount: (item.line_discount / 100).toFixed(2),
+        PreTaxVal: (((item.unit_price * item.quantity) - item.line_discount) / 100).toFixed(2),
+        AssAmt: (item.line_total / 100).toFixed(2),
+        GstRt: item.gst_rate || 18,
+        TotItemVal: (item.line_total / 100).toFixed(2)
+      })),
+      ValDtls: {
+        AssVal: (sale.subtotal / 100).toFixed(2),
+        CgstVal: (sale.cgst / 100).toFixed(2),
+        SgstVal: (sale.sgst / 100).toFixed(2),
+        IgstVal: (sale.igst / 100).toFixed(2),
+        Discount: (sale.discount / 100).toFixed(2),
+        TotInvVal: (sale.grand_total / 100).toFixed(2)
+      }
+    };
+
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Save E-Invoice JSON',
+      defaultPath: `e-invoice-${sale.invoice_no.replace(/\\//g, '-')}.json`,
+      filters: [{ name: 'JSON', extensions: ['json'] }]
+    });
+
+    if (canceled || !filePath) return { success: false, canceled: true };
+
+    fs.writeFileSync(filePath, JSON.stringify(einvoicePayload, null, 2));
+    return { success: true, filePath };
+  } catch (err: any) {
+    console.error("E-Invoice Export Error:", err);
+    return { success: false, error: err.message };
+  }
 });
 
 
