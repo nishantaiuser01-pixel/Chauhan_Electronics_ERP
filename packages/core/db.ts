@@ -28,15 +28,15 @@ export function initDB(dbPath: string, schemaSql: string) {
 }
 
 function seedDB(db: Database.Database) {
+  db.pragma('foreign_keys = OFF');
   const insertSetting = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
   
   // Seed settings
-  insertSetting.run('first_run', '0'); // Wizard completed
-  insertSetting.run('shop_name', 'Chauhan Electronics');
-  insertSetting.run('address', '12, SP Road, Bengaluru, Karnataka - 560002');
-  insertSetting.run('gstin', '29ABCDE1234F1Z5');
-  insertSetting.run('state_code', '29'); // Karnataka
-  insertSetting.run('invoice_prefix', 'CE/26/');
+  insertSetting.run('first_run', '1'); // Fresh install — wizard must run
+  insertSetting.run('shop_name', '');
+  insertSetting.run('address', '');
+  insertSetting.run('gstin', '');
+  insertSetting.run('state_code', '29'); // Karnataka default
   insertSetting.run('next_invoice_no', '1001');
   insertSetting.run('job_prefix', 'JOB/26/');
   insertSetting.run('next_job_no', '2001');
@@ -45,16 +45,7 @@ function seedDB(db: Database.Database) {
   insertSetting.run('sms_enabled', '0');
   insertSetting.run('online_lookup', '0');
 
-  // Seed Users
-  const insertUser = db.prepare('INSERT INTO users (name, pin_hash, role, active) VALUES (?, ?, ?, 1)');
-  
-  const ownerPinHash = bcrypt.hashSync('1234', 10);
-  const cashierPinHash = bcrypt.hashSync('5678', 10);
-  const techPinHash = bcrypt.hashSync('9012', 10);
-
-  insertUser.run('Nishant Chauhan', ownerPinHash, 'OWNER');
-  insertUser.run('SP Road Cashier', cashierPinHash, 'CASHIER');
-  insertUser.run('Repair Tech', techPinHash, 'TECHNICIAN');
+  // No seed users — the setup wizard creates the OWNER on first launch
 
   // Seed Customers
   const insertCustomer = db.prepare(`
@@ -149,4 +140,5 @@ function seedDB(db: Database.Database) {
     VALUES (?, ?, ?)
   `);
   insertRepairHistory.run(1, 'PENDING', 'IN_REPAIR');
+  db.pragma('foreign_keys = ON');
 }

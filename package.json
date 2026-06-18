@@ -9,6 +9,6 @@
   "scripts": {
     "install:all": "npm install",
     "dev:desktop": "npm run dev -w apps/desktop",
-    "build:desktop": "npm run build -w apps/desktop"
+    "verify:all": "npx tsx test_logic_suite.ts && npx tsx test_integration.ts && npx tsx test_security.ts && npx tsx test_mobile_flow.ts && npx tsx test_phase4.ts && npx tsx test_performance.ts && npx tsx test_e2e_journeys.ts"
   }
 }

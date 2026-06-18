@@ -285,15 +285,32 @@ async function run() {
 
   // SEC7: unit-test the permission matrix
   try {
+    // Existing roles
     assert.strictEqual(authorize('OWNER', 'ISSUE_CN'), true);
-    assert.strictEqual(authorize('CASHIER', 'ISSUE_CN'), true); // Cashier CAN issue CN
+    assert.strictEqual(authorize('CASHIER', 'ISSUE_CN'), true);
     assert.strictEqual(authorize('TECHNICIAN', 'MANAGE_REPAIRS'), true);
     assert.strictEqual(authorize('CASHIER', 'CHECKOUT'), true);
     assert.strictEqual(authorize('OWNER', 'VIEW_REPORTS'), true);
     assert.strictEqual(authorize('CASHIER', 'VIEW_REPORTS'), false);
-    report("SEC7 - authorize(role, action) across the grid", true);
+
+    // SALESPERSON — allowed
+    assert.strictEqual(authorize('SALESPERSON', 'CHECKOUT'), true,        'SALESPERSON must be able to CHECKOUT');
+    assert.strictEqual(authorize('SALESPERSON', 'READ_CATALOGUE'), true,  'SALESPERSON must read catalogue');
+    assert.strictEqual(authorize('SALESPERSON', 'READ_CUSTOMERS'), true,  'SALESPERSON must read customers');
+    assert.strictEqual(authorize('SALESPERSON', 'READ_STOCK'), true,      'SALESPERSON must read stock');
+
+    // SALESPERSON — denied
+    assert.strictEqual(authorize('SALESPERSON', 'VIEW_REPORTS'), false,   'SALESPERSON must NOT view reports');
+    assert.strictEqual(authorize('SALESPERSON', 'BACKUP_RESTORE'), false, 'SALESPERSON must NOT backup/restore');
+    assert.strictEqual(authorize('SALESPERSON', 'USER_MGMT'), false,      'SALESPERSON must NOT manage users');
+    assert.strictEqual(authorize('SALESPERSON', 'SHOW_COST'), false,      'SALESPERSON must NOT see cost/margin');
+    assert.strictEqual(authorize('SALESPERSON', 'ISSUE_CN'), false,       'SALESPERSON must NOT issue credit notes');
+    assert.strictEqual(authorize('SALESPERSON', 'VOID_SALE'), false,      'SALESPERSON must NOT void sales');
+    assert.strictEqual(authorize('SALESPERSON', 'EDIT_PRICE'), false,     'SALESPERSON must NOT edit prices');
+
+    report("SEC7 - authorize(role, action) across the grid incl. SALESPERSON", true);
   } catch(e: any) {
-    report("SEC7 - authorize(role, action) across the grid", false, e.message);
+    report("SEC7 - authorize(role, action) across the grid incl. SALESPERSON", false, e.message);
   }
 
   // SEC8: IPC handlers use session user_id, not 1, for audit logs

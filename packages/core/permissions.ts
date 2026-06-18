@@ -1,4 +1,4 @@
-export const ROLES = ['OWNER', 'CASHIER', 'STOCK', 'TECHNICIAN'] as const;
+export const ROLES = ['OWNER', 'CASHIER', 'STOCK', 'TECHNICIAN', 'SALESPERSON'] as const;
 export type Role = typeof ROLES[number];
 
 export const ACTIONS = [
@@ -6,7 +6,7 @@ export const ACTIONS = [
   'READ_DASHBOARD', 'READ_CATALOGUE', 'READ_STOCK', 'READ_CUSTOMERS', 'READ_SUPPLIERS', 'READ_REPAIRS', 'READ_ACCOUNTING',
   
   // High sensitivity
-  'EDIT_PRICE', 'OVERRIDE_CREDIT', 'VOID_SALE', 'REFUND_EDIT', 'BACKUP_RESTORE', 'USER_MGMT', 'EDIT_CATALOGUE', 'CREATE_SUPPLIER', 'RECORD_EXPENSE', 'VIEW_REPORTS',
+  'EDIT_PRICE', 'OVERRIDE_CREDIT', 'VOID_SALE', 'REFUND_EDIT', 'BACKUP_RESTORE', 'USER_MGMT', 'EDIT_CATALOGUE', 'CREATE_SUPPLIER', 'RECORD_EXPENSE', 'VIEW_REPORTS', 'SHOW_COST',
 
   // Routine
   'CHECKOUT', 'RECEIVE_GRN', 'MANAGE_REPAIRS', 'RECORD_PAYMENT', 'ISSUE_CN'
@@ -14,11 +14,24 @@ export const ACTIONS = [
 
 export type Action = typeof ACTIONS[number];
 
-export function authorize(role: Role | string | undefined | null, action: Action): boolean {
+let globalOverrides: Record<string, boolean> = {};
+
+export function setPermissionsOverrides(overrides: Record<string, boolean>) {
+  globalOverrides = overrides;
+}
+
+export function authorize(role: Role | string | undefined | null, action: Action, overrides?: Record<string, boolean>): boolean {
   if (!role) return false;
   
   // OWNER can do everything
   if (role === 'OWNER') return true;
+
+  // Check if there is an explicit override for this role_action combination
+  const activeOverrides = overrides || globalOverrides;
+  const overrideKey = `${role}_${action}`;
+  if (activeOverrides && activeOverrides[overrideKey] !== undefined) {
+    return activeOverrides[overrideKey];
+  }
 
   switch (action) {
     case 'EDIT_PRICE':
@@ -36,11 +49,16 @@ export function authorize(role: Role | string | undefined | null, action: Action
     case 'CREATE_SUPPLIER':
       return role === 'CASHIER' || role === 'STOCK';
       
+    case 'SHOW_COST':
+      return false; // OWNER-only (handled by the OWNER shortcut above)
+
     case 'RECORD_EXPENSE':
     case 'RECORD_PAYMENT':
-    case 'CHECKOUT':
     case 'ISSUE_CN':
       return role === 'CASHIER';
+
+    case 'CHECKOUT':
+      return role === 'CASHIER' || role === 'SALESPERSON';
       
     case 'RECEIVE_GRN':
       return role === 'STOCK';
@@ -52,7 +70,7 @@ export function authorize(role: Role | string | undefined | null, action: Action
     case 'READ_DASHBOARD': return true;
     case 'READ_CATALOGUE': return true;
     case 'READ_STOCK': return true;
-    case 'READ_CUSTOMERS': return role === 'CASHIER';
+    case 'READ_CUSTOMERS': return role === 'CASHIER' || role === 'SALESPERSON';
     case 'READ_SUPPLIERS': return role === 'CASHIER' || role === 'STOCK';
     case 'READ_REPAIRS': return true;
     case 'READ_ACCOUNTING': return role === 'CASHIER';
@@ -62,8 +80,8 @@ export function authorize(role: Role | string | undefined | null, action: Action
   }
 }
 
-export function assertCan(role: Role | string | undefined | null, action: Action) {
-  if (!authorize(role, action)) {
-    throw new Error(`Forbidden: Role ${role || 'UNAUTHENTICATED'} is not allowed to perform ${action}`);
+export function assertCan(role: Role | string | undefined | null, action: Action, overrides?: Record<string, boolean>) {
+  if (!authorize(role, action, overrides)) {
+    throw new Error(`Unauthorized: Role ${role} cannot perform ${action}`);
   }
 }

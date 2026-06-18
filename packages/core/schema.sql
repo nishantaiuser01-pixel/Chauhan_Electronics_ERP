@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS settings (
    -- job_prefix, next_job_no, default_gst_rate, currency, sms_enabled, online_lookup
 
 -- ---------- Users / roles (offline PIN auth) ----------
+
 CREATE TABLE IF NOT EXISTS users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -111,6 +112,8 @@ CREATE TABLE IF NOT EXISTS sales (
   subtotal INTEGER, discount INTEGER DEFAULT 0,
   cgst INTEGER DEFAULT 0, sgst INTEGER DEFAULT 0, igst INTEGER DEFAULT 0,
   grand_total INTEGER, amount_paid INTEGER, payment_mode TEXT,
+  trade_in_discount INTEGER DEFAULT 0,
+  trade_in_desc TEXT,
   status TEXT DEFAULT 'COMPLETED' CHECK(status IN ('HELD','COMPLETED','CANCELLED')),
   sold_by INTEGER REFERENCES users(user_id),
   created_at TEXT DEFAULT (datetime('now'))
@@ -143,7 +146,20 @@ CREATE TABLE IF NOT EXISTS rma_register (
   status TEXT NOT NULL DEFAULT 'SENT'
     CHECK(status IN ('SENT','REPLACED','CREDITED','RECEIVED_BACK')),
   sent_at TEXT DEFAULT (datetime('now')),
-  resolved_at TEXT, note TEXT
+  resolved_at TEXT, note TEXT,
+  tracking_id TEXT
+);
+
+-- ---------- Trade-Ins ----------
+CREATE TABLE IF NOT EXISTS trade_ins (
+  trade_in_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sale_id INTEGER REFERENCES sales(sale_id),
+  customer_id INTEGER REFERENCES customers(customer_id),
+  item_desc TEXT NOT NULL,
+  condition TEXT,
+  estimated_value INTEGER NOT NULL, -- paise
+  status TEXT DEFAULT 'RECEIVED' CHECK(status IN ('RECEIVED','REFURBISHED','SOLD','SCRAPPED')),
+  created_at TEXT DEFAULT (datetime('now'))
 );
 
 -- ---------- Repair / service ----------
@@ -195,4 +211,46 @@ CREATE TABLE IF NOT EXISTS expenses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   category TEXT, amount INTEGER, note TEXT,
   created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- ---------- UPI Accounts (for dynamic QR generation) ----------
+CREATE TABLE IF NOT EXISTS upi_accounts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,           -- e.g. "SBI Current", "HDFC Savings"
+  upi_id TEXT NOT NULL UNIQUE,  -- e.g. "shop@sbi"
+  merchant_code TEXT,           -- Optional MCC (Merchant Category Code)
+  is_active INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- ---------- Quotations (Proforma Invoices) ----------
+CREATE TABLE IF NOT EXISTS quotations (
+  quotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  quotation_no TEXT UNIQUE,
+  customer_id INTEGER REFERENCES customers(customer_id),
+  customer_name TEXT,
+  customer_phone TEXT,
+  total_taxable INTEGER,
+  total_cgst INTEGER,
+  total_sgst INTEGER,
+  total_igst INTEGER,
+  grand_total INTEGER,
+  status TEXT DEFAULT 'DRAFT' CHECK(status IN ('DRAFT', 'CONVERTED', 'EXPIRED')),
+  created_at TEXT DEFAULT (datetime('now')),
+  valid_until TEXT
+);
+
+CREATE TABLE IF NOT EXISTS quotation_items (
+  item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  quotation_id INTEGER REFERENCES quotations(quotation_id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(product_id),
+  quantity INTEGER,
+  unit_price INTEGER,
+  discount INTEGER DEFAULT 0,
+  tax_rate INTEGER,
+  taxable_value INTEGER,
+  cgst_amt INTEGER,
+  sgst_amt INTEGER,
+  igst_amt INTEGER,
+  total_amt INTEGER
 );
