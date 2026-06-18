@@ -27,8 +27,8 @@ jobs:
         run: npm install --no-package-lock --legacy-peer-deps
       - name: Build installer
         run: |
-          cd apps/desktop && npx electron-builder install-app-deps
-          cd ../.. && npm run dist -w apps/desktop -- ${{ matrix.target }}
+          npx @electron/rebuild -f -w better-sqlite3 -v 30.0.1
+          npm run dist -w apps/desktop -- ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
