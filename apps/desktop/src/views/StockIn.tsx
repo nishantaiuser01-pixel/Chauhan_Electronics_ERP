@@ -659,7 +659,7 @@ export default function StockIn() {
 
                   <div className="flex items-end">
                     <button
-                      onClick={() => window.open(`/#/print/LABEL/${selectedProdForLabel.product_id}?qty=${labelQty}`, '_blank', 'width=400,height=400')}
+                      onClick={() => window.open(window.location.pathname + `#/print/LABEL/${selectedProdForLabel.product_id}?qty=${labelQty}`, '_blank', 'width=400,height=400')}
                       className="w-full flex items-center justify-center space-x-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-bold px-4 py-2 rounded text-sm transition-colors font-mono"
                     >
                       <Printer size={16} />

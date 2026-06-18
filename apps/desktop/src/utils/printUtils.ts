@@ -15,7 +15,7 @@ export async function triggerPrint(kind: 'SALE' | 'CREDIT_NOTE' | 'REPAIR' | 'QU
       await (window as any).ipcRenderer.invoke('print-thermal', text);
     } else {
       // For A4, navigate to print view in a new window or use hash routing.
-      window.open(`/#/print/${kind}/${id}?reprint=${isReprint}`, '_blank', 'width=800,height=1000');
+      window.open(window.location.pathname + `#/print/${kind}/${id}?reprint=${isReprint}`, '_blank', 'width=800,height=1000');
     }
   } catch (err) {
     console.error("Print Error:", err);

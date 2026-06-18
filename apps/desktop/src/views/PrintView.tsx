@@ -28,6 +28,9 @@ export default function PrintView() {
           }, 500);
         }
         setLoading(false);
+      }).catch((err: any) => {
+        console.error("Print Error:", err);
+        setLoading(false);
       });
     } else {
       setLoading(false);
@@ -42,6 +45,7 @@ export default function PrintView() {
   const toINR = (paise: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format((paise || 0) / 100);
 
   if (kind === 'LABEL') {
+    if (!product) return <div className="p-10 font-mono text-center text-red-500">Product data missing for label.</div>;
     const labels = Array.from({ length: labelQty || 1 });
     return (
       <div className="bg-white text-black min-h-screen p-4 flex flex-wrap gap-4 items-start content-start">
